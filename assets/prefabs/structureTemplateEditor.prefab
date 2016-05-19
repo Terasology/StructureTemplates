@@ -1,0 +1,15 @@
+{
+  "parent" : "engine:iconItem",
+  "DisplayName" : {
+    "name" : "Structure Template Editor",
+    "description": "Allows you to create a structure templates from a structure in the world"
+  },
+  "Item" : {
+    "icon" : "engine:items#blueRecipe"
+  },
+  "StructureTemplateEditor": {},
+  "InteractionTarget": {},
+  "InteractionScreen": {
+    "screen": "StructureTemplates:StructureTemplateEditor"
+  }
+}
