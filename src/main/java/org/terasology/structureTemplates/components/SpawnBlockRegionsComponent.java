@@ -18,6 +18,7 @@ package org.terasology.structureTemplates.components;
 import org.terasology.entitySystem.Component;
 import org.terasology.math.Region3i;
 import org.terasology.reflection.MappedContainer;
+import org.terasology.world.block.Block;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +33,7 @@ public class SpawnBlockRegionsComponent implements Component{
     @MappedContainer
     public static class RegionToFill {
         public Region3i region;
-        public String blockType;
+        public Block blockType;
     }
 
 }

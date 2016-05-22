@@ -15,10 +15,13 @@
  */
 package org.terasology.structureTemplates.internal.systems;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.terasology.math.Region3i;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent.RegionToFill;
+import org.terasology.world.block.Block;
+import org.terasology.world.block.BlockUri;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,16 +29,24 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 
 /**
- *
+ * Tests for {@link  StructureTemplateEditorServerSystem}. Tests exemplay the region merging method mergeRegionsByX.
  */
 public class StructureTemplateEditorServerSystemTest {
 
 
+    private Block blockA;
+    private Block blockB;
+
+    @Before
+    public void prepare() {
+        blockA = new Block();
+        blockA.setUri(new BlockUri("a:a"));
+        blockB = new Block();
+        blockB.setUri(new BlockUri("a:b"));
+    }
 
     @Test
     public void testMergeRegionsByXTrippleMerge() {
-        String blockA = "a";
-
         // Region A and B can be merged
         RegionToFill regionA = createRegion(blockA, 2, 0, -1, 2, 1, 5);
         RegionToFill regionB = createRegion(blockA, 3, 0, -1, 3, 1, 5);
@@ -58,8 +69,6 @@ public class StructureTemplateEditorServerSystemTest {
 
     @Test
     public void testMergeRegionsByXWithTooFarAwayCase() {
-        String blockA = "a";
-
         RegionToFill regionA = createRegion(blockA, 2, 0, -1, 2, 1, 5);
         RegionToFill regionB = createRegion(blockA, 4, 0, -1, 5, 1, 5);
 
@@ -78,8 +87,6 @@ public class StructureTemplateEditorServerSystemTest {
 
     @Test
     public void testMergeRegionsByXWithMinYDifferCase() {
-        String blockA = "a";
-
         RegionToFill regionA = createRegion(blockA, 3, -1, -1, 3, 1, 5);
         RegionToFill regionB = createRegion(blockA, 2, 0, -1, 2, 1, 5);
 
@@ -97,8 +104,6 @@ public class StructureTemplateEditorServerSystemTest {
 
     @Test
     public void testMergeRegionsByXWithMaxYDifferCase() {
-        String blockA = "a";
-
         RegionToFill regionA = createRegion(blockA, 2, 0, -1, 2, 1, 5);
         RegionToFill regionB = createRegion(blockA, 3, 0, -1, 3, 2, 5);
 
@@ -116,8 +121,6 @@ public class StructureTemplateEditorServerSystemTest {
 
     @Test
     public void testMergeRegionsByXWithMinZDifferCase() {
-        String blockA = "a";
-
         RegionToFill regionA = createRegion(blockA, 3, 0, -2, 3, 1, 5);
         RegionToFill regionB = createRegion(blockA, 2, 0, -1, 2, 1, 5);
 
@@ -135,8 +138,6 @@ public class StructureTemplateEditorServerSystemTest {
 
     @Test
     public void testMergeRegionsByXWithMaxZDifferCase() {
-        String blockA = "a";
-
         RegionToFill regionA = createRegion(blockA, 2, 0, -1, 2, 1, 5);
         RegionToFill regionB = createRegion(blockA, 3, 0, -1, 3, 1, 6);
 
@@ -154,9 +155,6 @@ public class StructureTemplateEditorServerSystemTest {
 
     @Test
     public void testMergeRegionsByXWithBlockTypeDifferCase() {
-        String blockA = "a";
-        String blockB = "b";
-
         RegionToFill regionA = createRegion(blockA, 2, 0, -1, 2, 1, 5);
         RegionToFill regionB = createRegion(blockB, 3, 0, -1, 3, 1, 5);
 
@@ -175,7 +173,6 @@ public class StructureTemplateEditorServerSystemTest {
 
     @Test
     public void testMergeRegionsByXWithBasicSuccessCase() {
-        String blockA = "a";
         List<RegionToFill> regions = new ArrayList<>();
 
         // Region A and B can be merged
@@ -215,7 +212,7 @@ public class StructureTemplateEditorServerSystemTest {
         return regionToFill;
     }
 
-    private RegionToFill createRegion(String blockType, int minX, int minY, int minZ,
+    private RegionToFill createRegion(Block blockType, int minX, int minY, int minZ,
                                                                  int maxX, int maxY, int maxZ) {
         RegionToFill r = new RegionToFill();
         r.region = Region3i.createBounded(new Vector3i(minX, minY, minZ), new Vector3i(maxX, maxY, maxZ));

@@ -29,7 +29,6 @@ import org.terasology.structureTemplates.events.SpawnStructureEvent;
 import org.terasology.structureTemplates.util.transform.BlockRegionTransform;
 import org.terasology.world.WorldProvider;
 import org.terasology.world.block.Block;
-import org.terasology.world.block.BlockManager;
 
 /**
  * Spawns structures when entities with certain components receive a {@link SpawnStructureEvent}.
@@ -40,9 +39,6 @@ import org.terasology.world.block.BlockManager;
 public class StructureSpawnServerSystem extends BaseComponentSystem {
 
     @In
-    private BlockManager blockManager;
-
-    @In
     private WorldProvider worldProvider;
 
     @ReceiveEvent
@@ -50,7 +46,7 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
                                  SpawnBlockRegionsComponent spawnBlockRegionComponent) {
         BlockRegionTransform transformation = event.getTransformation();
         for (RegionToFill regionToFill: spawnBlockRegionComponent.regionsToFill) {
-            Block block = blockManager.getBlock(regionToFill.blockType);
+            Block block = regionToFill.blockType;
 
             Region3i region = regionToFill.region;
             region = transformation.transformRegion(region);

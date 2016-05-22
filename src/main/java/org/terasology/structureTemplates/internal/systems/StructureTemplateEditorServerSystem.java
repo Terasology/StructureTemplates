@@ -153,7 +153,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
             relativePosition.sub(structureTemplateEditorComponent.origin);
             Region3i region = Region3i.createBounded(relativePosition, relativePosition);
             regionToFill.region = region;
-            regionToFill.blockType = block.getURI().toString();
+            regionToFill.blockType = block;
             regionsToFill.add(regionToFill);
         }
         mergeRegionsByX(regionsToFill);
