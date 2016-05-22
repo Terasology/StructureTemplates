@@ -31,7 +31,6 @@ import org.terasology.math.geom.Vector3i;
 import org.terasology.registry.In;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent.RegionToFill;
-import org.terasology.structureTemplates.components.container.Region;
 import org.terasology.structureTemplates.internal.components.CreateStructureSpawnItemRequest;
 import org.terasology.structureTemplates.internal.components.FrontDirectionComponent;
 import org.terasology.structureTemplates.internal.events.CopyBlockRegionRequest;
@@ -51,9 +50,9 @@ import java.util.List;
  */
 @RegisterSystem(RegisterMode.AUTHORITY)
 public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
-    private static final Comparator<RegionToFill> REGION_BY_MIN_X_COMPARATOR = Comparator.comparing(r -> r.region.min.x());
-    private static final Comparator<RegionToFill> REGION_BY_MIN_Y_COMPARATOR = Comparator.comparing(r -> r.region.min.y());
-    private static final Comparator<RegionToFill> REGION_BY_MIN_Z_COMPARATOR = Comparator.comparing(r -> r.region.min.z());
+    private static final Comparator<RegionToFill> REGION_BY_MIN_X_COMPARATOR = Comparator.comparing(r -> r.region.minX());
+    private static final Comparator<RegionToFill> REGION_BY_MIN_Y_COMPARATOR = Comparator.comparing(r -> r.region.minY());
+    private static final Comparator<RegionToFill> REGION_BY_MIN_Z_COMPARATOR = Comparator.comparing(r -> r.region.minZ());
 
     @In
     private WorldProvider worldProvider;
@@ -94,9 +93,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
 
         EntityBuilder entityBuilder = entityManager.newBuilder("StructureTemplates:structureTemplateEditor");
         StructureTemplateEditorComponent editorComponent = entityBuilder.getComponent(StructureTemplateEditorComponent.class);
-        editorComponent.editRegion = new Region();
-        editorComponent.editRegion.min.set(region.min());
-        editorComponent.editRegion.max.set(region.max());
+        editorComponent.editRegion = region;
         editorComponent.origin.set(position);
         entityBuilder.saveComponent(editorComponent);
         FrontDirectionComponent frontDirectionComponent = new FrontDirectionComponent();
@@ -138,8 +135,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
     }
 
     private List<RegionToFill> createRegionsToFill(StructureTemplateEditorComponent structureTemplateEditorComponent) {
-        Region3i absoluteRegion = Region3i.createBounded(structureTemplateEditorComponent.editRegion.min
-                , structureTemplateEditorComponent.editRegion.max);
+        Region3i absoluteRegion = structureTemplateEditorComponent.editRegion;
         absoluteRegion = absoluteRegion.move(structureTemplateEditorComponent.origin);
         Block airBlock = blockManager.getBlock("engine:air");
         List<RegionToFill> regionsToFill = new ArrayList<>();
@@ -155,9 +151,8 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
             RegionToFill regionToFill = new RegionToFill();
             Vector3i relativePosition = new Vector3i(absolutePosition);
             relativePosition.sub(structureTemplateEditorComponent.origin);
-            regionToFill.region = new Region();
-            regionToFill.region.min.set(relativePosition);
-            regionToFill.region.max.set(relativePosition);
+            Region3i region = Region3i.createBounded(relativePosition, relativePosition);
+            regionToFill.region = region;
             regionToFill.blockType = block.getURI().toString();
             regionsToFill.add(regionToFill);
         }
@@ -167,6 +162,22 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         return regionsToFill;
     }
 
+    static Region3i regionWithMaxXSetTo(Region3i region, int newMaxX) {
+        Vector3i max = new Vector3i(newMaxX, region.maxY(), region.maxZ());
+        return Region3i.createBounded(region.min(), max);
+    }
+
+    static Region3i regionWithMaxYSetTo(Region3i region, int newMaxY) {
+        Vector3i max = new Vector3i(region.maxX(), newMaxY, region.maxZ());
+        return Region3i.createBounded(region.min(), max);
+    }
+
+
+    static Region3i regionWithMaxZSetTo(Region3i region, int newMaxZ) {
+        Vector3i max = new Vector3i(region.maxX(), region.maxY(), newMaxZ);
+        return Region3i.createBounded(region.min(), max);
+    }
+
 
     static void mergeRegionsByX(List<RegionToFill> regions) {
         regions.sort(REGION_BY_MIN_Y_COMPARATOR.thenComparing(REGION_BY_MIN_Z_COMPARATOR).
@@ -174,12 +185,12 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         List<RegionToFill> newList = new ArrayList<>();
         RegionToFill previous = null;
         for (RegionToFill r: regions) {
-            boolean canMerge = previous != null && previous.region.max.x() == r.region.min.x() -1
-                    && r.region.min.y() == previous.region.min.y() && r.region.max.y() == previous.region.max.y()
-                    && r.region.min.z() == previous.region.min.z() && r.region.max.z() == previous.region.max.z()
+            boolean canMerge = previous != null && previous.region.maxX() == r.region.minX() -1
+                    && r.region.minY() == previous.region.minY() && r.region.maxY() == previous.region.maxY()
+                    && r.region.minZ() == previous.region.minZ() && r.region.maxZ() == previous.region.maxZ()
                     && r.blockType.equals(previous.blockType);
             if (canMerge) {
-                previous.region.max.setX(r.region.max.x());
+                previous.region = regionWithMaxXSetTo(previous.region, r.region.maxX());
             } else {
                 newList.add(r);
                 previous = r;
@@ -195,12 +206,12 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         List<RegionToFill> newList = new ArrayList<>();
         RegionToFill previous = null;
         for (RegionToFill r: regions) {
-            boolean canMerge = previous != null && previous.region.max.y() == r.region.min.y() -1
-                    && r.region.min.x() == previous.region.min.x() && r.region.max.x() == previous.region.max.x()
-                    && r.region.min.z() == previous.region.min.z() && r.region.max.z() == previous.region.max.z()
+            boolean canMerge = previous != null && previous.region.maxY() == r.region.minY() -1
+                    && r.region.minX() == previous.region.minX() && r.region.maxX() == previous.region.maxX()
+                    && r.region.minZ() == previous.region.minZ() && r.region.maxZ() == previous.region.maxZ()
                     && r.blockType.equals(previous.blockType);
             if (canMerge) {
-                previous.region.max.setY(r.region.max.y());
+                previous.region = regionWithMaxYSetTo(previous.region, r.region.maxY());
             } else {
                 newList.add(r);
                 previous = r;
@@ -216,12 +227,12 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         List<RegionToFill> newList = new ArrayList<>();
         RegionToFill previous = null;
         for (RegionToFill r: regions) {
-            boolean canMerge = previous != null && previous.region.max.z() == r.region.min.z() -1
-                    && r.region.min.x() == previous.region.min.x() && r.region.max.x() == previous.region.max.x()
-                    && r.region.min.y() == previous.region.min.y() && r.region.max.y() == previous.region.max.y()
+            boolean canMerge = previous != null && previous.region.maxZ() == r.region.minZ() -1
+                    && r.region.minX() == previous.region.minX() && r.region.maxX() == previous.region.maxX()
+                    && r.region.minY() == previous.region.minY() && r.region.maxY() == previous.region.maxY()
                     && r.blockType.equals(previous.blockType);
             if (canMerge) {
-                previous.region.max.setZ(r.region.max.z());
+                previous.region = regionWithMaxZSetTo(previous.region, r.region.maxZ());
             } else {
                 newList.add(r);
                 previous = r;
@@ -237,17 +248,17 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
             sb.append("            { \"blockType\": \"");
             sb.append(regionToFill.blockType);
             sb.append("\", \"region\": { \"min\": [");
-            sb.append(regionToFill.region.min.x);
+            sb.append(regionToFill.region.minX());
             sb.append(", ");
-            sb.append(regionToFill.region.min.y);
+            sb.append(regionToFill.region.minY());
             sb.append(", ");
-            sb.append(regionToFill.region.min.z);
-            sb.append("], \"max\": [");
-            sb.append(regionToFill.region.max.x);
+            sb.append(regionToFill.region.minZ());
+            sb.append("], \"size\": [");
+            sb.append(regionToFill.region.sizeX());
             sb.append(", ");
-            sb.append(regionToFill.region.max.y);
+            sb.append(regionToFill.region.sizeY());
             sb.append(", ");
-            sb.append(regionToFill.region.max.z);
+            sb.append(regionToFill.region.sizeZ());
             sb.append("]}},\n");
         }
         return sb.toString();

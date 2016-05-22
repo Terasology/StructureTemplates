@@ -16,8 +16,8 @@
 package org.terasology.structureTemplates.internal.systems;
 
 import org.terasology.entitySystem.Component;
+import org.terasology.math.Region3i;
 import org.terasology.math.geom.Vector3i;
-import org.terasology.structureTemplates.components.container.Region;
 
 /**
  * Used to describe an block region location
@@ -26,7 +26,7 @@ public class StructureTemplateEditorComponent implements Component {
     /**
      * Edit region relative to origin.
      */
-    public Region editRegion = new Region();
+    public Region3i editRegion = Region3i.createBounded(new Vector3i(0,0,0), new Vector3i(0,0,0));
 
     /**
      * Origin for editRegion values. To get the avsolute edit region add this value to it.

@@ -52,9 +52,7 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
         for (RegionToFill regionToFill: spawnBlockRegionComponent.regionsToFill) {
             Block block = blockManager.getBlock(regionToFill.blockType);
 
-            Vector3i corner1 = new Vector3i(regionToFill.region.min);
-            Vector3i corner2 = new Vector3i(regionToFill.region.max);
-            Region3i region = Region3i.createBounded(corner1, corner2);
+            Region3i region = regionToFill.region;
             region = transformation.transformRegion(region);
             block = transformation.transformBlock(block);
 

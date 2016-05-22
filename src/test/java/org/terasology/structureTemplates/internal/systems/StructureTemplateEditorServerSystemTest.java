@@ -16,8 +16,9 @@
 package org.terasology.structureTemplates.internal.systems;
 
 import org.junit.Test;
+import org.terasology.math.Region3i;
+import org.terasology.math.geom.Vector3i;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent.RegionToFill;
-import org.terasology.structureTemplates.components.container.Region;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,7 +61,7 @@ public class StructureTemplateEditorServerSystemTest {
         String blockA = "a";
 
         RegionToFill regionA = createRegion(blockA, 2, 0, -1, 2, 1, 5);
-        RegionToFill regionB = createRegion(blockA, 4, 0, -1, 3, 1, 5);
+        RegionToFill regionB = createRegion(blockA, 4, 0, -1, 5, 1, 5);
 
         // Region A and B are not behind each other to test that the algotihm can deal with it:
         List<RegionToFill> regions = new ArrayList<>();
@@ -79,8 +80,8 @@ public class StructureTemplateEditorServerSystemTest {
     public void testMergeRegionsByXWithMinYDifferCase() {
         String blockA = "a";
 
-        RegionToFill regionA = createRegion(blockA, 2, 0, -1, 2, 1, 5);
-        RegionToFill regionB = createRegion(blockA, 3, -1, -1, 3, 1, 5);
+        RegionToFill regionA = createRegion(blockA, 3, -1, -1, 3, 1, 5);
+        RegionToFill regionB = createRegion(blockA, 2, 0, -1, 2, 1, 5);
 
         List<RegionToFill> regions = new ArrayList<>();
         regions.add(copyOf(regionA));
@@ -117,8 +118,8 @@ public class StructureTemplateEditorServerSystemTest {
     public void testMergeRegionsByXWithMinZDifferCase() {
         String blockA = "a";
 
-        RegionToFill regionA = createRegion(blockA, 2, 0, -1, 2, 1, 5);
-        RegionToFill regionB = createRegion(blockA, 3, 0, -2, 3, 1, 5);
+        RegionToFill regionA = createRegion(blockA, 3, 0, -2, 3, 1, 5);
+        RegionToFill regionB = createRegion(blockA, 2, 0, -1, 2, 1, 5);
 
         List<RegionToFill> regions = new ArrayList<>();
         regions.add(copyOf(regionA));
@@ -178,14 +179,14 @@ public class StructureTemplateEditorServerSystemTest {
         List<RegionToFill> regions = new ArrayList<>();
 
         // Region A and B can be merged
-        RegionToFill regionA = createRegion(blockA, 2, 0, 1, 3, -1, 5);
-        RegionToFill regionB = createRegion(blockA, 4, 0, 1, 5, -1, 5);
+        RegionToFill regionA = createRegion(blockA, 2, -1, 1, 3, 0, 5);
+        RegionToFill regionB = createRegion(blockA, 4, -1, 1, 5, 0, 5);
 
         // Region C is x wise inbetween but y wise different
-        RegionToFill regionC = createRegion(blockA, 3, -1, 1, 3, -1, 5);
+        RegionToFill regionC = createRegion(blockA, 3, 0, 1, 3, 0, 5);
 
         // Region D is x wise in between but z wise different
-        RegionToFill regionD = createRegion(blockA, 3, 0, 2, 3, -1, 5);
+        RegionToFill regionD = createRegion(blockA, 3, -1, 2, 3, 0, 5);
 
 
         // Region A and B are not behind each other to test that the algotihm can deal with it:
@@ -197,34 +198,34 @@ public class StructureTemplateEditorServerSystemTest {
 
         StructureTemplateEditorServerSystem.mergeRegionsByX(regions);
 
-        RegionToFill regionAB = createRegion(blockA, 2, 0, 1, 5, -1, 5);
+        RegionToFill regionAB = createRegion(blockA, 2, -1, 1, 5, 0, 5);
 
 
         List<RegionToFill> expectedRegions = new ArrayList<>();
-        expectedRegions.add(regionC);
         expectedRegions.add(regionAB);
         expectedRegions.add(regionD);
+        expectedRegions.add(regionC);
         assertRegionListsEqual(expectedRegions, regions);
     }
 
     private RegionToFill copyOf(RegionToFill r) {
-        return createRegion(r.blockType, r.region.min.x, r.region.min.y, r.region.min.z, r.region.max.x, r.region.max.y,
-                r.region.max.z);
+        RegionToFill regionToFill = new RegionToFill();
+        regionToFill.blockType = r.blockType;
+        regionToFill.region = r.region;
+        return regionToFill;
     }
 
     private RegionToFill createRegion(String blockType, int minX, int minY, int minZ,
                                                                  int maxX, int maxY, int maxZ) {
         RegionToFill r = new RegionToFill();
-        r.region = new Region();
-        r.region.min.set(minX, minY, minZ);
-        r.region.max.set(maxX, maxY, maxZ);
+        r.region = Region3i.createBounded(new Vector3i(minX, minY, minZ), new Vector3i(maxX, maxY, maxZ));
         r.blockType = blockType;
         return r;
     }
 
     private static String regionToString(RegionToFill r) {
-        return String.format("block: \"%s\", min: [%d, %d, %d], max: [%d, %d, %d]", r.blockType, r.region.min.x,
-                r. region.min.y, r. region.min.z, r. region.max.x, r. region.max.y, r. region.max.z);
+        return String.format("block: \"%s\", min: [%d, %d, %d], max: [%d, %d, %d]", r.blockType, r.region.minX(),
+                r. region.minY(), r. region.minZ(), r. region.maxX(), r. region.maxY(), r. region.maxZ());
     }
 
     private static String regionsToString(List<RegionToFill> regions) {

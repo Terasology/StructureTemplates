@@ -198,8 +198,7 @@ public class StructureSpawnClientSystem extends BaseComponentSystem implements U
 
         List<Region3i> regionsToDraw = new ArrayList<>();
         for (SpawnBlockRegionsComponent.RegionToFill regionToFill: spawnBlockRegionsComponent.regionsToFill) {
-            Region3i region = Region3i.createBounded(regionToFill.region.min,
-                    regionToFill.region.max);
+            Region3i region = regionToFill.region;
             region = regionTransform.transformRegion(region);
             regionsToDraw.add(region);
         }

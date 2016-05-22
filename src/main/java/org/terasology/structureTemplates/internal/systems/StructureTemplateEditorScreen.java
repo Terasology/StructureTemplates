@@ -16,6 +16,8 @@
 package org.terasology.structureTemplates.internal.systems;
 
 import org.terasology.entitySystem.entity.EntityRef;
+import org.terasology.math.Region3i;
+import org.terasology.math.geom.Vector3i;
 import org.terasology.rendering.nui.BaseInteractionScreen;
 import org.terasology.rendering.nui.UIWidget;
 import org.terasology.rendering.nui.databinding.Binding;
@@ -49,12 +51,15 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
         minXField.bindText(new AbstractIntEditorPropertyBinding() {
             @Override
             public int getInt(StructureTemplateEditorComponent editorComponent) {
-                return editorComponent.editRegion.min.x();
+                return editorComponent.editRegion.minX();
             }
 
             @Override
             public void setInt(StructureTemplateEditorComponent editorComponent, int value) {
-                editorComponent.editRegion.min.setX(value);
+                Region3i region = editorComponent.editRegion;
+                Vector3i min = new Vector3i(value, region.minY(), region.minZ());
+                Vector3i max = region.max();
+                editorComponent.editRegion = Region3i.createBounded(min, max);
             }
         });
 
@@ -62,12 +67,15 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
         minYField.bindText(new AbstractIntEditorPropertyBinding() {
             @Override
             public int getInt(StructureTemplateEditorComponent editorComponent) {
-                return editorComponent.editRegion.min.y();
+                return editorComponent.editRegion.minY();
             }
 
             @Override
             public void setInt(StructureTemplateEditorComponent editorComponent, int value) {
-                editorComponent.editRegion.min.setY(value);
+                Region3i region = editorComponent.editRegion;
+                Vector3i min = new Vector3i( region.minX(), value, region.minZ());
+                Vector3i max = region.max();
+                editorComponent.editRegion = Region3i.createBounded(min, max);
             }
         });
 
@@ -75,12 +83,15 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
         minZField.bindText(new AbstractIntEditorPropertyBinding() {
             @Override
             public int getInt(StructureTemplateEditorComponent editorComponent) {
-                return editorComponent.editRegion.min.z();
+                return editorComponent.editRegion.minZ();
             }
 
             @Override
             public void setInt(StructureTemplateEditorComponent editorComponent, int value) {
-                editorComponent.editRegion.min.setZ(value);
+                Region3i region = editorComponent.editRegion;
+                Vector3i min = new Vector3i( region.minX(), region.minY(), value);
+                Vector3i max = region.max();
+                editorComponent.editRegion = Region3i.createBounded(min, max);
             }
         });
 
@@ -88,12 +99,15 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
         maxXField.bindText(new AbstractIntEditorPropertyBinding() {
             @Override
             public int getInt(StructureTemplateEditorComponent editorComponent) {
-                return editorComponent.editRegion.max.x();
+                return editorComponent.editRegion.maxX();
             }
 
             @Override
             public void setInt(StructureTemplateEditorComponent editorComponent, int value) {
-                editorComponent.editRegion.max.setX(value);
+                Region3i region = editorComponent.editRegion;
+                Vector3i min = region.min();
+                Vector3i max = new Vector3i(value, region.maxY(), region.maxZ());
+                editorComponent.editRegion = Region3i.createBounded(min, max);
             }
         });
 
@@ -101,12 +115,15 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
         maxYField.bindText(new AbstractIntEditorPropertyBinding() {
             @Override
             public int getInt(StructureTemplateEditorComponent editorComponent) {
-                return editorComponent.editRegion.max.y();
+                return editorComponent.editRegion.maxY();
             }
 
             @Override
             public void setInt(StructureTemplateEditorComponent editorComponent, int value) {
-                editorComponent.editRegion.max.setY(value);
+                Region3i region = editorComponent.editRegion;
+                Vector3i min = region.min();
+                Vector3i max = new Vector3i(region.maxX(), value, region.maxZ());
+                editorComponent.editRegion = Region3i.createBounded(min, max);
             }
         });
 
@@ -114,12 +131,15 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
         maxZField.bindText(new AbstractIntEditorPropertyBinding() {
             @Override
             public int getInt(StructureTemplateEditorComponent editorComponent) {
-                return editorComponent.editRegion.max.z();
+                return editorComponent.editRegion.maxZ();
             }
 
             @Override
             public void setInt(StructureTemplateEditorComponent editorComponent, int value) {
-                editorComponent.editRegion.max.setZ(value);
+                Region3i region = editorComponent.editRegion;
+                Vector3i min = region.min();
+                Vector3i max = new Vector3i(region.maxX(), region.maxY(), value);
+                editorComponent.editRegion = Region3i.createBounded(min, max);
             }
         });
 

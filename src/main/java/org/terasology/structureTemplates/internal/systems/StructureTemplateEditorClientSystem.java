@@ -152,8 +152,7 @@ public class StructureTemplateEditorClientSystem extends BaseComponentSystem {
             return null;
         }
 
-        Region3i region = Region3i.createBounded(structureTemplateEditorComponent.editRegion.min,
-                structureTemplateEditorComponent.editRegion.max);
+        Region3i region = structureTemplateEditorComponent.editRegion;
         region = region.move(structureTemplateEditorComponent.origin);
         return region;
     }
