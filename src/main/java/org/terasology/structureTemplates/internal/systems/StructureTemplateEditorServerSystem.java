@@ -83,7 +83,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         Side frontDirectionOfStructure = directionStructureIsIn.reverse();
 
 
-        Region3i unrotatedRegion = Region3i.createBounded(new Vector3i(-2, 0, 0), new Vector3i(2, 4, 6));
+        Region3i unrotatedRegion = Region3i.createBounded(new Vector3i(-2, 1, 0), new Vector3i(2, 4, 6));
 
 
         HorizontalBlockRegionRotation rotation = HorizontalBlockRegionRotation.createRotationFromSideToSide(Side.FRONT,
