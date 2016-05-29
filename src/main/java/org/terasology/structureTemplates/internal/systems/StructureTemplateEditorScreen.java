@@ -46,7 +46,7 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
     }
 
     @Override
-    protected void initialise() {
+    public void initialise() {
         minXField = find("minXField", UIText.class);
         minXField.bindText(new AbstractIntEditorPropertyBinding() {
             @Override
