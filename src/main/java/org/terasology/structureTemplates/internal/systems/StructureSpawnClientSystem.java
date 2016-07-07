@@ -21,12 +21,18 @@ import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.entity.lifecycleEvents.BeforeDeactivateComponent;
 import org.terasology.entitySystem.entity.lifecycleEvents.OnActivatedComponent;
 import org.terasology.entitySystem.entity.lifecycleEvents.OnChangedComponent;
+import org.terasology.entitySystem.event.EventPriority;
 import org.terasology.entitySystem.event.ReceiveEvent;
+import org.terasology.entitySystem.prefab.Prefab;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.entitySystem.systems.UpdateSubscriberSystem;
+import org.terasology.input.ButtonState;
+import org.terasology.input.InputSystem;
+import org.terasology.input.binds.inventory.UseItemButton;
 import org.terasology.logic.clipboard.ClipboardManager;
+import org.terasology.logic.common.DisplayNameComponent;
 import org.terasology.logic.inventory.InventoryComponent;
 import org.terasology.logic.inventory.InventoryManager;
 import org.terasology.logic.inventory.SelectedInventorySlotComponent;
@@ -41,14 +47,18 @@ import org.terasology.math.geom.Vector3i;
 import org.terasology.registry.In;
 import org.terasology.rendering.logic.RegionOutlineComponent;
 import org.terasology.rendering.nui.Color;
+import org.terasology.rendering.nui.NUIManager;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent;
 import org.terasology.structureTemplates.components.SpawnStructureActionComponent;
 import org.terasology.structureTemplates.events.CheckSpawnConditionEvent;
 import org.terasology.structureTemplates.internal.components.FrontDirectionComponent;
+import org.terasology.structureTemplates.internal.events.StructureSpawnFailedEvent;
+import org.terasology.structureTemplates.internal.ui.StructurePlacementFailureOverlay;
 import org.terasology.structureTemplates.util.transform.BlockRegionTransform;
 import org.terasology.world.block.BlockComponent;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -57,8 +67,9 @@ import java.util.List;
  * {@link SpawnStructureActionComponent} and {@link SpawnBlockRegionsComponent}.
  */
 @RegisterSystem(RegisterMode.CLIENT)
-public class StructureSpawnClientSystem extends BaseComponentSystem implements UpdateSubscriberSystem{
+public class StructureSpawnClientSystem extends BaseComponentSystem implements UpdateSubscriberSystem {
 
+    public static final String STRUCTURE_PLACEMENT_FAILURE_OVERLAY = "StructureTemplates:StructurePlacementFailureOverlay";
     @In
     private ClipboardManager clipboardManager;
 
@@ -71,12 +82,21 @@ public class StructureSpawnClientSystem extends BaseComponentSystem implements U
     @In
     private InventoryManager inventoryManager;
 
+    @In
+    private NUIManager nuiManager;
+
+    @In
+    private InputSystem inputSystem;
+
     private List<EntityRef> regionOutlineEntities = new ArrayList<>();
 
+    private Region3i unconfirmSpawnErrorRegion = null;
 
     private Vector3i spawnPosition;
 
     private Side directionPlayerLooksAt;
+
+    private boolean messageConfirmationPending;
 
 
     @Override
@@ -98,14 +118,14 @@ public class StructureSpawnClientSystem extends BaseComponentSystem implements U
 
     @ReceiveEvent
     public void onActivatedSpawnStructureActionComponent(OnActivatedComponent event, EntityRef entity,
-                                                SpawnStructureActionComponent component) {
+                                                         SpawnStructureActionComponent component) {
         updateOutlineEntity();
     }
 
     @ReceiveEvent
     public void onChangedSpawnStructureActionOrBlockRegions(OnChangedComponent event, EntityRef entity,
-                                             SpawnBlockRegionsComponent blockRegionComponent,
-                                             SpawnStructureActionComponent spawnStructureComponent) {
+                                                            SpawnBlockRegionsComponent blockRegionComponent,
+                                                            SpawnStructureActionComponent spawnStructureComponent) {
         updateOutlineEntity();
     }
 
@@ -122,7 +142,7 @@ public class StructureSpawnClientSystem extends BaseComponentSystem implements U
 
     @ReceiveEvent
     public void onChangedSelectedInventorySlotComponent(OnChangedComponent event, EntityRef entity,
-                                                SelectedInventorySlotComponent component) {
+                                                        SelectedInventorySlotComponent component) {
         updateOutlineEntity();
     }
 
@@ -144,35 +164,44 @@ public class StructureSpawnClientSystem extends BaseComponentSystem implements U
     }
 
     void replaceRegionOutlineEntitiesWith(List<ColoredRegion> regionsToDraw) {
-        for (EntityRef entity: regionOutlineEntities) {
+        for (EntityRef entity : regionOutlineEntities) {
             if (entity.exists()) {
                 entity.destroy();
             }
         }
 
-        for (ColoredRegion coloredRegion: regionsToDraw) {
+        for (ColoredRegion coloredRegion : regionsToDraw) {
             Region3i region = coloredRegion.region;
-            EntityBuilder entityBuilder = entityManager.newBuilder();
-            entityBuilder.setPersistent(false);
-            RegionOutlineComponent regionOutlineComponent = new RegionOutlineComponent();
-            regionOutlineComponent.corner1 = new Vector3i(region.min());
-            regionOutlineComponent.corner2 = new Vector3i(region.max());
-            regionOutlineComponent.color = coloredRegion.getColor();
-            entityBuilder.addComponent(regionOutlineComponent);
-            EntityRef entity = entityBuilder.build();
+            Color color = coloredRegion.getColor();
+            EntityRef entity = createOutlineEntity(region, color);
             regionOutlineEntities.add(entity);
         }
     }
 
+    private EntityRef createOutlineEntity(Region3i region, Color color) {
+        EntityBuilder entityBuilder = entityManager.newBuilder();
+        entityBuilder.setPersistent(false);
+        RegionOutlineComponent regionOutlineComponent = new RegionOutlineComponent();
+        regionOutlineComponent.corner1 = new Vector3i(region.min());
+        regionOutlineComponent.corner2 = new Vector3i(region.max());
+        regionOutlineComponent.color = color;
+        entityBuilder.addComponent(regionOutlineComponent);
+        return entityBuilder.build();
+    }
+
 
     private List<ColoredRegion> getRegionsToDraw() {
+        if (unconfirmSpawnErrorRegion != null) {
+            return Arrays.asList(new ColoredRegion(unconfirmSpawnErrorRegion, Color.RED));
+        }
+
         EntityRef characterEntity = locatPlayer.getCharacterEntity();
         SelectedInventorySlotComponent selectedSlotComponent = characterEntity.
                 getComponent(SelectedInventorySlotComponent.class);
         if (selectedSlotComponent == null) {
             return Collections.emptyList();
         }
-        InventoryComponent inventoryComponent =  characterEntity.getComponent(InventoryComponent.class);
+        InventoryComponent inventoryComponent = characterEntity.getComponent(InventoryComponent.class);
         if (inventoryComponent == null) {
             return Collections.emptyList();
         }
@@ -197,7 +226,7 @@ public class StructureSpawnClientSystem extends BaseComponentSystem implements U
         FrontDirectionComponent templateFrontDirComp = item.getComponent(FrontDirectionComponent.class);
         Side frontOfStructure = (templateFrontDirComp != null) ? templateFrontDirComp.direction : Side.FRONT;
 
-        BlockRegionTransform regionTransform = SpawnStructureActionServerSystem.createBlockRegionTransformForCharacterTargeting(
+        BlockRegionTransform regionTransform = StructureSpawnServerSystem.createBlockRegionTransformForCharacterTargeting(
                 frontOfStructure, wantedFrontOfStructure, spawnPosition);
 
         List<ColoredRegion> regionsToDraw = new ArrayList<>();
@@ -233,6 +262,65 @@ public class StructureSpawnClientSystem extends BaseComponentSystem implements U
 
         public Color getColor() {
             return color;
+        }
+    }
+
+
+    @ReceiveEvent
+    public void onStructureSpawnFailedEvent(StructureSpawnFailedEvent event, EntityRef entity) {
+        StructurePlacementFailureOverlay overlay = nuiManager.addOverlay(
+                STRUCTURE_PLACEMENT_FAILURE_OVERLAY, StructurePlacementFailureOverlay.class);
+        messageConfirmationPending = true;
+
+        Prefab failedConditionPrefab = event.getFailedSpawnCondition();
+        DisplayNameComponent displayNameComponent = failedConditionPrefab != null ? failedConditionPrefab
+                .getComponent(DisplayNameComponent.class) : null;
+        String spawnConditionName = displayNameComponent != null ? displayNameComponent.name : null;
+        Region3i region = event.getSpawnPreventingRegion();
+        String message;
+        if (region != null) {
+            if (spawnConditionName != null) {
+                message = "Red region must contain: " + spawnConditionName;
+            } else {
+                message = "Red region prevented spawn";
+            }
+        } else {
+            if (spawnConditionName != null) {
+                message = "Condition not met: " + spawnConditionName;
+            } else {
+                message = "The failed check has no description";
+            }
+        }
+        overlay.setMessage(message);
+
+        overlay.setHint("(press c twice to continue)");
+
+        unconfirmSpawnErrorRegion = region;
+        updateOutlineEntity();
+    }
+
+
+    @ReceiveEvent(priority = EventPriority.PRIORITY_HIGH)
+    public void onUseItemButton(UseItemButton event, EntityRef entity) {
+        if (event.getState() == ButtonState.REPEAT) {
+            event.consume();
+            return;
+        }
+        if (messageConfirmationPending) {
+            if (event.getState() == ButtonState.DOWN) {
+                nuiManager.removeOverlay(STRUCTURE_PLACEMENT_FAILURE_OVERLAY);
+                messageConfirmationPending = false;
+            }
+            event.consume();
+            return;
+        }
+        if (unconfirmSpawnErrorRegion != null) {
+            if (event.getState() == ButtonState.DOWN) {
+                unconfirmSpawnErrorRegion = null;
+                updateOutlineEntity();
+            }
+            event.consume();
+            return;
         }
     }
 }

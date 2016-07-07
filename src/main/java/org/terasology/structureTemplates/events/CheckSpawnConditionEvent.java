@@ -15,8 +15,8 @@
  */
 package org.terasology.structureTemplates.events;
 
-import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.event.AbstractConsumableEvent;
+import org.terasology.entitySystem.prefab.Prefab;
 import org.terasology.math.Region3i;
 import org.terasology.structureTemplates.components.CheckBlockRegionConditionComponent;
 import org.terasology.structureTemplates.util.transform.BlockRegionTransform;
@@ -33,7 +33,7 @@ public class CheckSpawnConditionEvent extends AbstractConsumableEvent {
     /** result of the event */
     private boolean preventSpawn;
     /** Meta data about result */
-    private EntityRef failedSpawnCondition;
+    private Prefab failedSpawnCondition;
     /** Meta data about result */
     private Region3i spawnPreventingRegion;
 
@@ -60,7 +60,7 @@ public class CheckSpawnConditionEvent extends AbstractConsumableEvent {
      * @param failedSpawnCondition the entity that prevented the spawning. IT may contain later on an error message
      *                              that can be displayed to the user.
      */
-    public void setFailedSpawnCondition(EntityRef failedSpawnCondition) {
+    public void setFailedSpawnCondition(Prefab failedSpawnCondition) {
         this.failedSpawnCondition = failedSpawnCondition;
     }
 
@@ -72,7 +72,7 @@ public class CheckSpawnConditionEvent extends AbstractConsumableEvent {
         return preventSpawn;
     }
 
-    public EntityRef getFailedSpawnCondition() {
+    public Prefab getFailedSpawnCondition() {
         return failedSpawnCondition;
     }
 

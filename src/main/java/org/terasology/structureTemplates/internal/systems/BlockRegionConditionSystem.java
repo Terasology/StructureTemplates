@@ -114,6 +114,7 @@ public class BlockRegionConditionSystem extends BaseComponentSystem implements B
                 event.setPreventSpawn(true);
                 Region3i absoluteRegion = event.getBlockRegionTransform().transformRegion(relativeRegion);
                 event.setSpawnPreventingRegion(absoluteRegion);
+                event.setFailedSpawnCondition(conditionPrefab);
                 event.consume();
                 return;
             }
