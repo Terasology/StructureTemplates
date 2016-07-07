@@ -16,10 +16,16 @@
 package org.terasology.structureTemplates.components;
 
 import org.terasology.entitySystem.Component;
+import org.terasology.math.Region3i;
+import org.terasology.network.FieldReplicateType;
+import org.terasology.network.Replicate;
 
 /**
  * Add this component to an item to make it spawn a structure on activation.
  */
 public class SpawnStructureActionComponent implements Component {
+
+    @Replicate(FieldReplicateType.SERVER_TO_OWNER)
+    public Region3i unconfirmSpawnErrorRegion;
 
 }

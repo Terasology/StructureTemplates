@@ -21,16 +21,13 @@ import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.entity.lifecycleEvents.BeforeDeactivateComponent;
 import org.terasology.entitySystem.entity.lifecycleEvents.OnActivatedComponent;
 import org.terasology.entitySystem.entity.lifecycleEvents.OnChangedComponent;
-import org.terasology.entitySystem.event.EventPriority;
 import org.terasology.entitySystem.event.ReceiveEvent;
 import org.terasology.entitySystem.prefab.Prefab;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.entitySystem.systems.UpdateSubscriberSystem;
-import org.terasology.input.ButtonState;
 import org.terasology.input.InputSystem;
-import org.terasology.input.binds.inventory.UseItemButton;
 import org.terasology.logic.clipboard.ClipboardManager;
 import org.terasology.logic.common.DisplayNameComponent;
 import org.terasology.logic.inventory.InventoryComponent;
@@ -89,8 +86,6 @@ public class StructureSpawnClientSystem extends BaseComponentSystem implements U
     private InputSystem inputSystem;
 
     private List<EntityRef> regionOutlineEntities = new ArrayList<>();
-
-    private Region3i unconfirmSpawnErrorRegion = null;
 
     private Vector3i spawnPosition;
 
@@ -189,10 +184,6 @@ public class StructureSpawnClientSystem extends BaseComponentSystem implements U
 
 
     private List<ColoredRegion> getRegionsToDraw() {
-        if (unconfirmSpawnErrorRegion != null) {
-            return Arrays.asList(new ColoredRegion(unconfirmSpawnErrorRegion, Color.RED));
-        }
-
         EntityRef characterEntity = locatPlayer.getCharacterEntity();
         SelectedInventorySlotComponent selectedSlotComponent = characterEntity.
                 getComponent(SelectedInventorySlotComponent.class);
@@ -209,6 +200,14 @@ public class StructureSpawnClientSystem extends BaseComponentSystem implements U
         SpawnBlockRegionsComponent spawnBlockRegionsComponent = item.getComponent(SpawnBlockRegionsComponent.class);
         if (spawnBlockRegionsComponent == null) {
             return Collections.emptyList();
+        }
+
+        SpawnStructureActionComponent spawnActionComponent = item.getComponent(SpawnStructureActionComponent.class);
+        if (spawnActionComponent == null) {
+            return Collections.emptyList();
+        }
+        if (spawnActionComponent.unconfirmSpawnErrorRegion != null) {
+            return Arrays.asList(new ColoredRegion(spawnActionComponent.unconfirmSpawnErrorRegion, Color.RED));
         }
 
         if (spawnPosition == null) {
@@ -265,7 +264,8 @@ public class StructureSpawnClientSystem extends BaseComponentSystem implements U
 
 
     @ReceiveEvent
-    public void onStructureSpawnFailedEvent(StructureSpawnFailedEvent event, EntityRef entity) {
+    public void onStructureSpawnFailedEvent(StructureSpawnFailedEvent event, EntityRef entity,
+                                            SpawnStructureActionComponent spawnActionComponent) {
         Prefab failedConditionPrefab = event.getFailedSpawnCondition();
         DisplayNameComponent displayNameComponent = failedConditionPrefab != null ? failedConditionPrefab
                 .getComponent(DisplayNameComponent.class) : null;
@@ -288,25 +288,5 @@ public class StructureSpawnClientSystem extends BaseComponentSystem implements U
         StructurePlacementFailureScreen messagePopup = nuiManager.pushScreen(
                 STRUCTURE_PLACEMENT_FAILURE_OVERLAY, StructurePlacementFailureScreen.class);
         messagePopup.setMessage(message);
-
-        unconfirmSpawnErrorRegion = region;
-        updateOutlineEntity();
-    }
-
-
-    @ReceiveEvent(priority = EventPriority.PRIORITY_HIGH)
-    public void onUseItemButton(UseItemButton event, EntityRef entity) {
-        if (event.getState() == ButtonState.REPEAT) {
-            event.consume();
-            return;
-        }
-        if (unconfirmSpawnErrorRegion != null) {
-            if (event.getState() == ButtonState.DOWN) {
-                unconfirmSpawnErrorRegion = null;
-                updateOutlineEntity();
-            }
-            event.consume();
-            return;
-        }
     }
 }

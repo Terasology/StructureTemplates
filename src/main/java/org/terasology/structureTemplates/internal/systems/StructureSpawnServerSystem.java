@@ -76,7 +76,14 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
 
     @ReceiveEvent
     public void onActivate(ActivateEvent event, EntityRef entity,
-                           SpawnStructureActionComponent structureTemplateEditorComponent) {
+                           SpawnStructureActionComponent component) {
+        // activation with error hides error:
+        if (component.unconfirmSpawnErrorRegion != null) {
+            component.unconfirmSpawnErrorRegion = null;
+            entity.saveComponent(component);
+            return;
+        }
+
         EntityRef target = event.getTarget();
         BlockComponent blockComponent = target.getComponent(BlockComponent.class);
         if (blockComponent == null) {
@@ -98,6 +105,8 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
         CheckSpawnConditionEvent checkSpawnEvent = new CheckSpawnConditionEvent(blockRegionTransform);
         entity.send(checkSpawnEvent);
         if (checkSpawnEvent.isPreventSpawn()) {
+            component.unconfirmSpawnErrorRegion = checkSpawnEvent.getSpawnPreventingRegion();
+            entity.saveComponent(component);
             entity.send(new StructureSpawnFailedEvent(checkSpawnEvent.getFailedSpawnCondition(),
                     checkSpawnEvent.getSpawnPreventingRegion()));
             return;
