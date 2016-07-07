@@ -53,7 +53,7 @@ import org.terasology.structureTemplates.components.SpawnStructureActionComponen
 import org.terasology.structureTemplates.events.CheckSpawnConditionEvent;
 import org.terasology.structureTemplates.internal.components.FrontDirectionComponent;
 import org.terasology.structureTemplates.internal.events.StructureSpawnFailedEvent;
-import org.terasology.structureTemplates.internal.ui.StructurePlacementFailureOverlay;
+import org.terasology.structureTemplates.internal.ui.StructurePlacementFailureScreen;
 import org.terasology.structureTemplates.util.transform.BlockRegionTransform;
 import org.terasology.world.block.BlockComponent;
 
@@ -69,7 +69,7 @@ import java.util.List;
 @RegisterSystem(RegisterMode.CLIENT)
 public class StructureSpawnClientSystem extends BaseComponentSystem implements UpdateSubscriberSystem {
 
-    public static final String STRUCTURE_PLACEMENT_FAILURE_OVERLAY = "StructureTemplates:StructurePlacementFailureOverlay";
+    public static final String STRUCTURE_PLACEMENT_FAILURE_OVERLAY = "StructureTemplates:StructurePlacementFailureScreen";
     @In
     private ClipboardManager clipboardManager;
 
@@ -95,8 +95,6 @@ public class StructureSpawnClientSystem extends BaseComponentSystem implements U
     private Vector3i spawnPosition;
 
     private Side directionPlayerLooksAt;
-
-    private boolean messageConfirmationPending;
 
 
     @Override
@@ -268,10 +266,6 @@ public class StructureSpawnClientSystem extends BaseComponentSystem implements U
 
     @ReceiveEvent
     public void onStructureSpawnFailedEvent(StructureSpawnFailedEvent event, EntityRef entity) {
-        StructurePlacementFailureOverlay overlay = nuiManager.addOverlay(
-                STRUCTURE_PLACEMENT_FAILURE_OVERLAY, StructurePlacementFailureOverlay.class);
-        messageConfirmationPending = true;
-
         Prefab failedConditionPrefab = event.getFailedSpawnCondition();
         DisplayNameComponent displayNameComponent = failedConditionPrefab != null ? failedConditionPrefab
                 .getComponent(DisplayNameComponent.class) : null;
@@ -286,14 +280,14 @@ public class StructureSpawnClientSystem extends BaseComponentSystem implements U
             }
         } else {
             if (spawnConditionName != null) {
-                message = "Condition not met: " + spawnConditionName;
+                message = "Placement condition not met: " + spawnConditionName;
             } else {
-                message = "The failed check has no description";
+                message = "The failed placement condition has no description";
             }
         }
-        overlay.setMessage(message);
-
-        overlay.setHint("(press c twice to continue)");
+        StructurePlacementFailureScreen messagePopup = nuiManager.pushScreen(
+                STRUCTURE_PLACEMENT_FAILURE_OVERLAY, StructurePlacementFailureScreen.class);
+        messagePopup.setMessage(message);
 
         unconfirmSpawnErrorRegion = region;
         updateOutlineEntity();
@@ -303,14 +297,6 @@ public class StructureSpawnClientSystem extends BaseComponentSystem implements U
     @ReceiveEvent(priority = EventPriority.PRIORITY_HIGH)
     public void onUseItemButton(UseItemButton event, EntityRef entity) {
         if (event.getState() == ButtonState.REPEAT) {
-            event.consume();
-            return;
-        }
-        if (messageConfirmationPending) {
-            if (event.getState() == ButtonState.DOWN) {
-                nuiManager.removeOverlay(STRUCTURE_PLACEMENT_FAILURE_OVERLAY);
-                messageConfirmationPending = false;
-            }
             event.consume();
             return;
         }

@@ -15,29 +15,22 @@
  */
 package org.terasology.structureTemplates.internal.ui;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.terasology.rendering.nui.CoreScreenLayer;
+import org.terasology.rendering.nui.WidgetUtil;
 import org.terasology.rendering.nui.widgets.UILabel;
 
 /**
  * Overlay shown when the user tries to spawn a building but can't because the preconditions are not met.
  */
-public class StructurePlacementFailureOverlay extends CoreScreenLayer {
-    private static final Logger logger = LoggerFactory.getLogger(StructurePlacementFailureOverlay.class);
+public class StructurePlacementFailureScreen extends CoreScreenLayer {
 
     @Override
     public void initialise() {
+        WidgetUtil.trySubscribe(this, "okButton",  button -> getManager().popScreen());
     }
 
     public void setMessage(String message) {
         UILabel messageLabel = find("message", UILabel.class);
         messageLabel.setText(message);
     }
-
-    public void setHint(String hint) {
-        UILabel hintLabel = find("hint", UILabel.class);
-        hintLabel.setText(hint);
-    }
-
 }
