@@ -40,8 +40,10 @@ import org.terasology.math.geom.Vector3f;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.registry.In;
 import org.terasology.rendering.logic.RegionOutlineComponent;
+import org.terasology.rendering.nui.Color;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent;
 import org.terasology.structureTemplates.components.SpawnStructureActionComponent;
+import org.terasology.structureTemplates.events.CheckSpawnConditionEvent;
 import org.terasology.structureTemplates.internal.components.FrontDirectionComponent;
 import org.terasology.structureTemplates.util.transform.BlockRegionTransform;
 import org.terasology.world.block.BlockComponent;
@@ -137,22 +139,25 @@ public class StructureSpawnClientSystem extends BaseComponentSystem implements U
     }
 
     public void updateOutlineEntity() {
-        List<Region3i> regionsToDraw = getRegionsToDraw();
+        List<ColoredRegion> regionsToDraw = getRegionsToDraw();
+        replaceRegionOutlineEntitiesWith(regionsToDraw);
+    }
+
+    void replaceRegionOutlineEntitiesWith(List<ColoredRegion> regionsToDraw) {
         for (EntityRef entity: regionOutlineEntities) {
             if (entity.exists()) {
                 entity.destroy();
             }
         }
-        if (regionsToDraw.isEmpty()) {
-            return;
-        }
 
-        for (Region3i region: regionsToDraw) {
+        for (ColoredRegion coloredRegion: regionsToDraw) {
+            Region3i region = coloredRegion.region;
             EntityBuilder entityBuilder = entityManager.newBuilder();
             entityBuilder.setPersistent(false);
             RegionOutlineComponent regionOutlineComponent = new RegionOutlineComponent();
             regionOutlineComponent.corner1 = new Vector3i(region.min());
             regionOutlineComponent.corner2 = new Vector3i(region.max());
+            regionOutlineComponent.color = coloredRegion.getColor();
             entityBuilder.addComponent(regionOutlineComponent);
             EntityRef entity = entityBuilder.build();
             regionOutlineEntities.add(entity);
@@ -160,8 +165,7 @@ public class StructureSpawnClientSystem extends BaseComponentSystem implements U
     }
 
 
-
-    private List<Region3i> getRegionsToDraw() {
+    private List<ColoredRegion> getRegionsToDraw() {
         EntityRef characterEntity = locatPlayer.getCharacterEntity();
         SelectedInventorySlotComponent selectedSlotComponent = characterEntity.
                 getComponent(SelectedInventorySlotComponent.class);
@@ -196,13 +200,39 @@ public class StructureSpawnClientSystem extends BaseComponentSystem implements U
         BlockRegionTransform regionTransform = SpawnStructureActionServerSystem.createBlockRegionTransformForCharacterTargeting(
                 frontOfStructure, wantedFrontOfStructure, spawnPosition);
 
-        List<Region3i> regionsToDraw = new ArrayList<>();
-        for (SpawnBlockRegionsComponent.RegionToFill regionToFill: spawnBlockRegionsComponent.regionsToFill) {
-            Region3i region = regionToFill.region;
-            region = regionTransform.transformRegion(region);
-            regionsToDraw.add(region);
+        List<ColoredRegion> regionsToDraw = new ArrayList<>();
+        CheckSpawnConditionEvent checkSpawnEvent = new CheckSpawnConditionEvent(regionTransform);
+        item.send(checkSpawnEvent);
+        if (checkSpawnEvent.isPreventSpawn()) {
+            Region3i problematicRegion = checkSpawnEvent.getSpawnPreventingRegion();
+            if (problematicRegion != null) {
+                regionsToDraw.add(new ColoredRegion(problematicRegion, Color.RED));
+            }
         }
 
+        for (SpawnBlockRegionsComponent.RegionToFill regionToFill : spawnBlockRegionsComponent.regionsToFill) {
+            Region3i region = regionToFill.region;
+            region = regionTransform.transformRegion(region);
+            regionsToDraw.add(new ColoredRegion(region, Color.WHITE));
+        }
         return regionsToDraw;
+    }
+
+    private static final class ColoredRegion {
+        private Region3i region;
+        private Color color;
+
+        public ColoredRegion(Region3i region, Color color) {
+            this.region = region;
+            this.color = color;
+        }
+
+        public Region3i getRegion() {
+            return region;
+        }
+
+        public Color getColor() {
+            return color;
+        }
     }
 }

@@ -1,0 +1,14 @@
+{
+    /**
+     * Checks that a region looks like it is filled with ground like block like earth or stone.
+     */
+    "BlockPredicate":{},
+    "RequiredBlockProperties": {
+        "penetrable": false
+    },
+    "DisplayName": {
+        "name": "Ground like blocks", // Text gets used in a message like "Red region must contain: <name>"
+        "description": "Blocks that act like ground: They are not penetrable"
+    }
+
+}

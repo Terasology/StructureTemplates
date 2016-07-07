@@ -26,6 +26,7 @@ import org.terasology.math.Side;
 import org.terasology.math.geom.Vector3f;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.structureTemplates.components.SpawnStructureActionComponent;
+import org.terasology.structureTemplates.events.CheckSpawnConditionEvent;
 import org.terasology.structureTemplates.events.SpawnStructureEvent;
 import org.terasology.structureTemplates.internal.components.FrontDirectionComponent;
 import org.terasology.structureTemplates.util.transform.BlockRegionMovement;
@@ -61,6 +62,11 @@ public class SpawnStructureActionServerSystem extends BaseComponentSystem {
 
         BlockRegionTransform blockRegionTransform = createBlockRegionTransformForCharacterTargeting(frontOfStructure,
                 wantedFrontOfStructure, blockComponent.getPosition());
+        CheckSpawnConditionEvent checkSpawnEvent = new CheckSpawnConditionEvent(blockRegionTransform);
+        entity.send(checkSpawnEvent);
+        if (checkSpawnEvent.isPreventSpawn()) {
+            return;
+        }
 
         entity.send(new SpawnStructureEvent(blockRegionTransform));
 

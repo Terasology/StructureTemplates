@@ -1,0 +1,15 @@
+{
+    /**
+     * Checks that a region looks like it is filled with air like blocks that are penetratable and replaceable like
+     * grass.
+     */
+    "BlockPredicate":{},
+    "RequiredBlockProperties": {
+        "penetrable": true,
+        "liquid": false
+    },
+    "DisplayName": {
+        "name": "Air like blocks", // Text gets used in a message like "Red region must contain: <name>"
+        "description": "Blocks that act like air: e.g. they are penetratable and replaceable with other blocks"
+    }
+}
