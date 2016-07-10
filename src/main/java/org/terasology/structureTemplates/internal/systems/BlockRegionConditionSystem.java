@@ -51,7 +51,7 @@ import java.util.function.Predicate;
  *
  */
 @Share({BlockRegionChecker.class, BlockPredicateProvider.class})
-@RegisterSystem(RegisterMode.CLIENT)
+@RegisterSystem(RegisterMode.ALWAYS)
 public class BlockRegionConditionSystem extends BaseComponentSystem implements BlockRegionChecker,
         BlockPredicateProvider {
 
