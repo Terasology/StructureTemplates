@@ -16,8 +16,10 @@
 package org.terasology.structureTemplates.internal.systems;
 
 import org.terasology.entitySystem.entity.EntityRef;
+import org.terasology.logic.clipboard.ClipboardManager;
 import org.terasology.math.Region3i;
 import org.terasology.math.geom.Vector3i;
+import org.terasology.registry.In;
 import org.terasology.rendering.nui.BaseInteractionScreen;
 import org.terasology.rendering.nui.UIWidget;
 import org.terasology.rendering.nui.databinding.Binding;
@@ -39,6 +41,10 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
     private UIText maxZField;
     private UIButton copyToClipboardButton;
     private UIButton createSpawnerButton;
+    private UIButton copyGroundConditionButton;
+
+    @In
+    private ClipboardManager clipboardManager;
 
     @Override
     protected void initializeWithInteractionTarget(EntityRef interactionTarget) {
@@ -153,6 +159,20 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
             createSpawnerButton.subscribe(this::onCreateSpawnerButton);
         }
 
+        copyGroundConditionButton = find("copyGroundConditionButton", UIButton.class);
+        if (copyGroundConditionButton != null) {
+            copyGroundConditionButton.subscribe(this::onCopyGroundConditionButton);
+        }
+
+    }
+
+    private void onCopyGroundConditionButton(UIWidget button) {
+        EntityRef entity = getInteractionTarget();
+        StructureTemplateEditorComponent component = entity.getComponent(StructureTemplateEditorComponent.class);
+        Region3i region = component.editRegion;
+        clipboardManager.setClipboardContents(String.format(
+                "{\"condition\": \"StructureTemplates:IsGroundLike\", \"region\" :{\"min\": [%d, %d, %d], \"size\": [%d, %d, %d]}}",
+                region.minX(),region.minY(), region.minZ(),region.sizeX(), region.sizeY(), region.sizeZ()));
     }
 
     private void onCreateSpawnerButton(UIWidget button) {

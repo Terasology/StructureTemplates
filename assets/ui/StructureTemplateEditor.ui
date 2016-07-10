@@ -66,8 +66,8 @@
                     },
 ,
                     {
-                        "type" : "RowLayout",
-                        "horizontalSpacing" : 4,
+                        "type" : "ColumnLayout",
+                        "verticalSpacing" : 4,
                         "contents" : [
                             {
                                 "type" : "UIButton",
@@ -78,12 +78,19 @@
                                 "type" : "UIButton",
                                 "text" : "Create Structure Spawner",
                                 "id" : "createSpawnerButton"
+                            },
+                            {
+                                "type" : "UIButton",
+                                "text" : "Copy region as ground condition",
+                                "id" : "copyGroundConditionButton"
                             }
+
+
                         ]
                     }
                 ],
                 "layoutInfo": {
-                    "height" : 100,
+                    "use-content-height": true,
                     "width" : 200,
                     "position-top": {},
                     "position-left": {}
