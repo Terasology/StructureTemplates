@@ -15,11 +15,8 @@
  */
 package org.terasology.structureTemplates.internal.systems;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.assets.ResourceUrn;
 import org.terasology.entitySystem.entity.EntityBuilder;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
@@ -41,6 +38,7 @@ import org.terasology.structureTemplates.components.ScheduleStructurePlacementCo
 import org.terasology.structureTemplates.components.StructureTemplateComponent;
 import org.terasology.structureTemplates.events.CheckSpawnConditionEvent;
 import org.terasology.structureTemplates.events.SpawnStructureEvent;
+import org.terasology.structureTemplates.interfaces.StructureTemplateProvider;
 import org.terasology.structureTemplates.util.transform.BlockRegionMovement;
 import org.terasology.structureTemplates.util.transform.BlockRegionTransform;
 import org.terasology.structureTemplates.util.transform.BlockRegionTransformationList;
@@ -48,7 +46,6 @@ import org.terasology.structureTemplates.util.transform.HorizontalBlockRegionRot
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 
 /**
@@ -63,14 +60,15 @@ public class ScheduledStructureSpawnSystem extends BaseComponentSystem implement
     @In
     private EntityManager entityManager;
 
+    @In
+    private StructureTemplateProvider structureTemplateProvider;
+
     private List<EntityRef> pendingSpawnEntities = new ArrayList<>();
 
     @In
     private PrefabManager prefabManager;
 
     private Random random = new Random();
-
-    private Map<ResourceUrn, List<EntityRef>> structureTypeToEntitiesMap;
 
     @ReceiveEvent
     public void onScheduleStructurePlacement(SpawnStructureEvent event, EntityRef entity,
@@ -94,28 +92,6 @@ public class ScheduledStructureSpawnSystem extends BaseComponentSystem implement
             pendingStructureSpawnComponent.structureTemplateType = placement.structureTemplateType;
             entityBuilder.addComponent(pendingStructureSpawnComponent);
             entityBuilder.build();
-        }
-    }
-
-    @Override
-    public void postBegin() {
-        Iterable<Prefab> prefabs = prefabManager.listPrefabs(StructureTemplateComponent.class);
-        structureTypeToEntitiesMap = Maps.newHashMap();
-        for (Prefab prefab: prefabs) {
-            StructureTemplateComponent component = prefab.getComponent(StructureTemplateComponent.class);
-            Prefab structureTypePrefab = component.type;
-            if (structureTypePrefab == null) {
-                continue;
-            }
-            EntityBuilder entityBuilder = entityManager.newBuilder(prefab);
-            entityBuilder.setPersistent(false);
-            EntityRef entity = entityBuilder.build();
-            List<EntityRef> entities = structureTypeToEntitiesMap.get(structureTypePrefab.getUrn());
-            if (entities == null) {
-                entities = Lists.newArrayList();
-                structureTypeToEntitiesMap.put(structureTypePrefab.getUrn(), entities);
-            }
-            entities.add(entity);
         }
     }
 
@@ -150,13 +126,8 @@ public class ScheduledStructureSpawnSystem extends BaseComponentSystem implement
         Prefab type = pendingStructureSpawnComponent.structureTemplateType;
         Side direction = pendingStructureSpawnComponent.front;
 
-        List<EntityRef> possibleStructures = structureTypeToEntitiesMap.get(type.getUrn());
+        EntityRef structureToSpawn = structureTemplateProvider.getRandomTemplateOfType(type);
 
-        if (possibleStructures == null ||  possibleStructures.size() == 0) {
-            return;
-        }
-        EntityRef structureToSpawn = possibleStructures.get(random.nextInt(possibleStructures.size()));
-        
         StructureTemplateComponent structureTemplateComponent = structureToSpawn.getComponent(
                 StructureTemplateComponent.class);
         Vector3i spawnPosition = new Vector3i(locationComponent.getWorldPosition());
