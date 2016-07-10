@@ -55,6 +55,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
     private static final Comparator<RegionToFill> REGION_BY_MIN_X_COMPARATOR = Comparator.comparing(r -> r.region.minX());
     private static final Comparator<RegionToFill> REGION_BY_MIN_Y_COMPARATOR = Comparator.comparing(r -> r.region.minY());
     private static final Comparator<RegionToFill> REGION_BY_MIN_Z_COMPARATOR = Comparator.comparing(r -> r.region.minZ());
+    private static final Comparator<RegionToFill> REGION_BY_BLOCK_TYPE_COMPARATOR = Comparator.comparing(r -> r.blockType.getURI().toString());
 
     @In
     private WorldProvider worldProvider;
@@ -139,17 +140,9 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
     private List<RegionToFill> createRegionsToFill(StructureTemplateEditorComponent structureTemplateEditorComponent) {
         Region3i absoluteRegion = structureTemplateEditorComponent.editRegion;
         absoluteRegion = absoluteRegion.move(structureTemplateEditorComponent.origin);
-        Block airBlock = blockManager.getBlock("engine:air");
         List<RegionToFill> regionsToFill = new ArrayList<>();
         for (Vector3i absolutePosition : absoluteRegion) {
             Block block = worldProvider.getBlock(absolutePosition);
-            if (block == airBlock) {
-                /*
-                 * We assume that air is there and does not need to be placed. This makes it possible
-                 * to create structures for underwater on land and then have them be placed under water without air.
-                 */
-                continue;
-            }
             RegionToFill regionToFill = new RegionToFill();
             Vector3i relativePosition = new Vector3i(absolutePosition);
             relativePosition.sub(structureTemplateEditorComponent.origin);
@@ -161,6 +154,8 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         mergeRegionsByX(regionsToFill);
         mergeRegionsByY(regionsToFill);
         mergeRegionsByZ(regionsToFill);
+        regionsToFill.sort(REGION_BY_BLOCK_TYPE_COMPARATOR.thenComparing(REGION_BY_MIN_Z_COMPARATOR)
+                .thenComparing(REGION_BY_MIN_X_COMPARATOR).thenComparing(REGION_BY_MIN_Y_COMPARATOR));
         return regionsToFill;
     }
 
