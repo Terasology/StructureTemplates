@@ -18,13 +18,14 @@ package org.terasology.structureTemplates.components;
 import org.terasology.entitySystem.Component;
 import org.terasology.math.Region3i;
 import org.terasology.reflection.MappedContainer;
+import org.terasology.structureTemplates.events.SpawnStructureEvent;
 import org.terasology.world.block.Block;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
+ * Fills regions with blocks when a entity with component receives a {@link SpawnStructureEvent}.
  */
 public class SpawnBlockRegionsComponent implements Component{
     public List<RegionToFill> regionsToFill = new ArrayList<>();

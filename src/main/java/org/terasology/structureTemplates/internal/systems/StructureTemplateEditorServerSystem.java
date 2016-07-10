@@ -19,6 +19,8 @@ import org.terasology.entitySystem.entity.EntityBuilder;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.event.ReceiveEvent;
+import org.terasology.entitySystem.metadata.ComponentLibrary;
+import org.terasology.entitySystem.metadata.EntitySystemLibrary;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
@@ -31,8 +33,8 @@ import org.terasology.math.geom.Vector3i;
 import org.terasology.registry.In;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent.RegionToFill;
+import org.terasology.structureTemplates.components.StructureTemplateComponent;
 import org.terasology.structureTemplates.internal.components.CreateStructureSpawnItemRequest;
-import org.terasology.structureTemplates.internal.components.FrontDirectionComponent;
 import org.terasology.structureTemplates.internal.events.CopyBlockRegionRequest;
 import org.terasology.structureTemplates.internal.events.CopyBlockRegionResultEvent;
 import org.terasology.structureTemplates.util.transform.HorizontalBlockRegionRotation;
@@ -66,6 +68,9 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
     @In
     private EntityManager entityManager;
 
+    @In
+    private EntitySystemLibrary entitySystemLibrary;
+
 
     @ReceiveEvent
     public void onActivate(ActivateEvent event, EntityRef entity,
@@ -96,8 +101,8 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         editorComponent.editRegion = region;
         editorComponent.origin.set(position);
         entityBuilder.saveComponent(editorComponent);
-        FrontDirectionComponent frontDirectionComponent = new FrontDirectionComponent();
-        frontDirectionComponent.direction = frontDirectionOfStructure;
+        StructureTemplateComponent frontDirectionComponent = new StructureTemplateComponent();
+        frontDirectionComponent.front = frontDirectionOfStructure;
         entityBuilder.addOrSaveComponent(frontDirectionComponent);
         EntityRef editorItem = entityBuilder.build();
 
@@ -105,24 +110,21 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
 
     }
 
-
     @ReceiveEvent
     public void onCreateStructureSpawnItemRequest(CreateStructureSpawnItemRequest event, EntityRef entity,
-                                                  StructureTemplateEditorComponent structureTemplateEditorComponent) {
+                                                  StructureTemplateEditorComponent structureTemplateEditorComponent,
+                                                  StructureTemplateComponent structureTemplateComponent) {
         EntityBuilder entityBuilder = entityManager.newBuilder("StructureTemplates:structureSpawnItem");
         SpawnBlockRegionsComponent spawnBlockRegionsComponent = new SpawnBlockRegionsComponent();
         spawnBlockRegionsComponent.regionsToFill = createRegionsToFill(structureTemplateEditorComponent);
-
-        FrontDirectionComponent templateFrontDirComp = entity.getComponent(FrontDirectionComponent.class);
-        Side frontOfStructure = (templateFrontDirComp != null) ? templateFrontDirComp.direction : Side.FRONT;
-
         entityBuilder.addOrSaveComponent(spawnBlockRegionsComponent);
-        FrontDirectionComponent frontDirectionComponent = new FrontDirectionComponent();
-        frontDirectionComponent.direction = frontOfStructure;
-        entityBuilder.addOrSaveComponent(frontDirectionComponent);
-        EntityRef structureSpawnITem = entityBuilder.build();
 
-        inventoryManager.giveItem(entity.getOwner(), EntityRef.NULL, structureSpawnITem);
+        ComponentLibrary componentLibrary = entitySystemLibrary.getComponentLibrary();
+        StructureTemplateComponent structureTemplateComponentCopy = componentLibrary.copy(structureTemplateComponent);
+        entityBuilder.addOrSaveComponent(structureTemplateComponentCopy);
+        EntityRef structureSpawnItem = entityBuilder.build();
+
+        inventoryManager.giveItem(entity.getOwner(), EntityRef.NULL, structureSpawnItem);
     }
 
     @ReceiveEvent

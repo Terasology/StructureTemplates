@@ -30,9 +30,9 @@ import org.terasology.registry.In;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent.RegionToFill;
 import org.terasology.structureTemplates.components.SpawnStructureActionComponent;
+import org.terasology.structureTemplates.components.StructureTemplateComponent;
 import org.terasology.structureTemplates.events.CheckSpawnConditionEvent;
 import org.terasology.structureTemplates.events.SpawnStructureEvent;
-import org.terasology.structureTemplates.internal.components.FrontDirectionComponent;
 import org.terasology.structureTemplates.internal.events.StructureSpawnFailedEvent;
 import org.terasology.structureTemplates.util.transform.BlockRegionMovement;
 import org.terasology.structureTemplates.util.transform.BlockRegionTransform;
@@ -76,11 +76,12 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
 
     @ReceiveEvent
     public void onActivate(ActivateEvent event, EntityRef entity,
-                           SpawnStructureActionComponent component) {
+                           SpawnStructureActionComponent spawnActionComponent,
+                           StructureTemplateComponent structureTemplateComponent) {
         // activation with error hides error:
-        if (component.unconfirmSpawnErrorRegion != null) {
-            component.unconfirmSpawnErrorRegion = null;
-            entity.saveComponent(component);
+        if (spawnActionComponent.unconfirmSpawnErrorRegion != null) {
+            spawnActionComponent.unconfirmSpawnErrorRegion = null;
+            entity.saveComponent(spawnActionComponent);
             return;
         }
 
@@ -96,8 +97,7 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
         Side facedDirection = Side.inHorizontalDirection(directionVector.getX(), directionVector.getZ());
         Side wantedFrontOfStructure = facedDirection.reverse();
 
-        FrontDirectionComponent templateFrontDirComp = entity.getComponent(FrontDirectionComponent.class);
-        Side frontOfStructure = (templateFrontDirComp != null) ? templateFrontDirComp.direction : Side.FRONT;
+        Side frontOfStructure = structureTemplateComponent.front;
 
 
         BlockRegionTransform blockRegionTransform = createBlockRegionTransformForCharacterTargeting(frontOfStructure,
@@ -105,8 +105,8 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
         CheckSpawnConditionEvent checkSpawnEvent = new CheckSpawnConditionEvent(blockRegionTransform);
         entity.send(checkSpawnEvent);
         if (checkSpawnEvent.isPreventSpawn()) {
-            component.unconfirmSpawnErrorRegion = checkSpawnEvent.getSpawnPreventingRegion();
-            entity.saveComponent(component);
+            spawnActionComponent.unconfirmSpawnErrorRegion = checkSpawnEvent.getSpawnPreventingRegion();
+            entity.saveComponent(spawnActionComponent);
             entity.send(new StructureSpawnFailedEvent(checkSpawnEvent.getFailedSpawnCondition(),
                     checkSpawnEvent.getSpawnPreventingRegion()));
             return;
