@@ -76,12 +76,12 @@ public class ScheduledStructureSpawnSystem extends BaseComponentSystem implement
 
         BlockRegionTransform transformation = event.getTransformation();
         for (ScheduleStructurePlacementComponent.PlacementToSchedule placement: component.placementsToSchedule) {
-                Side direction =  transformation.transformSide(placement.front);
-                Vector3i position = transformation.transformVector3i(placement.position);
-                EntityBuilder entityBuilder = entityManager.newBuilder();
-                LocationComponent locationComponent = new LocationComponent();
-                locationComponent.setWorldPosition(position.toVector3f());
-                entityBuilder.addComponent(locationComponent);
+            Side direction =  transformation.transformSide(placement.front);
+            Vector3i position = transformation.transformVector3i(placement.position);
+            EntityBuilder entityBuilder = entityManager.newBuilder();
+            LocationComponent locationComponent = new LocationComponent();
+            locationComponent.setWorldPosition(position.toVector3f());
+            entityBuilder.addComponent(locationComponent);
             if (placement.structureTemplateType == null) {
                 logger.error("ScheduleStructurePlacement component in prefab %s has no (valid) structureTemplateType value");
                 continue;
