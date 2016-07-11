@@ -31,6 +31,11 @@ public class StructureTemplateComponent implements Component {
      */
     public Side front;
     /**
+     *
+     * Warning: Not fully implemented
+     *
+     * TODO implement this properly or remove it.
+     *
      * Describes where the spawn locatin is in the template coordinate system.
      *
      * e.g. the block that is at this position in the template will be placed at at the selected spawn location
@@ -40,5 +45,11 @@ public class StructureTemplateComponent implements Component {
      * Prefab of the entitiy that represents the type of this structure spawner.
      */
     public Prefab type;
+
+    /**
+     * If this values is twice as large than that of another structure template then this structure template will twice
+     * as often be picked when a random structure of the given type gets requested.
+     */
+    public int spawnChance = 100;
 
 }

@@ -59,7 +59,7 @@ public class StructureTemplateProviderSystem extends BaseComponentSystem impleme
     @In
     private AssetManager assetManager;
 
-    private Map<ResourceUrn, List<EntityRef>> structureTypeToEntitiesMap;
+    private Map<ResourceUrn, List<EntityChanceTuple>> structureTypeToEntitiesMap;
 
     @Override
     public void postBegin() {
@@ -86,27 +86,65 @@ public class StructureTemplateProviderSystem extends BaseComponentSystem impleme
             EntityBuilder entityBuilder = entityManager.newBuilder(prefab);
             entityBuilder.setPersistent(false);
             EntityRef entity = entityBuilder.build();
-            List<EntityRef> entities = structureTypeToEntitiesMap.get(structureTypePrefab.getUrn());
-            if (entities == null) {
+            List<EntityChanceTuple> entityChanceTuples = structureTypeToEntitiesMap.get(structureTypePrefab.getUrn());
+            if (entityChanceTuples == null) {
                 logger.error(String.format(
                         "The type %s of structue template %s is invalid. The type must be a prefab with the StructureTemplateType component",
                         structureTypePrefab.getUrn(), prefab.getUrn()));
                 continue;
             }
-            entities.add(entity);
+            if (component.spawnChance == 0) {
+                continue;
+            }
+            entityChanceTuples.add(new EntityChanceTuple(entity, component.spawnChance));
+        }
+    }
+
+    private static final class EntityChanceTuple {
+        private EntityRef entity;
+        private int chance;
+
+        public EntityChanceTuple(EntityRef entity, int chance) {
+            this.entity = entity;
+            this.chance = chance;
+        }
+
+        public int getChance() {
+            return chance;
+        }
+
+        public EntityRef getEntity() {
+            return entity;
         }
     }
 
     public EntityRef getRandomTemplateOfType(Prefab type) {
         initIfNotAlreadyDone();
-        List<EntityRef> list = structureTypeToEntitiesMap.get(type.getUrn());
+        List<EntityChanceTuple> list = structureTypeToEntitiesMap.get(type.getUrn());
         if (list == null) {
             throw new IllegalArgumentException("No valid structure template type: " + type.getUrn());
         }
         if (list.size() == 0) {
-            throw new IllegalArgumentException("Structure template type has no templates: " + type.getUrn());
+            throw new IllegalArgumentException("Structure template type has no templates (with spawn chance > 0): " + type.getUrn());
         }
-        return list.get(random.nextInt(list.size()));
+        return selectRandomOneBasedOnChance(list);
+    }
+
+    EntityRef selectRandomOneBasedOnChance(List<EntityChanceTuple> list) {
+        long sumOfAll = 0;
+        for (EntityChanceTuple entityChanceTuple:list) {
+            sumOfAll += entityChanceTuple.getChance();
+        }
+        long randomValue = Math.abs(random.nextLong() % sumOfAll);
+        long sum = 0;
+        for (EntityChanceTuple entityChanceTuple:list) {
+            sum += entityChanceTuple.getChance();
+            if (randomValue < sum) {
+                return entityChanceTuple.getEntity();
+            }
+        }
+        logger.error("Did not select a entity, something is wrong with the above code");
+        return list.get(0).getEntity();
     }
 
     public EntityRef getRandomTemplateOfType(String structureTemplateTypePrefab) {
