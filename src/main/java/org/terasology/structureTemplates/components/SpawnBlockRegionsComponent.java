@@ -17,6 +17,7 @@ package org.terasology.structureTemplates.components;
 
 import org.terasology.entitySystem.Component;
 import org.terasology.math.Region3i;
+import org.terasology.math.geom.Vector3i;
 import org.terasology.reflection.MappedContainer;
 import org.terasology.structureTemplates.events.SpawnStructureEvent;
 import org.terasology.world.block.Block;
@@ -27,14 +28,41 @@ import java.util.List;
 /**
  * Fills regions with blocks when a entity with component receives a {@link SpawnStructureEvent}.
  */
-public class SpawnBlockRegionsComponent implements Component{
+public class SpawnBlockRegionsComponent implements Component {
     public List<RegionToFill> regionsToFill = new ArrayList<>();
 
+    public Region3i getBoundingBox() {
+        if (regionsToFill == null) {
+            return null;
+        }
+        Vector3i max = new Vector3i(regionsToFill.get(0).region.max());
+        Vector3i min = new Vector3i(regionsToFill.get(0).region.min());
+        for (RegionToFill regionToFill : regionsToFill) {
+            if (regionToFill.region.maxX() > max.x()) {
+                max.x = regionToFill.region.maxX();
+            }
+            if (regionToFill.region.maxY() > max.y()) {
+                max.y = regionToFill.region.maxY();
+            }
+            if (regionToFill.region.maxZ() > max.z()) {
+                max.z = regionToFill.region.maxZ();
+            }
+            if (regionToFill.region.minX() < min.x()) {
+                min.x = regionToFill.region.minX();
+            }
+            if (regionToFill.region.minY() < min.y()) {
+                min.y = regionToFill.region.minY();
+            }
+            if (regionToFill.region.minZ() < min.z()) {
+                min.z = regionToFill.region.minZ();
+            }
+        }
+        return Region3i.createFromMinMax(min, max);
+    }
 
     @MappedContainer
     public static class RegionToFill {
         public Region3i region;
         public Block blockType;
     }
-
 }
