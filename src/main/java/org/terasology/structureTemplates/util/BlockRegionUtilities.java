@@ -29,7 +29,7 @@ import java.util.List;
  * A collection of little helper to ease the work with structure templates.
  **/
 
-public class BlockRegionToolbox {
+public class BlockRegionUtilities {
 
     public static BlockRegionMovement setOnCenterXZ(SpawnBlockRegionsComponent spawnBlockRegionsComponent) {
         Vector3f bbCenter = getBoundingBox(spawnBlockRegionsComponent).center();

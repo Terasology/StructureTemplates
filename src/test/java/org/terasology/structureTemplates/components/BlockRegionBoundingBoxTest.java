@@ -22,9 +22,9 @@ import org.terasology.math.Region3i;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.world.block.Block;
 import org.terasology.world.block.BlockUri;
+import org.junit.Assert;
+import org.terasology.structureTemplates.util.BlockRegionUtilities;
 
-import static org.junit.Assert.assertEquals;
-import static org.terasology.structureTemplates.util.BlockRegionToolbox.getBoundingBox;
 
 public class BlockRegionBoundingBoxTest {
     private Block blockA;
@@ -47,9 +47,9 @@ public class BlockRegionBoundingBoxTest {
         blockRegionA.regionsToFill.add(regionA);
         blockRegionA.regionsToFill.add(regionB);
         blockRegionA.regionsToFill.add(regionC);
-        Region3i bb = getBoundingBox(blockRegionA);
-        assertEquals(bb.max(), new Vector3i(6, 1, 5));
-        assertEquals(bb.min(), new Vector3i(2, 0, -1));
+        Region3i bb = BlockRegionUtilities.getBoundingBox(blockRegionA);
+        Assert.assertEquals(bb.max(), new Vector3i(6, 1, 5));
+        Assert.assertEquals(bb.min(), new Vector3i(2, 0, -1));
 
 
     }
