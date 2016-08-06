@@ -5,6 +5,7 @@
      */
     "BlockPredicate":{},
     "RequiredBlockProperties": {
+        "loaded": true,
         "penetrable": true,
         "liquid": false
     },

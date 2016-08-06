@@ -4,6 +4,7 @@
      */
     "BlockPredicate":{},
     "RequiredBlockProperties": {
+        "loaded": true,
         "penetrable": false
     },
     "DisplayName": {

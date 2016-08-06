@@ -42,4 +42,7 @@ public class RequiredBlockPropertiesComponent implements Component {
      * the specified value.
      */
     public Boolean liquid = null;
+
+
+    public Boolean loaded = null;
 }

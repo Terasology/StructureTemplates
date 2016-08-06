@@ -38,6 +38,7 @@ import org.terasology.structureTemplates.interfaces.BlockPredicateProvider;
 import org.terasology.structureTemplates.util.transform.BlockRegionTransform;
 import org.terasology.world.WorldProvider;
 import org.terasology.world.block.Block;
+import org.terasology.world.block.BlockManager;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -64,6 +65,9 @@ public class BlockRegionConditionSystem extends BaseComponentSystem implements B
 
     @In
     private PrefabManager prefabManager;
+
+    @In
+    private BlockManager blockManager;
 
     private Map<ResourceUrn, EntityRef> prefabUrnToEntityMap = new HashMap<>();
 
@@ -161,13 +165,19 @@ public class BlockRegionConditionSystem extends BaseComponentSystem implements B
     public void onGetBlockPropertiesPredicate(GetBlockPredicateEvent event, EntityRef entity,
                                         RequiredBlockPropertiesComponent requiredBlockPropertiesComponent) {
         final Boolean wantedLiquidValue = requiredBlockPropertiesComponent.liquid;
-        final Boolean wantedPenetrableValue = requiredBlockPropertiesComponent.penetrable;
         if (wantedLiquidValue != null) {
             Predicate<Block> condition = (block) -> (block.isLiquid() == wantedLiquidValue.booleanValue());
             event.predicate = event.predicate.and(condition);
         }
+        final Boolean wantedPenetrableValue = requiredBlockPropertiesComponent.penetrable;
         if (wantedPenetrableValue != null) {
             Predicate<Block> condition = (block) -> (block.isPenetrable() == wantedPenetrableValue.booleanValue());
+            event.predicate = event.predicate.and(condition);
+        }
+        final Boolean wantedLoadedValue = requiredBlockPropertiesComponent.loaded;
+        if (wantedLoadedValue != null) {
+            Predicate<Block> condition = (block) -> ((!block.getURI().equals(BlockManager.UNLOADED_ID))
+                    == wantedLoadedValue.booleanValue());
             event.predicate = event.predicate.and(condition);
         }
     }
