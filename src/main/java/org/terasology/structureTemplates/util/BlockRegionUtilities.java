@@ -15,31 +15,30 @@
  */
 package org.terasology.structureTemplates.util;
 
-
 import org.terasology.math.Region3i;
 import org.terasology.math.geom.Vector3f;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent;
-import org.terasology.structureTemplates.util.transform.BlockRegionMovement;
 
 import java.util.List;
 
-
-/**
- * A collection of little helper to ease the work with structure templates.
- **/
-
 public class BlockRegionUtilities {
 
-    public static BlockRegionMovement setOnCenterXZ(SpawnBlockRegionsComponent spawnBlockRegionsComponent) {
+    /**
+     * @param spawnBlockRegionsComponent
+     * @return the bottom center point of a spawnBlockRegion
+     */
+    public static Vector3i determineBottomCenter(SpawnBlockRegionsComponent spawnBlockRegionsComponent) {
         Vector3f bbCenter = getBoundingBox(spawnBlockRegionsComponent).center();
         Vector3i center = new Vector3i(-bbCenter.x, (float) getBoundingBox(spawnBlockRegionsComponent).minY(), -bbCenter.z);
 
-        return new BlockRegionMovement(center);
-
-
+        return center;
     }
 
+    /**
+     * @param spawnBlockRegionsComponent
+     * @return the region encompassing the spawnBlockRegion
+     */
     public static Region3i getBoundingBox(SpawnBlockRegionsComponent spawnBlockRegionsComponent) {
         List<SpawnBlockRegionsComponent.RegionToFill> regionsToFill = spawnBlockRegionsComponent.regionsToFill;
         if (regionsToFill == null) {
