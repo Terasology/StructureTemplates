@@ -15,6 +15,8 @@
  */
 package org.terasology.structureTemplates.internal.systems;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.event.ReceiveEvent;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
@@ -52,6 +54,7 @@ import org.terasology.world.block.BlockComponent;
  */
 @RegisterSystem(RegisterMode.AUTHORITY)
 public class StructureSpawnServerSystem extends BaseComponentSystem {
+    private static final Logger logger = LoggerFactory.getLogger(StructureSpawnServerSystem.class);
 
     @In
     private WorldProvider worldProvider;
@@ -59,6 +62,7 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
     @ReceiveEvent
     public void onSpawnBlockRegions(SpawnStructureEvent event, EntityRef entity,
                                  SpawnBlockRegionsComponent spawnBlockRegionComponent) {
+        long startTime = System.currentTimeMillis();
         BlockRegionTransform transformation = event.getTransformation();
         for (RegionToFill regionToFill: spawnBlockRegionComponent.regionsToFill) {
             Block block = regionToFill.blockType;
@@ -70,6 +74,11 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
             for (Vector3i pos : region) {
                 worldProvider.setBlock(pos, block);
             }
+        }
+        long endTime = System.currentTimeMillis();
+        long delta = endTime - startTime;
+        if (delta > 20) {
+            logger.warn("Structure of type " +entity.getParentPrefab().getName() + " took " + delta + "ms to spawn");
         }
     }
 
