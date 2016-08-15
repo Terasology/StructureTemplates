@@ -35,8 +35,10 @@ import org.terasology.structureTemplates.components.StructureTemplateTypeCompone
 import org.terasology.structureTemplates.interfaces.StructureTemplateProvider;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Random;
 
@@ -119,6 +121,11 @@ public class StructureTemplateProviderSystem extends BaseComponentSystem impleme
     }
 
     public EntityRef getRandomTemplateOfType(Prefab type) {
+        List<EntityChanceTuple> list = getEntityChanceTuplesForPrefab(type);
+        return selectRandomOneBasedOnChance(list);
+    }
+
+    List<EntityChanceTuple> getEntityChanceTuplesForPrefab(Prefab type) {
         initIfNotAlreadyDone();
         List<EntityChanceTuple> list = structureTypeToEntitiesMap.get(type.getUrn());
         if (list == null) {
@@ -127,24 +134,30 @@ public class StructureTemplateProviderSystem extends BaseComponentSystem impleme
         if (list.size() == 0) {
             throw new IllegalArgumentException("Structure template type has no templates (with spawn chance > 0): " + type.getUrn());
         }
-        return selectRandomOneBasedOnChance(list);
+        return list;
     }
 
     EntityRef selectRandomOneBasedOnChance(List<EntityChanceTuple> list) {
+        EntityChanceTuple entityChanceTuple = list.get(randomIndexBasedOnSpawnChance(list));
+        return entityChanceTuple.getEntity();
+    }
+
+
+    private int randomIndexBasedOnSpawnChance(List<EntityChanceTuple> list) {
         long sumOfAll = 0;
         for (EntityChanceTuple entityChanceTuple:list) {
             sumOfAll += entityChanceTuple.getChance();
         }
         long randomValue = Math.abs(random.nextLong() % sumOfAll);
         long sum = 0;
-        for (EntityChanceTuple entityChanceTuple:list) {
+        for (int index = 0;index < list.size(); index++) {
+            EntityChanceTuple entityChanceTuple = list.get(index);
             sum += entityChanceTuple.getChance();
             if (randomValue < sum) {
-                return entityChanceTuple.getEntity();
+                return index;
             }
         }
-        logger.error("Did not select a entity, something is wrong with the above code");
-        return list.get(0).getEntity();
+        throw new IllegalArgumentException("list had 0 spawn chance");
     }
 
     public EntityRef getRandomTemplateOfType(String structureTemplateTypePrefab) {
@@ -153,5 +166,36 @@ public class StructureTemplateProviderSystem extends BaseComponentSystem impleme
             throw new IllegalArgumentException("The provided argument is not a prefab: " + structureTemplateTypePrefab);
         }
         return getRandomTemplateOfType(prefab.get());
+    }
+
+    public Iterator<EntityRef> iterateStructureTempaltesOfTypeInRandomOrder(Prefab prefab) {
+        List<EntityChanceTuple> entityChanceTuples = getEntityChanceTuplesForPrefab(prefab);
+        return new StructureTemplateIterator(entityChanceTuples);
+    }
+
+    private class StructureTemplateIterator implements Iterator<EntityRef> {
+        private List<EntityChanceTuple> remaining;
+        /**
+         *
+         * @param list won't be modified, this class works with a copy of this list
+         */
+        public StructureTemplateIterator(List<EntityChanceTuple> list) {
+            this.remaining = new ArrayList<EntityChanceTuple>(list);
+        }
+
+        @Override
+        public boolean hasNext() {
+            return !remaining.isEmpty();
+        }
+
+        @Override
+        public EntityRef next() {
+            if (!hasNext()) {
+                throw new NoSuchElementException();
+            }
+            int ramdomIndex = randomIndexBasedOnSpawnChance(remaining);
+            EntityChanceTuple entityChanceTuple = remaining.remove(ramdomIndex);
+            return entityChanceTuple.getEntity();
+        }
     }
 }

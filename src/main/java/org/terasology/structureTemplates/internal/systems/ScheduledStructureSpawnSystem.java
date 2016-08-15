@@ -45,6 +45,7 @@ import org.terasology.structureTemplates.util.transform.BlockRegionTransformatio
 import org.terasology.structureTemplates.util.transform.HorizontalBlockRegionRotation;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
@@ -64,6 +65,12 @@ public class ScheduledStructureSpawnSystem extends BaseComponentSystem implement
     private StructureTemplateProvider structureTemplateProvider;
 
     private List<EntityRef> pendingSpawnEntities = new ArrayList<>();
+
+    private EntityRef activeEntity;
+    private Side activeEntityDirection;
+    private Iterator<EntityRef> activeEntityRemainingTemplates;
+    private Vector3i activeEntityLocation;
+
 
     @In
     private PrefabManager prefabManager;
@@ -116,35 +123,59 @@ public class ScheduledStructureSpawnSystem extends BaseComponentSystem implement
             return;
         }
 
-        EntityRef randomEntity = pendingSpawnEntities.get(pendingSpawnEntities.size()-1);
-        PendingStructureSpawnComponent pendingStructureSpawnComponent = randomEntity.getComponent(
-                PendingStructureSpawnComponent.class);
-        LocationComponent locationComponent = randomEntity.getComponent(LocationComponent.class);
-        if (pendingStructureSpawnComponent == null || locationComponent == null) {
-            return; // should not happen though how map gets filled, but just to be sure
-        }
-        Prefab type = pendingStructureSpawnComponent.structureTemplateType;
-        Side direction = pendingStructureSpawnComponent.front;
+        if (activeEntity == null) {
+            activeEntity = pendingSpawnEntities.get(pendingSpawnEntities.size() - 1);
 
-        EntityRef structureToSpawn = structureTemplateProvider.getRandomTemplateOfType(type);
+            PendingStructureSpawnComponent pendingStructureSpawnComponent = activeEntity.getComponent(
+                    PendingStructureSpawnComponent.class);
+            LocationComponent locationComponent = activeEntity.getComponent(LocationComponent.class);
+            if (pendingStructureSpawnComponent == null || locationComponent == null) {
+                // should not happen though how map gets filled, but just to be sure
+                activeEntity.destroy();
+                return;
+            }
+            Prefab type = pendingStructureSpawnComponent.structureTemplateType;
+            activeEntityDirection = pendingStructureSpawnComponent.front;
+            activeEntityLocation = new Vector3i(locationComponent.getWorldPosition());
+            activeEntityRemainingTemplates = structureTemplateProvider.iterateStructureTempaltesOfTypeInRandomOrder(type);
+        }
+
+        // 1 entity should be remaining, as list gets cleared
+        EntityRef structureToSpawn = activeEntityRemainingTemplates.next();
 
         StructureTemplateComponent structureTemplateComponent = structureToSpawn.getComponent(
                 StructureTemplateComponent.class);
-        Vector3i spawnPosition = new Vector3i(locationComponent.getWorldPosition());
+
         Vector3i relSpawnPosition = new Vector3i(structureTemplateComponent.spawnPosition);
         Side front = structureTemplateComponent.front;
 
-        BlockRegionTransformationList transformList = createTransformForIncomingConnectionPoint(direction,
-                spawnPosition, relSpawnPosition, front);
+        BlockRegionTransformationList transformList = createTransformForIncomingConnectionPoint(activeEntityDirection,
+                activeEntityLocation, relSpawnPosition, front);
 
         CheckSpawnConditionEvent checkSpawnConditionEvent = new CheckSpawnConditionEvent(transformList);
         structureToSpawn.send(checkSpawnConditionEvent);
         if (checkSpawnConditionEvent.isPreventSpawn()) {
+            if (!activeEntityRemainingTemplates.hasNext()) {
+                /**
+                 * No template of the specified type is spawnable, to avoid waste CPU usage, do so as if spawing was
+                 * succesful and destroy the entity that acts as placeholder.
+                 */
+                destroyActiveEntityAndItsClearFields();
+            }
             return;
         }
-        structureToSpawn.send(new SpawnStructureEvent(transformList));
 
-        randomEntity.destroy();
+        structureToSpawn.send(new SpawnStructureEvent(transformList));
+        destroyActiveEntityAndItsClearFields();
+    }
+
+    private void destroyActiveEntityAndItsClearFields() {
+        activeEntity.destroy();
+        activeEntity = null;
+        activeEntityRemainingTemplates = null;
+        activeEntityDirection = null;
+        activeEntityLocation = null;
+
     }
 
     static BlockRegionTransformationList createTransformForIncomingConnectionPoint(Side direction, Vector3i spawnPosition, Vector3i incomingConnectionPointPosition, Side incomingConnectionPointDirection) {
