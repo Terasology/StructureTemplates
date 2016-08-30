@@ -15,7 +15,7 @@
  */
 package org.terasology.structureTemplates.events;
 
-import org.terasology.entitySystem.event.Event;
+import org.terasology.entitySystem.event.AbstractConsumableEvent;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent;
 import org.terasology.structureTemplates.util.transform.BlockRegionTransform;
 
@@ -23,7 +23,7 @@ import org.terasology.structureTemplates.util.transform.BlockRegionTransform;
  * When sent to entities with components like {@link SpawnBlockRegionsComponent} then the structure described by
  * that entity will be generated.
  */
-public class SpawnStructureEvent implements Event {
+public class SpawnStructureEvent extends AbstractConsumableEvent {
     private BlockRegionTransform transformation;
 
     public SpawnStructureEvent(BlockRegionTransform transform) {
