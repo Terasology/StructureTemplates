@@ -16,20 +16,11 @@
 package org.terasology.structureTemplates.components;
 
 
-import java.util.Map;
 import org.terasology.entitySystem.Component;
-import org.terasology.math.geom.Vector3i;
 import org.terasology.structureTemplates.events.SpawnStructureEvent;
-import org.terasology.world.block.Block;
 
 /**
  * Rises a block structure from the ground up when an entity with this component receives a {@link SpawnStructureEvent} and it also has a {@link SpawnBlockRegionsComponent}.
  */
-public class GrowBlockRegionsComponent implements Component {
-    public int iter;
-    public Map<Integer, Map<Vector3i, Block>> blocksPerLayer;
-
-    public GrowBlockRegionsComponent() {
-
-    }
+public class GrowStructureComponent implements Component {
 }

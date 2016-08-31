@@ -18,11 +18,11 @@ package org.terasology.structureTemplates.internal.systems;
 import java.util.HashMap;
 import java.util.Map;
 import com.google.common.collect.Maps;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.event.EventPriority;
 import org.terasology.entitySystem.event.ReceiveEvent;
@@ -38,13 +38,15 @@ import org.terasology.math.Side;
 import org.terasology.math.geom.Vector3f;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.registry.In;
-import org.terasology.structureTemplates.components.GrowBlockRegionsComponent;
+import org.terasology.structureTemplates.components.GrowStructureComponent;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent.RegionToFill;
 import org.terasology.structureTemplates.components.SpawnStructureActionComponent;
 import org.terasology.structureTemplates.components.StructureTemplateComponent;
 import org.terasology.structureTemplates.events.CheckSpawnConditionEvent;
 import org.terasology.structureTemplates.events.SpawnStructureEvent;
+import org.terasology.structureTemplates.internal.components.GrowStructureCounterComponent;
+import org.terasology.structureTemplates.internal.components.LayeredStructureComponent;
 import org.terasology.structureTemplates.internal.events.StructureSpawnFailedEvent;
 import org.terasology.structureTemplates.util.transform.BlockRegionMovement;
 import org.terasology.structureTemplates.util.transform.BlockRegionTransform;
@@ -71,6 +73,8 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
     @In
     private WorldProvider worldProvider;
 
+    @In
+    private EntityManager entityManager;
 
     @In
     private DelayManager delayManager;
@@ -104,7 +108,7 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
 
     @ReceiveEvent(priority = EventPriority.PRIORITY_HIGH)
     public void onGrowBlockRegions(SpawnStructureEvent event, EntityRef entity,
-                                   GrowBlockRegionsComponent growBlockRegionsComponent, SpawnBlockRegionsComponent spawnBlockRegionsComponent) {
+                                   GrowStructureComponent growStructureComponent, SpawnBlockRegionsComponent spawnBlockRegionsComponent) {
 
 
         BlockRegionTransform transformation = event.getTransformation();
@@ -126,24 +130,28 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
             }
         }
 
-        growBlockRegionsComponent.blocksPerLayer = blocksPerLayer;
-        growBlockRegionsComponent.iter = 1;
-        entity.saveComponent(growBlockRegionsComponent);
+        LayeredStructureComponent layeredStructureComponent = new LayeredStructureComponent(blocksPerLayer);
+        GrowStructureCounterComponent growStructureCounter = new GrowStructureCounterComponent();
 
-        delayManager.addDelayedAction(entity, GROW_STRUCTURE_ACTION_ID, 0);
+        EntityRef growingStructureEntity = entityManager.create(layeredStructureComponent, growStructureCounter);
+
+        growingStructureEntity.addOrSaveComponent(layeredStructureComponent);
+        growingStructureEntity.addOrSaveComponent(growStructureCounter);
+
+        delayManager.addDelayedAction(growingStructureEntity, GROW_STRUCTURE_ACTION_ID, 0);
         event.consume();    // structure should not be build by any other event handler.
     }
 
     @ReceiveEvent
     public void onDelayedTriggeredEvent(DelayedActionTriggeredEvent event, EntityRef entity,
-                                        GrowBlockRegionsComponent growBlockRegionsComponent, SpawnBlockRegionsComponent spawnBlockRegionsComponent) {
+                                        LayeredStructureComponent layeredStructureComponent, GrowStructureCounterComponent counterComponent) {
 
-        Map<Integer, Map<Vector3i, Block>> blocksPerLayer = growBlockRegionsComponent.blocksPerLayer;
+        Map<Integer, Map<Vector3i, Block>> blocksPerLayer = layeredStructureComponent.blocksPerLayer;
 
         // place the first 'iter' layers on the ground, starting from the top
-        final int min = Collections.min(blocksPerLayer.keySet());
-        final int max = Collections.max(blocksPerLayer.keySet());
-        final int iter = growBlockRegionsComponent.iter;
+        final int min = layeredStructureComponent.minY;
+        final int max = layeredStructureComponent.maxY;
+        final int iter = counterComponent.iter;
 
         Map<Vector3i, Block> blocksToPlace = Maps.newHashMap();
 
@@ -157,9 +165,11 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
         worldProvider.getWorldEntity().send(blockEvent);
 
         if (min + iter <= max) {
-            growBlockRegionsComponent.iter = growBlockRegionsComponent.iter + 1;
-            entity.saveComponent(growBlockRegionsComponent);
-            delayManager.addDelayedAction(entity, GROW_STRUCTURE_ACTION_ID, 200);
+            counterComponent.iter = counterComponent.iter + 1;
+            entity.saveComponent(counterComponent);
+            delayManager.addDelayedAction(entity, GROW_STRUCTURE_ACTION_ID, 1000);
+        } else {
+            entity.destroy();
         }
     }
 
