@@ -20,6 +20,6 @@ import org.terasology.entitySystem.Component;
 /**
  * TODO: add javadoc
  */
-public class GrowStructureCounterComponent implements Component {
+public class BuildStructureCounterComponent implements Component {
     public int iter;
 }
