@@ -15,6 +15,8 @@
  */
 package org.terasology.structureTemplates.internal.systems;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.entitySystem.entity.EntityRef;
@@ -48,9 +50,8 @@ import org.terasology.world.block.BlockComponent;
  * Spawns structures when entities with certain components receive a {@link SpawnStructureEvent}.
  * e.g. the entity that receives a {@link SpawnStructureEvent} has a {@link SpawnBlockRegionsComponent} then
  * the regions specified by that component will be filled with the specified block types.
- *
+ * <p>
  * Handles also the activation of items with the {@link SpawnStructureActionComponent}
- *
  */
 @RegisterSystem(RegisterMode.AUTHORITY)
 public class StructureSpawnServerSystem extends BaseComponentSystem {
@@ -61,10 +62,12 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
 
     @ReceiveEvent
     public void onSpawnBlockRegions(SpawnStructureEvent event, EntityRef entity,
-                                 SpawnBlockRegionsComponent spawnBlockRegionComponent) {
+                                    SpawnBlockRegionsComponent spawnBlockRegionComponent) {
         long startTime = System.currentTimeMillis();
         BlockRegionTransform transformation = event.getTransformation();
-        for (RegionToFill regionToFill: spawnBlockRegionComponent.regionsToFill) {
+
+        Map<Vector3i, Block> blocksToPlace = new HashMap<>();
+        for (RegionToFill regionToFill : spawnBlockRegionComponent.regionsToFill) {
             Block block = regionToFill.blockType;
 
             Region3i region = regionToFill.region;
@@ -72,13 +75,15 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
             block = transformation.transformBlock(block);
 
             for (Vector3i pos : region) {
-                worldProvider.setBlock(pos, block);
+                blocksToPlace.put(pos, block);
             }
         }
+
+        worldProvider.setBlocks(blocksToPlace);
         long endTime = System.currentTimeMillis();
         long delta = endTime - startTime;
         if (delta > 20) {
-            logger.warn("Structure of type " +entity.getParentPrefab().getName() + " took " + delta + "ms to spawn");
+            logger.warn("Structure of type {} took {} ms to spawn", entity.getParentPrefab().getName(), delta);
         }
     }
 
@@ -101,7 +106,7 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
         }
 
         LocationComponent characterLocation = event.getInstigator().getComponent(LocationComponent.class);
-        Vector3f directionVector =  characterLocation.getWorldDirection();
+        Vector3f directionVector = characterLocation.getWorldDirection();
 
         Side facedDirection = Side.inHorizontalDirection(directionVector.getX(), directionVector.getZ());
         Side wantedFrontOfStructure = facedDirection.reverse();
