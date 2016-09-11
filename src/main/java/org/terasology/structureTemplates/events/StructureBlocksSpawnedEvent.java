@@ -19,7 +19,7 @@ import org.terasology.entitySystem.event.Event;
 import org.terasology.structureTemplates.util.transform.BlockRegionTransform;
 
 /**
- * Gets sen when the basic blocks of a structure template got placed. Event handlers
+ * Gets send when the basic blocks of a structure template got placed. Event handlers
  * typically add then entities that rely on the blocks being present.
  */
 public class StructureBlocksSpawnedEvent implements Event {

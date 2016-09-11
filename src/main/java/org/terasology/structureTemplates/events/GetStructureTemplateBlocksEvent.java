@@ -35,6 +35,7 @@ public class GetStructureTemplateBlocksEvent implements Event {
     private BlockRegionTransform transformation;
     /**
      * Final placement position to final block type map: The transformation is already applied.
+     * The position is the coordinate of the block in the world.
      */
     private Map<Vector3i, Block> blocksToPlace = new HashMap<>();
 
