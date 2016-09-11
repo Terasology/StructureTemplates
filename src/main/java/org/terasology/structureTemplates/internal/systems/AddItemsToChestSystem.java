@@ -19,7 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.entitySystem.event.EventPriority;
 import org.terasology.entitySystem.event.ReceiveEvent;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
@@ -29,7 +28,7 @@ import org.terasology.logic.inventory.InventoryManager;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.registry.In;
 import org.terasology.structureTemplates.components.AddItemsToChestComponent;
-import org.terasology.structureTemplates.events.SpawnStructureEvent;
+import org.terasology.structureTemplates.events.StructureBlocksSpawnedEvent;
 import org.terasology.structureTemplates.util.transform.BlockRegionTransform;
 import org.terasology.world.BlockEntityRegistry;
 import org.terasology.world.block.items.BlockItemFactory;
@@ -50,9 +49,9 @@ public class AddItemsToChestSystem extends BaseComponentSystem {
     @In
     private InventoryManager inventoryManager;
 
-    @ReceiveEvent(priority = EventPriority.PRIORITY_LOW)
-    public void onSpawnStructureEvent(SpawnStructureEvent event, EntityRef entity,
-                                    AddItemsToChestComponent component) {
+    @ReceiveEvent
+    public void onSpawnStructureEvent(StructureBlocksSpawnedEvent event, EntityRef entity,
+                                      AddItemsToChestComponent component) {
         BlockRegionTransform transformation = event.getTransformation();
 
         BlockItemFactory blockFactory = new BlockItemFactory(entityManager);

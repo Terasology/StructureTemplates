@@ -15,11 +15,10 @@
  */
 package org.terasology.structureTemplates.internal.systems;
 
-import java.util.HashMap;
-import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.entitySystem.entity.EntityRef;
+import org.terasology.entitySystem.event.EventPriority;
 import org.terasology.entitySystem.event.ReceiveEvent;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
@@ -36,7 +35,10 @@ import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent.R
 import org.terasology.structureTemplates.components.SpawnStructureActionComponent;
 import org.terasology.structureTemplates.components.StructureTemplateComponent;
 import org.terasology.structureTemplates.events.CheckSpawnConditionEvent;
+import org.terasology.structureTemplates.events.GetStructureTemplateBlocksEvent;
 import org.terasology.structureTemplates.events.SpawnStructureEvent;
+import org.terasology.structureTemplates.events.StructureBlocksSpawnedEvent;
+import org.terasology.structureTemplates.events.StructureSpawnStartedEvent;
 import org.terasology.structureTemplates.internal.events.StructureSpawnFailedEvent;
 import org.terasology.structureTemplates.util.transform.BlockRegionMovement;
 import org.terasology.structureTemplates.util.transform.BlockRegionTransform;
@@ -45,6 +47,8 @@ import org.terasology.structureTemplates.util.transform.HorizontalBlockRegionRot
 import org.terasology.world.WorldProvider;
 import org.terasology.world.block.Block;
 import org.terasology.world.block.BlockComponent;
+
+import java.util.Map;
 
 /**
  * Spawns structures when entities with certain components receive a {@link SpawnStructureEvent}.
@@ -60,25 +64,17 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
     @In
     private WorldProvider worldProvider;
 
-    @ReceiveEvent
-    public void onSpawnBlockRegions(SpawnStructureEvent event, EntityRef entity,
-                                    SpawnBlockRegionsComponent spawnBlockRegionComponent) {
+    @ReceiveEvent(priority = EventPriority.PRIORITY_CRITICAL)
+    public void onSpawnStructureEventWithHighestPriority(SpawnStructureEvent event, EntityRef entity) {
+        entity.send(new StructureSpawnStartedEvent(event.getTransformation()));
+    }
+
+    @ReceiveEvent(priority = EventPriority.PRIORITY_NORMAL)
+    public void onSpawnStructureEventWithBlocksPriority(SpawnStructureEvent event, EntityRef entity) {
         long startTime = System.currentTimeMillis();
-        BlockRegionTransform transformation = event.getTransformation();
-
-        Map<Vector3i, Block> blocksToPlace = new HashMap<>();
-        for (RegionToFill regionToFill : spawnBlockRegionComponent.regionsToFill) {
-            Block block = regionToFill.blockType;
-
-            Region3i region = regionToFill.region;
-            region = transformation.transformRegion(region);
-            block = transformation.transformBlock(block);
-
-            for (Vector3i pos : region) {
-                blocksToPlace.put(pos, block);
-            }
-        }
-
+        GetStructureTemplateBlocksEvent getBlocksEvent =  new GetStructureTemplateBlocksEvent(event.getTransformation());
+        entity.send(getBlocksEvent);
+        Map<Vector3i, Block> blocksToPlace = getBlocksEvent.getBlocksToPlace();
         worldProvider.setBlocks(blocksToPlace);
         long endTime = System.currentTimeMillis();
         long delta = endTime - startTime;
@@ -87,6 +83,26 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
         }
     }
 
+    @ReceiveEvent(priority = EventPriority.PRIORITY_TRIVIAL)
+    public void onSpawnStructureEventWithLowestPriority(SpawnStructureEvent event, EntityRef entity) {
+        entity.send(new StructureBlocksSpawnedEvent(event.getTransformation()));
+    }
+
+    @ReceiveEvent
+    public void onGetStructureTemplateBlocks(GetStructureTemplateBlocksEvent event, EntityRef entity,
+                                             SpawnBlockRegionsComponent spawnBlockRegionComponent) {
+        BlockRegionTransform transformation = event.getTransformation();
+
+        for (RegionToFill regionToFill : spawnBlockRegionComponent.regionsToFill) {
+            Block block = regionToFill.blockType;
+
+            Region3i region = regionToFill.region;
+            region = transformation.transformRegion(region);
+            block = transformation.transformBlock(block);
+
+            event.fillRegion(region, block);
+        }
+    }
 
     @ReceiveEvent
     public void onActivate(ActivateEvent event, EntityRef entity,
