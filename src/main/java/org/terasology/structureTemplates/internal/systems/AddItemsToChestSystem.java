@@ -23,7 +23,6 @@ import org.terasology.entitySystem.event.ReceiveEvent;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
-import org.terasology.logic.inventory.InventoryComponent;
 import org.terasology.logic.inventory.InventoryManager;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.registry.In;
@@ -59,7 +58,6 @@ public class AddItemsToChestSystem extends BaseComponentSystem {
         for (AddItemsToChestComponent.ChestToFill chestToFill: component.chestsToFill) {
             Vector3i absolutePosition = transformation.transformVector3i(chestToFill.position);
             EntityRef chest = blockEntityRegistry.getBlockEntityAt(absolutePosition);
-            chest.addComponent(new InventoryComponent(30)); // TODO neccessary?
             for (AddItemsToChestComponent.Item item: chestToFill.items) {
                 addItemToChest(chest, item, blockFactory);
             }
