@@ -38,6 +38,7 @@ import org.terasology.structureTemplates.components.ScheduleStructurePlacementCo
 import org.terasology.structureTemplates.components.StructureTemplateComponent;
 import org.terasology.structureTemplates.events.CheckSpawnConditionEvent;
 import org.terasology.structureTemplates.events.SpawnStructureEvent;
+import org.terasology.structureTemplates.events.StructureBlocksSpawnedEvent;
 import org.terasology.structureTemplates.interfaces.StructureTemplateProvider;
 import org.terasology.structureTemplates.util.transform.BlockRegionMovement;
 import org.terasology.structureTemplates.util.transform.BlockRegionTransform;
@@ -78,8 +79,8 @@ public class ScheduledStructureSpawnSystem extends BaseComponentSystem implement
     private Random random = new Random();
 
     @ReceiveEvent
-    public void onScheduleStructurePlacement(SpawnStructureEvent event, EntityRef entity,
-                                    ScheduleStructurePlacementComponent component) {
+    public void onScheduleStructurePlacement(StructureBlocksSpawnedEvent event, EntityRef entity,
+                                             ScheduleStructurePlacementComponent component) {
 
         BlockRegionTransform transformation = event.getTransformation();
         for (ScheduleStructurePlacementComponent.PlacementToSchedule placement: component.placementsToSchedule) {
