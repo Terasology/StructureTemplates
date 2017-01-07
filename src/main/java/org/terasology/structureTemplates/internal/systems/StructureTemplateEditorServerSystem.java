@@ -46,6 +46,8 @@ import org.terasology.world.block.Block;
 import org.terasology.world.block.BlockComponent;
 import org.terasology.world.block.BlockManager;
 import org.terasology.world.block.entity.placement.PlaceBlocks;
+import org.terasology.world.block.items.BlockItemComponent;
+import org.terasology.world.block.items.OnBlockItemPlaced;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -95,12 +97,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         Side frontDirectionOfStructure = directionStructureIsIn.reverse();
 
 
-        Region3i unrotatedRegion = Region3i.createBounded(new Vector3i(0, 1, 1), new Vector3i(0, 1, 1));
-
-
-        HorizontalBlockRegionRotation rotation = HorizontalBlockRegionRotation.createRotationFromSideToSide(Side.FRONT,
-                frontDirectionOfStructure);
-        Region3i region = rotation.transformRegion(unrotatedRegion);
+        Region3i region = calculateDefaultRegion(frontDirectionOfStructure);
 
         EntityBuilder entityBuilder = entityManager.newBuilder("StructureTemplates:structureTemplateEditor");
         StructureTemplateEditorComponent editorComponent = entityBuilder.getComponent(StructureTemplateEditorComponent.class);
@@ -115,6 +112,15 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         location.setWorldRotation(new Quat4f(new Vector3f(0,1,0), sideToAngle(directionStructureIsIn)));
         entityBuilder.build();
 
+    }
+
+    Region3i calculateDefaultRegion(Side frontDirectionOfStructure) {
+        Region3i unrotatedRegion = Region3i.createBounded(new Vector3i(0, 1, 1), new Vector3i(0, 1, 1));
+
+
+        HorizontalBlockRegionRotation rotation = HorizontalBlockRegionRotation.createRotationFromSideToSide(Side.FRONT,
+                frontDirectionOfStructure);
+        return rotation.transformRegion(unrotatedRegion);
     }
 
 
@@ -184,6 +190,24 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
 
         CopyBlockRegionResultEvent resultEvent = new CopyBlockRegionResultEvent(textToSend);
         event.getInstigator().send(resultEvent);
+    }
+
+
+    @ReceiveEvent(components = {BlockItemComponent.class})
+    public void onPlaced(OnBlockItemPlaced event, EntityRef itemEntity) {
+        EntityRef placedBlockEntity = event.getPlacedBlock();
+        StructureTemplateEditorComponent structureTemplateEditorComponent = placedBlockEntity.getComponent(StructureTemplateEditorComponent.class );
+        if (structureTemplateEditorComponent == null) {
+            return;
+        }
+        Vector3i origin = new Vector3i(event.getPosition());
+        origin.subY(1); // block below marker
+        structureTemplateEditorComponent.origin = origin;
+
+        Side side = placedBlockEntity.getComponent(BlockComponent.class).getBlock().getDirection();
+        structureTemplateEditorComponent.editRegion = calculateDefaultRegion(side);
+
+        placedBlockEntity.saveComponent(structureTemplateEditorComponent);
     }
 
     private List<RegionToFill> createRegionsToFill(StructureTemplateEditorComponent structureTemplateEditorComponent) {

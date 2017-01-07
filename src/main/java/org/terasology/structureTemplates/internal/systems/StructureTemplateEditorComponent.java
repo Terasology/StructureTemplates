@@ -20,10 +20,12 @@ import org.terasology.math.Region3i;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.network.FieldReplicateType;
 import org.terasology.network.Replicate;
+import org.terasology.world.block.ForceBlockActive;
 
 /**
  * Used to describe an block region location
  */
+@ForceBlockActive
 public class StructureTemplateEditorComponent implements Component {
 
 
