@@ -1,15 +1,22 @@
 {
-  "parent" : "engine:iconItem",
-  "DisplayName" : {
-    "name" : "Structure Template Editor",
-    "description": "Allows you to create a structure templates from a structure in the world"
+  "Network" : {},
+  "Location": {},
+  "Mesh": {
+    "mesh": "StructureTemplates:blockMarkerQuad",
+    "material": "StructureTemplates:StructureTemplateEditor"
   },
-  "Item" : {
-    "icon" : "engine:items#blueRecipe"
+  "BoxShape": {
+    "extents": [0.8, 0.1, 0.8]
   },
-  "StructureTemplateEditor": {},
+  "StructureTemplateEditor": {
+  },
   "InteractionTarget": {},
   "InteractionScreen": {
     "screen": "StructureTemplates:StructureTemplateEditor"
+  },
+  "RigidBody" : {
+    "mass" : 0,
+    "collisionGroup" : "engine:world",
+    "collidesWith" : ["engine:world"]
   }
 }

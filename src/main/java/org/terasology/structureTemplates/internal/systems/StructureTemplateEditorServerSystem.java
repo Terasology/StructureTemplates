@@ -102,7 +102,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
                 frontDirectionOfStructure);
         Region3i region = rotation.transformRegion(unrotatedRegion);
 
-        EntityBuilder entityBuilder = entityManager.newBuilder("StructureTemplates:structureTemplateOrigin");
+        EntityBuilder entityBuilder = entityManager.newBuilder("StructureTemplates:structureTemplateEditor");
         StructureTemplateEditorComponent editorComponent = entityBuilder.getComponent(StructureTemplateEditorComponent.class);
         editorComponent.editRegion = region;
         editorComponent.origin.set(position);
