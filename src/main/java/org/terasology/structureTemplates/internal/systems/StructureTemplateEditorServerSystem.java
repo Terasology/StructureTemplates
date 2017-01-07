@@ -26,26 +26,31 @@ import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.logic.common.ActivateEvent;
 import org.terasology.logic.inventory.InventoryManager;
+import org.terasology.logic.location.LocationComponent;
 import org.terasology.math.Region3i;
 import org.terasology.math.Side;
+import org.terasology.math.geom.Quat4f;
 import org.terasology.math.geom.Vector3f;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.registry.In;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent.RegionToFill;
 import org.terasology.structureTemplates.components.StructureTemplateComponent;
-import org.terasology.structureTemplates.internal.components.CreateStructureSpawnItemRequest;
+import org.terasology.structureTemplates.internal.components.EditsCopyRegionComponent;
 import org.terasology.structureTemplates.internal.events.CopyBlockRegionRequest;
 import org.terasology.structureTemplates.internal.events.CopyBlockRegionResultEvent;
+import org.terasology.structureTemplates.internal.events.CreateStructureSpawnItemRequest;
 import org.terasology.structureTemplates.util.transform.HorizontalBlockRegionRotation;
 import org.terasology.world.WorldProvider;
 import org.terasology.world.block.Block;
 import org.terasology.world.block.BlockComponent;
 import org.terasology.world.block.BlockManager;
+import org.terasology.world.block.entity.placement.PlaceBlocks;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Handles the activation of the copyBlockRegionTool item.
@@ -73,6 +78,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
     private EntitySystemLibrary entitySystemLibrary;
 
 
+
     @ReceiveEvent
     public void onActivate(ActivateEvent event, EntityRef entity,
                            StructureTemplateGeneratorComponent structureTemplateEditorComponent) {
@@ -89,15 +95,14 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         Side frontDirectionOfStructure = directionStructureIsIn.reverse();
 
 
-        Region3i unrotatedRegion = Region3i.createBounded(new Vector3i(-2, 1, 0), new Vector3i(2, 4, 6));
+        Region3i unrotatedRegion = Region3i.createBounded(new Vector3i(0, 1, 1), new Vector3i(0, 1, 1));
 
 
         HorizontalBlockRegionRotation rotation = HorizontalBlockRegionRotation.createRotationFromSideToSide(Side.FRONT,
                 frontDirectionOfStructure);
         Region3i region = rotation.transformRegion(unrotatedRegion);
 
-
-        EntityBuilder entityBuilder = entityManager.newBuilder("StructureTemplates:structureTemplateEditor");
+        EntityBuilder entityBuilder = entityManager.newBuilder("StructureTemplates:structureTemplateOrigin");
         StructureTemplateEditorComponent editorComponent = entityBuilder.getComponent(StructureTemplateEditorComponent.class);
         editorComponent.editRegion = region;
         editorComponent.origin.set(position);
@@ -105,10 +110,52 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         StructureTemplateComponent frontDirectionComponent = new StructureTemplateComponent();
         frontDirectionComponent.front = frontDirectionOfStructure;
         entityBuilder.addOrSaveComponent(frontDirectionComponent);
-        EntityRef editorItem = entityBuilder.build();
+        LocationComponent location = entityBuilder.getComponent(LocationComponent.class);
+        location.setWorldPosition(position.toVector3f().addY(0.51f));
+        location.setWorldRotation(new Quat4f(new Vector3f(0,1,0), sideToAngle(directionStructureIsIn)));
+        entityBuilder.build();
 
-        inventoryManager.giveItem(owner, owner, editorItem);
+    }
 
+
+    private float sideToAngle(Side side) {
+        switch (side) {
+            case LEFT:
+                return 0.5f * (float) Math.PI;
+            case RIGHT:
+                return -0.5f * (float) Math.PI;
+            case BACK:
+                return (float) Math.PI;
+            default:
+                return 0f;
+
+        }
+    }
+
+    @ReceiveEvent
+    public void updateCopyRegionOnBlockPlacement(PlaceBlocks placeBlocks, EntityRef world) {
+        EntityRef player = placeBlocks.getInstigator().getOwner();
+        EditsCopyRegionComponent editsCopyRegionComponent = player.getComponent(EditsCopyRegionComponent.class);
+        if (editsCopyRegionComponent == null) {
+            return;
+        }
+        EntityRef editorEnitity = editsCopyRegionComponent.structureTemplateEditor;
+        StructureTemplateEditorComponent editorComponent = editorEnitity.getComponent(StructureTemplateEditorComponent.class);
+        Region3i region3i = editorComponent.editRegion;
+
+        final Map<Vector3i, Block> blocksMap = placeBlocks.getBlocks();
+        for (Map.Entry<Vector3i, Block> blockEntry : blocksMap.entrySet()) {
+            final Vector3i absolutePosition = blockEntry.getKey();
+            final Vector3i relativePosition = new Vector3i(absolutePosition);
+            relativePosition.sub(editorComponent.origin);
+            if (!region3i.encompasses(relativePosition)) {
+                region3i = region3i.expandToContain( relativePosition);
+            }
+        }
+        if (!editorComponent.editRegion.equals(region3i)) {
+            editorComponent.editRegion = region3i;
+            editorEnitity.saveComponent(editorComponent);
+        }
     }
 
     @ReceiveEvent
@@ -125,7 +172,9 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         entityBuilder.addOrSaveComponent(structureTemplateComponentCopy);
         EntityRef structureSpawnItem = entityBuilder.build();
 
-        inventoryManager.giveItem(entity.getOwner(), EntityRef.NULL, structureSpawnItem);
+        EntityRef character = event.getInstigator();
+        // TODO check permission once PermissionManager is public API
+        inventoryManager.giveItem(character, EntityRef.NULL, structureSpawnItem);
     }
 
     @ReceiveEvent
@@ -134,7 +183,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         String textToSend = formatAsString(regionsToFill);
 
         CopyBlockRegionResultEvent resultEvent = new CopyBlockRegionResultEvent(textToSend);
-        entity.send(resultEvent);
+        event.getInstigator().send(resultEvent);
     }
 
     private List<RegionToFill> createRegionsToFill(StructureTemplateEditorComponent structureTemplateEditorComponent) {

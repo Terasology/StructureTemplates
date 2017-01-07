@@ -17,6 +17,7 @@ package org.terasology.structureTemplates.internal.systems;
 
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.logic.clipboard.ClipboardManager;
+import org.terasology.logic.players.LocalPlayer;
 import org.terasology.math.Region3i;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.registry.In;
@@ -24,8 +25,10 @@ import org.terasology.rendering.nui.BaseInteractionScreen;
 import org.terasology.rendering.nui.UIWidget;
 import org.terasology.rendering.nui.databinding.Binding;
 import org.terasology.rendering.nui.widgets.UIButton;
+import org.terasology.rendering.nui.widgets.UICheckbox;
 import org.terasology.rendering.nui.widgets.UIText;
-import org.terasology.structureTemplates.internal.components.CreateStructureSpawnItemRequest;
+import org.terasology.structureTemplates.internal.events.CreateStructureSpawnItemRequest;
+import org.terasology.structureTemplates.internal.components.EditsCopyRegionComponent;
 import org.terasology.structureTemplates.internal.events.CopyBlockRegionRequest;
 
 /**
@@ -42,9 +45,15 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
     private UIButton copyToClipboardButton;
     private UIButton createSpawnerButton;
     private UIButton copyGroundConditionButton;
+    private UICheckbox editCopyRegionsCheckBox;
 
     @In
     private ClipboardManager clipboardManager;
+
+
+    @In
+    private LocalPlayer localPlayer;
+
 
     @Override
     protected void initializeWithInteractionTarget(EntityRef interactionTarget) {
@@ -164,6 +173,41 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
             copyGroundConditionButton.subscribe(this::onCopyGroundConditionButton);
         }
 
+        editCopyRegionsCheckBox = find("editCopyRegionsCheckBox", UICheckbox.class);
+        if (editCopyRegionsCheckBox != null) {
+            editCopyRegionsCheckBox.bindChecked(
+                    new Binding<Boolean>() {
+                        @Override
+                        public Boolean get() {
+                            EntityRef client = localPlayer.getClientEntity();
+                            EditsCopyRegionComponent component = client.getComponent(EditsCopyRegionComponent.class);
+                            if (component == null) {
+                                return Boolean.FALSE;
+                            }
+                            return (component.structureTemplateEditor.equals(getInteractionTarget()));
+                        }
+
+                        @Override
+                        public void set(Boolean value) {
+                            EntityRef client = localPlayer.getClientEntity();
+                            if (Boolean.TRUE.equals(value)) {
+
+                                EditsCopyRegionComponent component = client.getComponent(EditsCopyRegionComponent.class);
+                                if (component == null) {
+                                    component = new EditsCopyRegionComponent();
+                                }
+                                component.structureTemplateEditor = getInteractionTarget();
+                                client.addOrSaveComponent(component);
+                            } else {
+                                EditsCopyRegionComponent component = client.getComponent(EditsCopyRegionComponent.class);
+                                if (component.structureTemplateEditor.equals(getInteractionTarget())) {
+                                    client.removeComponent(EditsCopyRegionComponent.class);
+                                }
+                            }
+                        }
+            });
+        }
+
     }
 
     private void onCopyGroundConditionButton(UIWidget button) {
@@ -176,11 +220,11 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
     }
 
     private void onCreateSpawnerButton(UIWidget button) {
-        getInteractionTarget().send(new CreateStructureSpawnItemRequest());
+        getInteractionTarget().send(new CreateStructureSpawnItemRequest(localPlayer.getCharacterEntity()));
     }
 
     private void onCopyToClipboardClicked(UIWidget button) {
-        getInteractionTarget().send(new CopyBlockRegionRequest());
+        getInteractionTarget().send(new CopyBlockRegionRequest(localPlayer.getCharacterEntity()));
     }
 
     private abstract class AbstractIntEditorPropertyBinding implements Binding<String> {

@@ -1,0 +1,22 @@
+{
+  "Network" : {},
+  "Location": {},
+  "Mesh": {
+    "mesh": "StructureTemplates:blockMarkerQuad",
+    "material": "StructureTemplates:StructureTemplateOrigin"
+  },
+  "BoxShape": {
+    "extents": [0.8, 0.1, 0.8]
+  },
+  "StructureTemplateEditor": {
+  },
+  "InteractionTarget": {},
+  "InteractionScreen": {
+    "screen": "StructureTemplates:StructureTemplateEditor"
+  },
+  "RigidBody" : {
+    "mass" : 0,
+    "collisionGroup" : "engine:world",
+    "collidesWith" : ["engine:world"]
+  }
+}

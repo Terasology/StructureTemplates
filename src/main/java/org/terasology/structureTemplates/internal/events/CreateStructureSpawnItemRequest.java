@@ -13,14 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.structureTemplates.internal.components;
+package org.terasology.structureTemplates.internal.events;
 
-import org.terasology.entitySystem.event.Event;
+import org.terasology.entitySystem.entity.EntityRef;
+import org.terasology.network.NetworkEvent;
 import org.terasology.network.ServerEvent;
 
 /**
  *
  */
 @ServerEvent
-public class CreateStructureSpawnItemRequest implements Event {
+public class CreateStructureSpawnItemRequest extends NetworkEvent {
+
+    public CreateStructureSpawnItemRequest() {
+    }
+
+    public CreateStructureSpawnItemRequest(EntityRef instigator) {
+        super(instigator);
+    }
 }

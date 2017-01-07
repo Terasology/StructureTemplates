@@ -1,101 +1,117 @@
 {
-    "type" : "StructureTemplateEditorScreen",
-    "contents" : {
-        "type": "RelativeLayout",
+  "type": "StructureTemplateEditorScreen",
+  "contents": {
+    "type": "RelativeLayout",
+    "contents": [
+      {
+        "type": "ColumnLayout",
         "contents": [
-            {
-                "type": "ColumnLayout",
-                "contents" : [
-                    {
-                        "type" : "RowLayout",
-                        "horizontalSpacing" : 4,
-                        "contents" : [
-                            {
-                                "type" : "UILabel",
-                                "text" : "Min",
-                                "id" : "minLabel"
-                            },
-                            {
-                                "type": "UIText",
-                                "readOnly": false,
-                                "multiline": false,
-                                "id": "minXField"
-                            },
-                            {
-                                "type": "UIText",
-                                "readOnly": false,
-                                "multiline": false,
-                                "id": "minYField"
-                            },
-                            {
-                                "type": "UIText",
-                                "readOnly": false,
-                                "multiline": false,
-                                "id": "minZField"
-                            }
-                        ]
-                    },
-                    {
-                        "type" : "RowLayout",
-                        "horizontalSpacing" : 4,
-                        "contents" : [
-                            {
-                                "type" : "UILabel",
-                                "text" : "Max",
-                                "id" : "maxLabel"
-                            },
-                            {
-                                "type": "UIText",
-                                "readOnly": false,
-                                "multiline": false,
-                                "id": "maxXField"
-                            },
-                            {
-                                "type": "UIText",
-                                "readOnly": false,
-                                "multiline": false,
-                                "id": "maxYField"
-                            },
-                            {
-                                "type": "UIText",
-                                "readOnly": false,
-                                "multiline": false,
-                                "id": "maxZField"
-                            }
-                        ]
-                    },
-,
-                    {
-                        "type" : "ColumnLayout",
-                        "verticalSpacing" : 4,
-                        "contents" : [
-                            {
-                                "type" : "UIButton",
-                                "text" : "Selected -> Clipboard",
-                                "id" : "copyToClipboardButton"
-                            },
-                            {
-                                "type" : "UIButton",
-                                "text" : "Create Structure Spawner",
-                                "id" : "createSpawnerButton"
-                            },
-                            {
-                                "type" : "UIButton",
-                                "text" : "Copy region as ground condition",
-                                "id" : "copyGroundConditionButton"
-                            }
-
-
-                        ]
+          {
+            "type": "RowLayout",
+            "horizontalSpacing": 4,
+            "contents": [
+              {
+                "type": "UILabel",
+                "text": "Min",
+                "id": "minLabel"
+              },
+              {
+                "type": "UIText",
+                "readOnly": false,
+                "multiline": false,
+                "id": "minXField"
+              },
+              {
+                "type": "UIText",
+                "readOnly": false,
+                "multiline": false,
+                "id": "minYField"
+              },
+              {
+                "type": "UIText",
+                "readOnly": false,
+                "multiline": false,
+                "id": "minZField"
+              }
+            ]
+          },
+          {
+            "type": "RowLayout",
+            "horizontalSpacing": 4,
+            "contents": [
+              {
+                "type": "UILabel",
+                "text": "Max",
+                "id": "maxLabel"
+              },
+              {
+                "type": "UIText",
+                "readOnly": false,
+                "multiline": false,
+                "id": "maxXField"
+              },
+              {
+                "type": "UIText",
+                "readOnly": false,
+                "multiline": false,
+                "id": "maxYField"
+              },
+              {
+                "type": "UIText",
+                "readOnly": false,
+                "multiline": false,
+                "id": "maxZField"
+              }
+            ]
+          },
+          {
+            "type": "ColumnLayout",
+            "verticalSpacing": 4,
+            "contents": [
+              {
+                "type": "UIButton",
+                "text": "Selected -\u003e Clipboard",
+                "id": "copyToClipboardButton"
+              },
+              {
+                "type": "UIButton",
+                "text": "Create Structure Spawner",
+                "id": "createSpawnerButton"
+              },
+              {
+                "type": "UIButton",
+                "text": "Copy region as ground condition",
+                "id": "copyGroundConditionButton"
+              },
+              {
+                "type": "engine:RowLayout",
+                "id": "newWidget",
+                "layoutInfo": {},
+                "contents": [
+                  {
+                    "type": "engine:UICheckbox",
+                    "id": "editCopyRegionsCheckBox",
+                    "layoutInfo": {
+                      "relativeWidth": 0.1
                     }
-                ],
-                "layoutInfo": {
-                    "use-content-height": true,
-                    "width" : 200,
-                    "position-top": {},
-                    "position-left": {}
-                }
-            }
-        ]
-    }
+                  },
+                  {
+                    "type": "engine:UILabel",
+                    "layoutInfo": {},
+                    "text": "Update region on block placement"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "layoutInfo": {
+          "use-content-height": true,
+          "width": 200,
+          "position-top": {},
+          "position-left": {}
+        }
+      }
+    ]
+  }
 }

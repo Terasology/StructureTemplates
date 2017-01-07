@@ -26,15 +26,13 @@ import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.logic.clipboard.ClipboardManager;
-import org.terasology.logic.inventory.InventoryComponent;
 import org.terasology.logic.inventory.InventoryManager;
-import org.terasology.logic.inventory.SelectedInventorySlotComponent;
-import org.terasology.logic.inventory.events.InventorySlotChangedEvent;
 import org.terasology.logic.players.LocalPlayer;
 import org.terasology.math.Region3i;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.registry.In;
 import org.terasology.rendering.logic.RegionOutlineComponent;
+import org.terasology.structureTemplates.internal.components.EditsCopyRegionComponent;
 import org.terasology.structureTemplates.internal.events.CopyBlockRegionResultEvent;
 
 /**
@@ -56,7 +54,7 @@ public class StructureTemplateEditorClientSystem extends BaseComponentSystem {
     private InventoryManager inventoryManager;
 
     private EntityRef regionOutlineEntity = EntityRef.NULL;
-    private Region3i regionWithOutline;
+    private EntityRef highlightedEditorEntity = EntityRef.NULL;
 
 
     @ReceiveEvent
@@ -67,39 +65,56 @@ public class StructureTemplateEditorClientSystem extends BaseComponentSystem {
     @ReceiveEvent
     public void onAddedCopyBlockRegionComponent(OnAddedComponent event, EntityRef entity,
                                                 StructureTemplateEditorComponent component) {
-        updateOutlineEntity();
+        updateHighlightedEditorEntity();
     }
 
     @ReceiveEvent
     public void onChangedCopyBlockRegionComponent(OnChangedComponent event, EntityRef entity,
                                              StructureTemplateEditorComponent component) {
-        updateOutlineEntity();
+        updateHighlightedEditorEntity();
     }
 
     @ReceiveEvent
     public void onBeforeRemoveCopyBlockRegionComponent(BeforeRemoveComponent event, EntityRef entity,
                                                   StructureTemplateEditorComponent component) {
-        updateOutlineEntity();
+        if (entity.equals(highlightedEditorEntity)) {
+            setHighlightedEditorEntity(EntityRef.NULL);
+        }
+        // Calling updateOutlineEntity is not possible as component is still there
+    }
+
+
+    @ReceiveEvent
+    public void onAddedEditsCopyRegionComponent(OnAddedComponent event, EntityRef entity,
+                                                EditsCopyRegionComponent component) {
+        updateHighlightedEditorEntity();
     }
 
     @ReceiveEvent
-    public void onInventorySlotChanged(InventorySlotChangedEvent event, EntityRef entity) {
-        updateOutlineEntity();
+    public void onChangedEditsCopyRegionComponent(OnChangedComponent event, EntityRef entity,
+                                                  EditsCopyRegionComponent component) {
+        updateHighlightedEditorEntity();
     }
 
     @ReceiveEvent
-    public void onChangedSelectedInventorySlotComponent(OnChangedComponent event, EntityRef entity,
-                                                SelectedInventorySlotComponent component) {
-        updateOutlineEntity();
+    public void onBeforeRemoveEditsCopyRegionComponent(BeforeRemoveComponent event, EntityRef entity,
+                                                       EditsCopyRegionComponent component) {
+        if (entity.equals(locatPlayer.getClientEntity())) {
+            setHighlightedEditorEntity(EntityRef.NULL);
+        }
     }
 
+    public void destoryOutlineEntiy() {
+        if (regionOutlineEntity.exists()) {
+            regionOutlineEntity.destroy();
+        }
+        highlightedEditorEntity = EntityRef.NULL;
+    }
 
     public void updateOutlineEntity() {
         Region3i region3i = getRegionToDraw();
         if (region3i == null) {
-            if (regionOutlineEntity.exists()) {
-                regionOutlineEntity.destroy();
-            }
+            destoryOutlineEntiy();
         } else {
             if (regionOutlineEntity.exists()) {
                 RegionOutlineComponent oldComponent = regionOutlineEntity.getComponent(RegionOutlineComponent.class);
@@ -128,22 +143,26 @@ public class StructureTemplateEditorClientSystem extends BaseComponentSystem {
     }
 
 
+    private void setHighlightedEditorEntity(EntityRef entityRef) {
+        highlightedEditorEntity = entityRef;
+        updateOutlineEntity();
+    }
+
+    private void updateHighlightedEditorEntity() {
+        EntityRef clientEntity = locatPlayer.getClientEntity();
+
+        EditsCopyRegionComponent editsCopyRegionComponent = clientEntity.getComponent(EditsCopyRegionComponent.class);
+        if (editsCopyRegionComponent == null) {
+            setHighlightedEditorEntity(EntityRef.NULL);
+        } else {
+            setHighlightedEditorEntity(editsCopyRegionComponent.structureTemplateEditor);
+        }
+    }
+
 
     private Region3i getRegionToDraw() {
-        EntityRef characterEntity = locatPlayer.getCharacterEntity();
-        SelectedInventorySlotComponent selectedSlotComponent = characterEntity.
-                getComponent(SelectedInventorySlotComponent.class);
-        if (selectedSlotComponent == null) {
-            return null;
-        }
-        InventoryComponent inventoryComponent =  characterEntity.getComponent(InventoryComponent.class);
-        if (inventoryComponent == null) {
-            return null;
-        }
-        inventoryComponent.itemSlots.get(selectedSlotComponent.slot);
 
-        EntityRef item = inventoryManager.getItemInSlot(characterEntity, selectedSlotComponent.slot);
-        StructureTemplateEditorComponent structureTemplateEditorComponent = item.getComponent(StructureTemplateEditorComponent.class);
+        StructureTemplateEditorComponent structureTemplateEditorComponent = highlightedEditorEntity.getComponent(StructureTemplateEditorComponent.class);
         if (structureTemplateEditorComponent == null) {
             return null;
         }

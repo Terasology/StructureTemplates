@@ -13,23 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.structureTemplates.internal.events;
+package org.terasology.structureTemplates.internal.components;
 
+import org.terasology.entitySystem.Component;
 import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.network.NetworkEvent;
-import org.terasology.network.ServerEvent;
+import org.terasology.network.FieldReplicateType;
+import org.terasology.network.Replicate;
 
 /**
- * Requests the server to return a copy of the region specified by the entity to the client via a
- * {@link CopyBlockRegionResultEvent} event. The event gets trigged by a button in the structure template editor.
- *
+ * Gets added to a client entity when that client decides to edit the copy region of a structure template..
  */
-@ServerEvent
-public class CopyBlockRegionRequest extends NetworkEvent {
-    public CopyBlockRegionRequest() {
-    }
-
-    public CopyBlockRegionRequest(EntityRef instigator) {
-        super(instigator);
-    }
+public class EditsCopyRegionComponent implements Component {
+    @Replicate(FieldReplicateType.OWNER_TO_SERVER)
+    public EntityRef structureTemplateEditor = EntityRef.NULL;
 }
