@@ -25,15 +25,18 @@ import org.terasology.network.Replicate;
  * Used to describe an block region location
  */
 public class StructureTemplateEditorComponent implements Component {
+
+
     /**
      * Edit region relative to origin.
      */
-    @Replicate(FieldReplicateType.OWNER_TO_SERVER)
+    @Replicate(FieldReplicateType.OWNER_TO_SERVER_TO_CLIENT)
     public Region3i editRegion = Region3i.createBounded(new Vector3i(0,0,0), new Vector3i(0,0,0));
 
     /**
      * Origin for editRegion values. To get the avsolute edit region add this value to it.
      */
-    @Replicate(FieldReplicateType.OWNER_TO_SERVER)
+    @Replicate(FieldReplicateType.OWNER_TO_SERVER_TO_CLIENT)
     public Vector3i origin = new Vector3i();
+
 }
