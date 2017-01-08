@@ -24,16 +24,17 @@ import org.terasology.world.block.BlockUri;
  */
 @ServerEvent
 public class RequestBlockFromToolboxEvent implements Event {
-    private BlockUri blockUri;
+    // BlockUri seems not to get serialized properly
+    private String blockUri;
 
     public RequestBlockFromToolboxEvent(BlockUri blockUri) {
-        this.blockUri = blockUri;
+        this.blockUri = blockUri.toString();
     }
 
     public RequestBlockFromToolboxEvent() {
     }
 
     public BlockUri getBlockUri() {
-        return blockUri;
+        return new BlockUri(blockUri);
     }
 }
