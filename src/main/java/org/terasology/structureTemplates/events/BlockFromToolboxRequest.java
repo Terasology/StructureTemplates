@@ -23,15 +23,15 @@ import org.terasology.world.block.BlockUri;
  * Gets sent to the server to inform it that the user wants to have a block item from the toolbox.
  */
 @ServerEvent
-public class RequestBlockFromToolboxEvent implements Event {
+public class BlockFromToolboxRequest implements Event {
     // BlockUri seems not to get serialized properly
     private String blockUri;
 
-    public RequestBlockFromToolboxEvent(BlockUri blockUri) {
+    public BlockFromToolboxRequest(BlockUri blockUri) {
         this.blockUri = blockUri.toString();
     }
 
-    public RequestBlockFromToolboxEvent() {
+    public BlockFromToolboxRequest() {
     }
 
     public BlockUri getBlockUri() {

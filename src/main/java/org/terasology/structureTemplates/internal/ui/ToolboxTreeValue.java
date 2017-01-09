@@ -16,7 +16,7 @@
 package org.terasology.structureTemplates.internal.ui;
 
 import org.terasology.entitySystem.event.Event;
-import org.terasology.rendering.assets.texture.Texture;
+import org.terasology.rendering.assets.texture.TextureRegion;
 
 import java.util.function.Supplier;
 
@@ -25,12 +25,12 @@ import java.util.function.Supplier;
  */
 public final class ToolboxTreeValue {
     private String text;
-    private Texture texture;
+    private TextureRegion textureRegion;
     private Supplier<Event> itemRequestFactory;
 
-    public ToolboxTreeValue(String text, Texture texture, Supplier<Event> itemRequestFactory) {
+    public ToolboxTreeValue(String text, TextureRegion textureRegion, Supplier<Event> itemRequestFactory) {
         this.text = text;
-        this.texture = texture;
+        this.textureRegion = textureRegion;
         this.itemRequestFactory = itemRequestFactory;
     }
 
@@ -47,7 +47,7 @@ public final class ToolboxTreeValue {
         return text;
     }
 
-    public Texture getTexture() {
-        return texture;
+    public TextureRegion getTextureRegion() {
+        return textureRegion;
     }
 }

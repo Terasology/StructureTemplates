@@ -15,7 +15,7 @@
  */
 package org.terasology.structureTemplates.internal.ui;
 
-import org.terasology.rendering.assets.texture.Texture;
+import org.terasology.rendering.assets.texture.TextureRegion;
 import org.terasology.rendering.nui.itemRendering.StringTextIconRenderer;
 
 /**
@@ -33,7 +33,7 @@ public class ToolboxItemRenderer extends StringTextIconRenderer<ToolboxTreeValue
     }
 
     @Override
-    public Texture getTexture(ToolboxTreeValue value) {
-        return value.getTexture();
+    public TextureRegion getTexture(ToolboxTreeValue value) {
+        return value.getTextureRegion();
     }
 }
