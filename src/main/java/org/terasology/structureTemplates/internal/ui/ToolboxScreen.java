@@ -86,9 +86,9 @@ public class ToolboxScreen extends BaseInteractionScreen {
         if (treeView != null) {
             Texture toolboxTexture = assetManager.getAsset("StructureTemplates:Toolbox16x16", Texture.class).get();
             ToolboxTree tree = new ToolboxTree(new ToolboxTreeValue("Toolbox", toolboxTexture, null));
-
             tree.addChild(createBlockSubTree());
             tree.addChild(createStructureTemplateSubTree());
+            tree.setExpanded(true);
 
             treeView.setModel(tree);
 
