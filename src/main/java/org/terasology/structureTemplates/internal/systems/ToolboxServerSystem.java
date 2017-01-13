@@ -34,8 +34,10 @@ import org.terasology.network.NetworkComponent;
 import org.terasology.registry.In;
 import org.terasology.rendering.assets.texture.TextureRegionAsset;
 import org.terasology.structureTemplates.components.SpawnStructureActionComponent;
+import org.terasology.structureTemplates.components.SpawnTemplateActionComponent;
 import org.terasology.structureTemplates.events.BlockFromToolboxRequest;
 import org.terasology.structureTemplates.events.StructureSpawnerFromToolboxRequest;
+import org.terasology.structureTemplates.events.StructureTemplateFromToolboxRequest;
 import org.terasology.world.block.BlockManager;
 import org.terasology.world.block.family.BlockFamily;
 import org.terasology.world.block.items.BlockItemFactory;
@@ -99,7 +101,7 @@ public class ToolboxServerSystem extends BaseComponentSystem {
     }
 
     @ReceiveEvent
-    public void onStructureTemplateFromToolboxRequest(StructureSpawnerFromToolboxRequest event, EntityRef toolboxEntity) {
+    public void onStructureSpawnerFromToolboxRequest(StructureSpawnerFromToolboxRequest event, EntityRef toolboxEntity) {
         EntityRef owner = toolboxEntity.getOwner();
 
         EntityBuilder entityBuilder = entityManager.newBuilder(event.getStructureTemplatePrefab());
@@ -125,4 +127,34 @@ public class ToolboxServerSystem extends BaseComponentSystem {
         giveItemToOwnerOrDestroyItem(item, owner);
 
     }
+
+
+    @ReceiveEvent
+    public void onStructureTemplateFromToolboxRequest(StructureTemplateFromToolboxRequest event, EntityRef toolboxEntity) {
+        EntityRef owner = toolboxEntity.getOwner();
+
+        EntityBuilder entityBuilder = entityManager.newBuilder(event.getStructureTemplatePrefab());
+        ItemComponent itemComponent = entityBuilder.getComponent(ItemComponent.class);
+        if (itemComponent == null) {
+            itemComponent = new ItemComponent();
+        }
+        Optional<TextureRegionAsset> optionalIcon = assetManager.getAsset("StructureTemplates:StructureTemplateEditor", TextureRegionAsset.class);
+        itemComponent.icon = optionalIcon.get();
+        itemComponent.damageType = assetManager.getAsset("engine:physicalDamage", Prefab.class).get();
+        itemComponent.pickupPrefab = assetManager.getAsset("engine:itemPickup", Prefab.class).get();
+        entityBuilder.addOrSaveComponent(itemComponent);
+        DisplayNameComponent displayNameComponent = entityBuilder.getComponent(DisplayNameComponent.class);
+        if (displayNameComponent == null) {
+            displayNameComponent = new DisplayNameComponent();
+        }
+
+        displayNameComponent.name =  event.getStructureTemplatePrefab().getName() + " Template";
+        entityBuilder.addOrSaveComponent(displayNameComponent);
+        entityBuilder.addOrSaveComponent(new SpawnTemplateActionComponent());
+        entityBuilder.addOrSaveComponent(new NetworkComponent());
+        EntityRef item = entityBuilder.build();
+        giveItemToOwnerOrDestroyItem(item, owner);
+
+    }
+
 }

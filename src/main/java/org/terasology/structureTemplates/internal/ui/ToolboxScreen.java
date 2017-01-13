@@ -39,6 +39,7 @@ import org.terasology.rendering.nui.widgets.treeView.Tree;
 import org.terasology.structureTemplates.components.StructureTemplateComponent;
 import org.terasology.structureTemplates.events.BlockFromToolboxRequest;
 import org.terasology.structureTemplates.events.StructureSpawnerFromToolboxRequest;
+import org.terasology.structureTemplates.events.StructureTemplateFromToolboxRequest;
 import org.terasology.world.block.BlockExplorer;
 import org.terasology.world.block.BlockManager;
 import org.terasology.world.block.BlockUri;
@@ -87,7 +88,9 @@ public class ToolboxScreen extends BaseInteractionScreen {
             Texture toolboxTexture = assetManager.getAsset("StructureTemplates:Toolbox16x16", Texture.class).get();
             ToolboxTree tree = new ToolboxTree(new ToolboxTreeValue("Toolbox", toolboxTexture, null));
             tree.addChild(createBlockSubTree());
-            tree.addChild(createStructureTemplateSubTree());
+            tree.addChild(createStructureSpawnersSubTree());
+            tree.addChild(createStructureTemplatesSubTree());
+
             tree.setExpanded(true);
 
             treeView.setModel(tree);
@@ -155,7 +158,7 @@ public class ToolboxScreen extends BaseInteractionScreen {
         return blockTree;
     }
 
-    private ToolboxTree createStructureTemplateSubTree() {
+    private ToolboxTree createStructureSpawnersSubTree() {
         Optional<TextureRegionAsset> optionalTextureRegion = assetManager.getAsset("engine:items#whiteRecipe", TextureRegionAsset.class);
         TextureRegion texture = optionalTextureRegion.get();
 
@@ -166,6 +169,23 @@ public class ToolboxScreen extends BaseInteractionScreen {
         for (Prefab prefab: prefabs) {
             ToolboxTree item = new ToolboxTree(new ToolboxTreeValue(prefab.getUrn().toString(), texture,
                     () -> new StructureSpawnerFromToolboxRequest(prefab)));
+            structureTemplatesTree.addChild(item);
+
+        }
+        return structureTemplatesTree;
+    }
+
+    private ToolboxTree createStructureTemplatesSubTree() {
+        Optional<TextureRegionAsset> optionalTextureRegion = assetManager.getAsset("StructureTemplates:StructureTemplateEditor", TextureRegionAsset.class);
+        TextureRegion texture = optionalTextureRegion.get();
+
+        ToolboxTree structureTemplatesTree = new ToolboxTree(new ToolboxTreeValue("Structure Templates", texture, null));
+
+
+        Iterable<Prefab> prefabs = prefabManager.listPrefabs(StructureTemplateComponent.class);
+        for (Prefab prefab: prefabs) {
+            ToolboxTree item = new ToolboxTree(new ToolboxTreeValue(prefab.getUrn().toString(), texture,
+                    () -> new StructureTemplateFromToolboxRequest(prefab)));
             structureTemplatesTree.addChild(item);
 
         }
