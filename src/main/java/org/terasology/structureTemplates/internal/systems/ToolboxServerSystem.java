@@ -151,6 +151,7 @@ public class ToolboxServerSystem extends BaseComponentSystem {
         displayNameComponent.name =  event.getStructureTemplatePrefab().getName() + " Template";
         entityBuilder.addOrSaveComponent(displayNameComponent);
         entityBuilder.addOrSaveComponent(new SpawnTemplateActionComponent());
+        entityBuilder.removeComponent(SpawnStructureActionComponent.class);
         entityBuilder.addOrSaveComponent(new NetworkComponent());
         EntityRef item = entityBuilder.build();
         giveItemToOwnerOrDestroyItem(item, owner);
