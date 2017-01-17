@@ -23,22 +23,30 @@ import org.terasology.assets.management.AssetManager;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.event.Event;
+import org.terasology.entitySystem.prefab.Prefab;
+import org.terasology.entitySystem.prefab.PrefabManager;
 import org.terasology.logic.clipboard.ClipboardManager;
 import org.terasology.logic.players.LocalPlayer;
 import org.terasology.registry.In;
 import org.terasology.rendering.assets.texture.Texture;
+import org.terasology.rendering.assets.texture.TextureRegion;
+import org.terasology.rendering.assets.texture.TextureRegionAsset;
 import org.terasology.rendering.nui.BaseInteractionScreen;
 import org.terasology.rendering.nui.UIWidget;
 import org.terasology.rendering.nui.databinding.ReadOnlyBinding;
 import org.terasology.rendering.nui.widgets.UIButton;
 import org.terasology.rendering.nui.widgets.treeView.Tree;
-import org.terasology.structureTemplates.events.RequestBlockFromToolboxEvent;
+import org.terasology.structureTemplates.components.StructureTemplateComponent;
+import org.terasology.structureTemplates.events.BlockFromToolboxRequest;
+import org.terasology.structureTemplates.events.StructureSpawnerFromToolboxRequest;
+import org.terasology.structureTemplates.events.StructureTemplateFromToolboxRequest;
 import org.terasology.world.block.BlockExplorer;
 import org.terasology.world.block.BlockManager;
 import org.terasology.world.block.BlockUri;
 import org.terasology.world.block.shapes.BlockShape;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -62,6 +70,9 @@ public class ToolboxScreen extends BaseInteractionScreen {
     @In
     private AssetManager assetManager;
 
+    @In
+    private PrefabManager prefabManager;
+
     private ToolboxTreeView treeView;
 
 
@@ -76,8 +87,11 @@ public class ToolboxScreen extends BaseInteractionScreen {
         if (treeView != null) {
             Texture toolboxTexture = assetManager.getAsset("StructureTemplates:Toolbox16x16", Texture.class).get();
             ToolboxTree tree = new ToolboxTree(new ToolboxTreeValue("Toolbox", toolboxTexture, null));
+            tree.addChild(createBlockSubTree());
+            tree.addChild(createStructureSpawnersSubTree());
+            tree.addChild(createStructureTemplatesSubTree());
 
-            tree.addChild(createBlockSubTree(tree));
+            tree.setExpanded(true);
 
             treeView.setModel(tree);
 
@@ -100,7 +114,7 @@ public class ToolboxScreen extends BaseInteractionScreen {
         }
     }
 
-    ToolboxTree createBlockSubTree(ToolboxTree tree) {
+    private ToolboxTree createBlockSubTree() {
         Texture genericBlockTexture = assetManager.getAsset("StructureTemplates:Cube16x16Bright", Texture.class).get();
 
         ToolboxTree blockTree = new ToolboxTree(new ToolboxTreeValue("Blocks", genericBlockTexture, null));
@@ -129,19 +143,53 @@ public class ToolboxScreen extends BaseInteractionScreen {
                 // String displayName = blockFamily.getDisplayName();
                 String displayName = block.toString();
                 ToolboxTree blockFamiliyTree = new ToolboxTree(new ToolboxTreeValue(displayName, genericBlockTexture,
-                        () -> new RequestBlockFromToolboxEvent(block)));
+                        () -> new BlockFromToolboxRequest(block)));
                 if (freeFormBlocks.contains(block)) {
                     for (ResourceUrn shareUrn: blockShapes) {
 
                         blockFamiliyTree.addChild(new ToolboxTreeValue(shareUrn.toString(),
                                 genericBlockTexture,
-                                () -> new RequestBlockFromToolboxEvent(new BlockUri(block.getBlockFamilyDefinitionUrn(), shareUrn))));
+                                () -> new BlockFromToolboxRequest(new BlockUri(block.getBlockFamilyDefinitionUrn(), shareUrn))));
                     }
                 }
                 blockTree.addChild(blockFamiliyTree);
             }
         }
         return blockTree;
+    }
+
+    private ToolboxTree createStructureSpawnersSubTree() {
+        Optional<TextureRegionAsset> optionalTextureRegion = assetManager.getAsset("engine:items#whiteRecipe", TextureRegionAsset.class);
+        TextureRegion texture = optionalTextureRegion.get();
+
+        ToolboxTree structureTemplatesTree = new ToolboxTree(new ToolboxTreeValue("Structure Spawner", texture, null));
+
+
+        Iterable<Prefab> prefabs = prefabManager.listPrefabs(StructureTemplateComponent.class);
+        for (Prefab prefab: prefabs) {
+            ToolboxTree item = new ToolboxTree(new ToolboxTreeValue(prefab.getUrn().toString(), texture,
+                    () -> new StructureSpawnerFromToolboxRequest(prefab)));
+            structureTemplatesTree.addChild(item);
+
+        }
+        return structureTemplatesTree;
+    }
+
+    private ToolboxTree createStructureTemplatesSubTree() {
+        Optional<TextureRegionAsset> optionalTextureRegion = assetManager.getAsset("StructureTemplates:StructureTemplateEditor", TextureRegionAsset.class);
+        TextureRegion texture = optionalTextureRegion.get();
+
+        ToolboxTree structureTemplatesTree = new ToolboxTree(new ToolboxTreeValue("Structure Templates", texture, null));
+
+
+        Iterable<Prefab> prefabs = prefabManager.listPrefabs(StructureTemplateComponent.class);
+        for (Prefab prefab: prefabs) {
+            ToolboxTree item = new ToolboxTree(new ToolboxTreeValue(prefab.getUrn().toString(), texture,
+                    () -> new StructureTemplateFromToolboxRequest(prefab)));
+            structureTemplatesTree.addChild(item);
+
+        }
+        return structureTemplatesTree;
     }
 
     private void onTakeItemButton(UIWidget button) {

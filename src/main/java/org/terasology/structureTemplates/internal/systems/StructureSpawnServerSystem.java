@@ -17,6 +17,8 @@ package org.terasology.structureTemplates.internal.systems;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.entitySystem.entity.EntityBuilder;
+import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.event.EventPriority;
 import org.terasology.entitySystem.event.ReceiveEvent;
@@ -24,6 +26,7 @@ import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.logic.common.ActivateEvent;
+import org.terasology.logic.inventory.InventoryManager;
 import org.terasology.logic.location.LocationComponent;
 import org.terasology.math.Region3i;
 import org.terasology.math.Side;
@@ -33,10 +36,12 @@ import org.terasology.registry.In;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent.RegionToFill;
 import org.terasology.structureTemplates.components.SpawnStructureActionComponent;
+import org.terasology.structureTemplates.components.SpawnTemplateActionComponent;
 import org.terasology.structureTemplates.components.StructureTemplateComponent;
 import org.terasology.structureTemplates.events.CheckSpawnConditionEvent;
 import org.terasology.structureTemplates.events.GetStructureTemplateBlocksEvent;
 import org.terasology.structureTemplates.events.SpawnStructureEvent;
+import org.terasology.structureTemplates.events.SpawnTemplateEvent;
 import org.terasology.structureTemplates.events.StructureBlocksSpawnedEvent;
 import org.terasology.structureTemplates.events.StructureSpawnStartedEvent;
 import org.terasology.structureTemplates.internal.events.StructureSpawnFailedEvent;
@@ -64,6 +69,12 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
     @In
     private WorldProvider worldProvider;
 
+    @In
+    private EntityManager entityManager;
+
+    @In
+    private InventoryManager inventoryManager;
+
     @ReceiveEvent(priority = EventPriority.PRIORITY_CRITICAL)
     public void onSpawnStructureEventWithHighestPriority(SpawnStructureEvent event, EntityRef entity) {
         entity.send(new StructureSpawnStartedEvent(event.getTransformation()));
@@ -71,8 +82,19 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
 
     @ReceiveEvent(priority = EventPriority.PRIORITY_NORMAL)
     public void onSpawnStructureEventWithBlocksPriority(SpawnStructureEvent event, EntityRef entity) {
+        spawnBlocks(entity, event.getTransformation());
+    }
+
+
+    @ReceiveEvent(priority = EventPriority.PRIORITY_TRIVIAL)
+    public void onSpawnStructureEventWithLowestPriority(SpawnStructureEvent event, EntityRef entity) {
+        entity.send(new StructureBlocksSpawnedEvent(event.getTransformation()));
+    }
+
+
+    private void spawnBlocks(EntityRef entity, BlockRegionTransform transformation) {
         long startTime = System.currentTimeMillis();
-        GetStructureTemplateBlocksEvent getBlocksEvent =  new GetStructureTemplateBlocksEvent(event.getTransformation());
+        GetStructureTemplateBlocksEvent getBlocksEvent =  new GetStructureTemplateBlocksEvent(transformation);
         entity.send(getBlocksEvent);
         Map<Vector3i, Block> blocksToPlace = getBlocksEvent.getBlocksToPlace();
         worldProvider.setBlocks(blocksToPlace);
@@ -83,9 +105,9 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
         }
     }
 
-    @ReceiveEvent(priority = EventPriority.PRIORITY_TRIVIAL)
-    public void onSpawnStructureEventWithLowestPriority(SpawnStructureEvent event, EntityRef entity) {
-        entity.send(new StructureBlocksSpawnedEvent(event.getTransformation()));
+    @ReceiveEvent(priority = EventPriority.PRIORITY_NORMAL)
+    public void onSpawnTemplateEventWithBlocksPriority(SpawnTemplateEvent event, EntityRef entity) {
+        spawnBlocks(entity, event.getTransformation());
     }
 
     @ReceiveEvent
@@ -121,17 +143,7 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
             return;
         }
 
-        LocationComponent characterLocation = event.getInstigator().getComponent(LocationComponent.class);
-        Vector3f directionVector = characterLocation.getWorldDirection();
-
-        Side facedDirection = Side.inHorizontalDirection(directionVector.getX(), directionVector.getZ());
-        Side wantedFrontOfStructure = facedDirection.reverse();
-
-        Side frontOfStructure = structureTemplateComponent.front;
-
-
-        BlockRegionTransform blockRegionTransform = createBlockRegionTransformForCharacterTargeting(frontOfStructure,
-                wantedFrontOfStructure, blockComponent.getPosition());
+        BlockRegionTransform blockRegionTransform = getBlockRegionTransformForStructurePlacement(event, structureTemplateComponent, blockComponent);
         CheckSpawnConditionEvent checkSpawnEvent = new CheckSpawnConditionEvent(blockRegionTransform);
         entity.send(checkSpawnEvent);
         if (checkSpawnEvent.isPreventSpawn()) {
@@ -144,6 +156,79 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
 
         entity.send(new SpawnStructureEvent(blockRegionTransform));
 
+    }
+
+    @ReceiveEvent
+    public void onActivate(ActivateEvent event, EntityRef entity,
+                           SpawnTemplateActionComponent spawnActionComponent,
+                           StructureTemplateComponent structureTemplateComponent) {
+        EntityRef target = event.getTarget();
+        BlockComponent blockComponent = target.getComponent(BlockComponent.class);
+        if (blockComponent == null) {
+            return;
+        }
+
+        BlockRegionTransform blockRegionTransform = getBlockRegionTransformForStructurePlacement(event, structureTemplateComponent, blockComponent);
+        entity.send(new SpawnTemplateEvent(blockRegionTransform));
+
+
+        EntityRef owner = entity.getOwner();
+        Vector3i position = blockComponent.getPosition();
+
+        Vector3f directionVector = event.getDirection();
+        Side directionStructureIsIn = Side.inHorizontalDirection(directionVector.getX(), directionVector.getZ());
+        Side frontDirectionOfStructure = directionStructureIsIn.reverse();
+
+
+        Region3i unrotatedRegion = null;
+        SpawnBlockRegionsComponent blockRegionsComponent = entity.getComponent(SpawnBlockRegionsComponent.class);
+        if (blockRegionsComponent != null) {
+            for (RegionToFill regionToFill : blockRegionsComponent.regionsToFill) {
+                if (unrotatedRegion == null) {
+                    unrotatedRegion = regionToFill.region;
+                } else {
+                    unrotatedRegion = unrotatedRegion.expandToContain(regionToFill.region.min());
+                    unrotatedRegion = unrotatedRegion.expandToContain(regionToFill.region.max());
+                }
+            }
+        }
+        if (unrotatedRegion == null) {
+            unrotatedRegion = Region3i.createBounded(new Vector3i(0, 0, 0), new Vector3i(0, 0, 0));
+        }
+
+        // TODO check for code sharing with StructureTemplateEditorServerSystem#onActivate
+        HorizontalBlockRegionRotation rotation = HorizontalBlockRegionRotation.createRotationFromSideToSide(Side.FRONT,
+                frontDirectionOfStructure);
+        Region3i region = rotation.transformRegion(unrotatedRegion);
+
+
+        EntityBuilder entityBuilder = entityManager.newBuilder("StructureTemplates:structureTemplateEditor");
+        StructureTemplateEditorComponent editorComponent = entityBuilder.getComponent(StructureTemplateEditorComponent.class);
+        editorComponent.editRegion = region;
+        editorComponent.origin.set(position);
+        entityBuilder.saveComponent(editorComponent);
+        StructureTemplateComponent frontDirectionComponent = new StructureTemplateComponent();
+        frontDirectionComponent.front = frontDirectionOfStructure;
+        entityBuilder.addOrSaveComponent(frontDirectionComponent);
+        EntityRef editorItem = entityBuilder.build();
+
+        inventoryManager.giveItem(owner, owner, editorItem);
+
+        entity.destroy();
+    }
+
+    BlockRegionTransform getBlockRegionTransformForStructurePlacement(ActivateEvent event, StructureTemplateComponent structureTemplateComponent, BlockComponent blockComponent) {
+        LocationComponent characterLocation = event.getInstigator().getComponent(LocationComponent.class);
+        Vector3f directionVector = characterLocation.getWorldDirection();
+
+        Side facedDirection = Side.inHorizontalDirection(directionVector.getX(), directionVector.getZ());
+        Side wantedFrontOfStructure = facedDirection.reverse();
+
+        Side frontOfStructure = structureTemplateComponent.front;
+
+
+        return createBlockRegionTransformForCharacterTargeting(frontOfStructure,
+                wantedFrontOfStructure, blockComponent.getPosition());
     }
 
     public static BlockRegionTransform createBlockRegionTransformForCharacterTargeting(

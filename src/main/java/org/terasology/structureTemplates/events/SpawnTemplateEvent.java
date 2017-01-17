@@ -16,25 +16,21 @@
 package org.terasology.structureTemplates.events;
 
 import org.terasology.entitySystem.event.Event;
-import org.terasology.network.ServerEvent;
-import org.terasology.world.block.BlockUri;
+import org.terasology.structureTemplates.util.transform.BlockRegionTransform;
 
 /**
- * Gets sent to the server to inform it that the user wants to have a block item from the toolbox.
+ * Send this event to a structure template entity to make it spawn the template in edit mode.
+ *
+ * Send {@link SpawnStructureEvent} if you want to spawn the structure of the template regularly.
  */
-@ServerEvent
-public class RequestBlockFromToolboxEvent implements Event {
-    // BlockUri seems not to get serialized properly
-    private String blockUri;
+public class SpawnTemplateEvent implements Event {
+    private BlockRegionTransform transformation;
 
-    public RequestBlockFromToolboxEvent(BlockUri blockUri) {
-        this.blockUri = blockUri.toString();
+    public SpawnTemplateEvent(BlockRegionTransform transform) {
+        this.transformation = transform;
     }
 
-    public RequestBlockFromToolboxEvent() {
-    }
-
-    public BlockUri getBlockUri() {
-        return new BlockUri(blockUri);
+    public BlockRegionTransform getTransformation() {
+        return transformation;
     }
 }
