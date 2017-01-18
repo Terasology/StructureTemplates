@@ -2,20 +2,24 @@
  * A chest is interesting for two reasons: It is asymmetrical (front texture differs) and should store stuff
  */
 {
-  "translucent": true,
+  "translucent": false,
   "invisible": false,
   "targetable": true,
-  "penetrable": true,
+  "penetrable": false,
   "replacementAllowed": false,
-  "shadowCasting": false,
-  "attachmentAllowed": false,
+  "shadowCasting": true,
+  "attachmentAllowed": true,
   "hardness": 100,
   "displayName": "structure template editor",
   "rotation": "horizontal",
   "sounds": "none",
-  "shape" : "StructureTemplates:blockMarkerQuad",
+  "shape" : "engine:cube",
   "entity": {
     "prefab": "StructureTemplates:structureTemplateEditor"
+  },
+  "tiles": {
+      "topBottom": "StructureTemplates:StructureTemplateEditorTopBottom",
+      "sides": "StructureTemplates:StructureTemplateEditorSides"
   },
   "inventory": {
     "stackable": false,
