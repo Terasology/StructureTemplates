@@ -35,7 +35,6 @@ import org.terasology.registry.In;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent.RegionToFill;
 import org.terasology.structureTemplates.components.SpawnStructureActionComponent;
-import org.terasology.structureTemplates.components.SpawnTemplateActionComponent;
 import org.terasology.structureTemplates.components.StructureTemplateComponent;
 import org.terasology.structureTemplates.events.CheckSpawnConditionEvent;
 import org.terasology.structureTemplates.events.GetStructureTemplateBlocksEvent;
@@ -48,14 +47,10 @@ import org.terasology.structureTemplates.util.transform.BlockRegionMovement;
 import org.terasology.structureTemplates.util.transform.BlockRegionTransform;
 import org.terasology.structureTemplates.util.transform.BlockRegionTransformationList;
 import org.terasology.structureTemplates.util.transform.HorizontalBlockRegionRotation;
-import org.terasology.world.BlockEntityRegistry;
 import org.terasology.world.WorldProvider;
 import org.terasology.world.block.Block;
 import org.terasology.world.block.BlockComponent;
 import org.terasology.world.block.BlockManager;
-import org.terasology.world.block.entity.placement.PlaceBlocks;
-import org.terasology.world.block.family.BlockFamily;
-import org.terasology.world.block.family.HorizontalBlockFamily;
 
 import java.util.Map;
 
@@ -82,8 +77,6 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
     @In
     private BlockManager blockManager;
 
-    @In
-    private BlockEntityRegistry blockEntityRegistry;
 
     @ReceiveEvent(priority = EventPriority.PRIORITY_CRITICAL)
     public void onSpawnStructureEventWithHighestPriority(SpawnStructureEvent event, EntityRef entity) {
@@ -168,93 +161,8 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
 
     }
 
-    @ReceiveEvent
-    public void onActivate(ActivateEvent event, EntityRef entity,
-                           SpawnTemplateActionComponent spawnActionComponent,
-                           StructureTemplateComponent structureTemplateComponent) {
-        EntityRef target = event.getTarget();
-        BlockComponent blockComponent = target.getComponent(BlockComponent.class);
-        if (blockComponent == null) {
-            return;
-        }
-
-        Vector3i position = blockComponent.getPosition();
-        Vector3f directionVector = event.getDirection();
-        Side directionStructureIsIn = Side.inHorizontalDirection(directionVector.getX(), directionVector.getZ());
-        Side frontDirectionOfStructure = directionStructureIsIn.reverse();
-
-
-        Region3i unrotatedRegion = getPlacementBoundingsOfTemplate(entity);
-
-        // TODO check for code sharing with StructureTemplateEditorServerSystem#onActivate
-        HorizontalBlockRegionRotation rotation = HorizontalBlockRegionRotation.createRotationFromSideToSide(Side.FRONT,
-                frontDirectionOfStructure);
-        Region3i region = rotation.transformRegion(unrotatedRegion);
-
-        boolean originPlaced = placeOriginMarkerWithTemplateData(event, position, frontDirectionOfStructure, region);
-        if (!originPlaced) {
-            return;
-        }
-        BlockRegionTransform blockRegionTransform = getBlockRegionTransformForStructurePlacement(event, structureTemplateComponent, blockComponent);
-        entity.send(new SpawnTemplateEvent(blockRegionTransform));
-
-        // TODO check if consuming event and making item consumable works too e.g. event.consume();
-        entity.destroy();
-    }
-
-    private Region3i getPlacementBoundingsOfTemplate(EntityRef entity) {
-        Region3i unrotatedRegion = null;
-        SpawnBlockRegionsComponent blockRegionsComponent = entity.getComponent(SpawnBlockRegionsComponent.class);
-        if (blockRegionsComponent != null) {
-            for (RegionToFill regionToFill : blockRegionsComponent.regionsToFill) {
-                if (unrotatedRegion == null) {
-                    unrotatedRegion = regionToFill.region;
-                } else {
-                    unrotatedRegion = unrotatedRegion.expandToContain(regionToFill.region.min());
-                    unrotatedRegion = unrotatedRegion.expandToContain(regionToFill.region.max());
-                }
-            }
-        }
-        if (unrotatedRegion == null) {
-            unrotatedRegion = Region3i.createBounded(new Vector3i(0, 0, 0), new Vector3i(0, 0, 0));
-        }
-        return unrotatedRegion;
-    }
-
-    boolean placeOriginMarkerWithTemplateData(ActivateEvent event, Vector3i position, Side frontDirectionOfStructure, Region3i region) {
-        boolean originPlaced = placeOriginMarkerBlockWithoutData(event, position, frontDirectionOfStructure);
-        if (!originPlaced) {
-            return false;
-        }
-        EntityRef originBlockEntity = blockEntityRegistry.getBlockEntityAt(position);
-        addTemplateDataToBlockEntity(position, frontDirectionOfStructure, region, originBlockEntity);
-        return true;
-    }
-
-    private void addTemplateDataToBlockEntity(Vector3i position, Side frontDirectionOfStructure, Region3i region, EntityRef originBlockEntity) {
-        StructureTemplateEditorComponent editorComponent = originBlockEntity.getComponent(StructureTemplateEditorComponent.class);
-        editorComponent.editRegion = region;
-        editorComponent.origin.set(position);
-        originBlockEntity.saveComponent(editorComponent);
-        editorComponent.editRegion = region;
-        editorComponent.origin.set(position);
-        // TODO remove concept of front and store it somewhere in editor
-        StructureTemplateComponent frontDirectionComponent = new StructureTemplateComponent();
-        frontDirectionComponent.front = frontDirectionOfStructure;
-        originBlockEntity.addOrSaveComponent(frontDirectionComponent);
-    }
-
-    private boolean placeOriginMarkerBlockWithoutData(ActivateEvent event, Vector3i position, Side frontDirectionOfStructure) {
-        BlockFamily blockFamily = blockManager.getBlockFamily("StructureTemplates:StructureTemplateEditor");
-        HorizontalBlockFamily horizontalBlockFamily = (HorizontalBlockFamily) blockFamily;
-        Block block = horizontalBlockFamily.getBlockForSide(frontDirectionOfStructure);
-
-        PlaceBlocks placeBlocks = new PlaceBlocks(position, block, event.getInstigator());
-        worldProvider.getWorldEntity().send(placeBlocks);
-        return !placeBlocks.isConsumed();
-    }
-
-    BlockRegionTransform getBlockRegionTransformForStructurePlacement(ActivateEvent event, StructureTemplateComponent structureTemplateComponent, BlockComponent blockComponent) {
+    // TODO move method into utility class:
+    public static BlockRegionTransform getBlockRegionTransformForStructurePlacement(ActivateEvent event, StructureTemplateComponent structureTemplateComponent, BlockComponent blockComponent) {
         LocationComponent characterLocation = event.getInstigator().getComponent(LocationComponent.class);
         Vector3f directionVector = characterLocation.getWorldDirection();
 
