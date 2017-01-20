@@ -34,6 +34,7 @@ import org.terasology.world.block.items.BlockItemFactory;
 
 /**
  * System to power the {@link AddItemsToChestComponent}
+ * Adds items to chests specified by the AddItemsToChestComponent.
  */
 @RegisterSystem(RegisterMode.AUTHORITY)
 public class AddItemsToChestSystem extends BaseComponentSystem {
@@ -48,6 +49,12 @@ public class AddItemsToChestSystem extends BaseComponentSystem {
     @In
     private InventoryManager inventoryManager;
 
+    /**
+     * Listens to structures spawning. When a structure spawns, all of chests specified in the prefab get filled with the specified items through @link addItemToChest.
+     * @param event The event passed.
+     * @param component The component as provided in the prefab. Contains the items, location and such.
+     * @param entity A wrapper around an entity id providing access to common functionality.
+     */
     @ReceiveEvent
     public void onSpawnStructureEvent(StructureBlocksSpawnedEvent event, EntityRef entity,
                                       AddItemsToChestComponent component) {
@@ -64,6 +71,12 @@ public class AddItemsToChestSystem extends BaseComponentSystem {
         }
     }
 
+    /**
+     * A private method used by @link onSpawnStructureEvent. It actually adds the items to the chest.
+     * @param chest The chest to add the items to.
+     * @param item The item to be added.
+     * @param blockFactory If this item is a block, this parameter is used to make a new instance of the block as an item.
+     */
     private void addItemToChest(EntityRef chest, AddItemsToChestComponent.Item item, BlockItemFactory blockFactory) {
         EntityRef itemEntity;
         if (item.itemPrefab != null) {
