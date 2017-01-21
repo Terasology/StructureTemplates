@@ -147,12 +147,14 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         EntityRef editorEnitity = editsCopyRegionComponent.structureTemplateEditor;
         StructureTemplateEditorComponent editorComponent = editorEnitity.getComponent(StructureTemplateEditorComponent.class);
         Region3i region3i = editorComponent.editRegion;
+        BlockComponent blockComponent = editorEnitity.getComponent(BlockComponent.class);
+
 
         final Map<Vector3i, Block> blocksMap = placeBlocks.getBlocks();
         for (Map.Entry<Vector3i, Block> blockEntry : blocksMap.entrySet()) {
             final Vector3i absolutePosition = blockEntry.getKey();
             final Vector3i relativePosition = new Vector3i(absolutePosition);
-            relativePosition.sub(editorComponent.origin);
+            relativePosition.sub(blockComponent.getPosition());
             if (!region3i.encompasses(relativePosition)) {
                 region3i = region3i.expandToContain( relativePosition);
             }
@@ -203,7 +205,6 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
             componentOfBlock = new StructureTemplateEditorComponent();
         }
         Vector3i origin = new Vector3i(event.getPosition());
-        componentOfBlock.origin = origin;
         componentOfBlock.editRegion = componentOfItem.editRegion;
         placedBlockEntity.saveComponent(componentOfBlock);
     }
@@ -225,7 +226,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         Side front = blockComponent.getBlock().getDirection();
         BlockRegionTransformationList transformList = new BlockRegionTransformationList();
         Vector3i minusOrigin = new Vector3i(0, 0, 0);
-        minusOrigin.sub(structureTemplateEditorComponent.origin);
+        minusOrigin.sub(blockComponent.getPosition());
         transformList.addTransformation(new BlockRegionMovement(minusOrigin));
         transformList.addTransformation(
                 HorizontalBlockRegionRotation.createRotationFromSideToSide(front, Side.FRONT));
@@ -418,7 +419,6 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
     private void addTemplateDataToBlockEntity(Vector3i position, Region3i region, EntityRef originBlockEntity) {
         StructureTemplateEditorComponent editorComponent = originBlockEntity.getComponent(StructureTemplateEditorComponent.class);
         editorComponent.editRegion = region;
-        editorComponent.origin.set(position);
         originBlockEntity.saveComponent(editorComponent);
     }
 
