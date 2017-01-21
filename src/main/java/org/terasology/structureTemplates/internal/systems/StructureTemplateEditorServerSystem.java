@@ -40,7 +40,9 @@ import org.terasology.structureTemplates.internal.components.EditsCopyRegionComp
 import org.terasology.structureTemplates.internal.events.CopyBlockRegionRequest;
 import org.terasology.structureTemplates.internal.events.CopyBlockRegionResultEvent;
 import org.terasology.structureTemplates.internal.events.CreateStructureSpawnItemRequest;
+import org.terasology.structureTemplates.util.transform.BlockRegionMovement;
 import org.terasology.structureTemplates.util.transform.BlockRegionTransform;
+import org.terasology.structureTemplates.util.transform.BlockRegionTransformationList;
 import org.terasology.structureTemplates.util.transform.HorizontalBlockRegionRotation;
 import org.terasology.world.BlockEntityRegistry;
 import org.terasology.world.WorldProvider;
@@ -167,11 +169,10 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
                                                   BlockComponent blockComponent) {
         EntityBuilder entityBuilder = entityManager.newBuilder("StructureTemplates:structureSpawnItem");
         SpawnBlockRegionsComponent spawnBlockRegionsComponent = new SpawnBlockRegionsComponent();
-        spawnBlockRegionsComponent.regionsToFill = createRegionsToFill(structureTemplateEditorComponent);
+        spawnBlockRegionsComponent.regionsToFill = createRegionsToFill(structureTemplateEditorComponent, blockComponent);
         entityBuilder.addOrSaveComponent(spawnBlockRegionsComponent);
 
         StructureTemplateComponent structureTemplateComponent = new StructureTemplateComponent();
-        structureTemplateComponent.front = blockComponent.getBlock().getDirection();
         entityBuilder.addOrSaveComponent(structureTemplateComponent);
         EntityRef structureSpawnItem = entityBuilder.build();
 
@@ -181,8 +182,10 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
     }
 
     @ReceiveEvent
-    public void onCopyBlockRegionRequest(CopyBlockRegionRequest event, EntityRef entity, StructureTemplateEditorComponent structureTemplateEditorComponent) {
-        List<RegionToFill> regionsToFill = createRegionsToFill(structureTemplateEditorComponent);
+    public void onCopyBlockRegionRequest(CopyBlockRegionRequest event, EntityRef entity,
+                                         StructureTemplateEditorComponent structureTemplateEditorComponent,
+                                         BlockComponent blockComponent) {
+        List<RegionToFill> regionsToFill = createRegionsToFill(structureTemplateEditorComponent, blockComponent);
         String textToSend = formatAsString(regionsToFill);
 
         CopyBlockRegionResultEvent resultEvent = new CopyBlockRegionResultEvent(textToSend);
@@ -217,14 +220,21 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         item.saveComponent(componentOfItem);
     }
 
-    private List<RegionToFill> createRegionsToFill(StructureTemplateEditorComponent structureTemplateEditorComponent) {
+    private List<RegionToFill> createRegionsToFill(StructureTemplateEditorComponent structureTemplateEditorComponent, BlockComponent blockComponent) {
         Region3i absoluteRegion = structureTemplateEditorComponent.editRegion;
+        Side front = blockComponent.getBlock().getDirection();
+        BlockRegionTransformationList transformList = new BlockRegionTransformationList();
+        Vector3i minusOrigin = new Vector3i(0, 0, 0);
+        minusOrigin.sub(structureTemplateEditorComponent.origin);
+        transformList.addTransformation(new BlockRegionMovement(minusOrigin));
+        transformList.addTransformation(
+                HorizontalBlockRegionRotation.createRotationFromSideToSide(front, Side.FRONT));
+
         List<RegionToFill> regionsToFill = new ArrayList<>();
         for (Vector3i absolutePosition : absoluteRegion) {
             Block block = worldProvider.getBlock(absolutePosition);
             RegionToFill regionToFill = new RegionToFill();
-            Vector3i relativePosition = new Vector3i(absolutePosition);
-            relativePosition.sub(structureTemplateEditorComponent.origin);
+            Vector3i relativePosition = transformList.transformVector3i(absolutePosition);
             Region3i region = Region3i.createBounded(relativePosition, relativePosition);
             regionToFill.region = region;
             regionToFill.blockType = block;
@@ -343,8 +353,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
 
     @ReceiveEvent
     public void onActivate(ActivateEvent event, EntityRef entity,
-                           SpawnTemplateActionComponent spawnActionComponent,
-                           StructureTemplateComponent structureTemplateComponent) {
+                           SpawnTemplateActionComponent spawnActionComponent) {
         EntityRef target = event.getTarget();
         BlockComponent blockComponent = target.getComponent(BlockComponent.class);
         if (blockComponent == null) {
@@ -370,7 +379,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
             return;
         }
         BlockRegionTransform blockRegionTransform = StructureSpawnServerSystem.getBlockRegionTransformForStructurePlacement(
-                event, structureTemplateComponent, blockComponent);
+                event, blockComponent);
         entity.send(new SpawnTemplateEvent(blockRegionTransform));
 
         // TODO check if consuming event and making item consumable works too e.g. event.consume();
@@ -402,21 +411,15 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
             return false;
         }
         EntityRef originBlockEntity = blockEntityRegistry.getBlockEntityAt(position);
-        addTemplateDataToBlockEntity(position, frontDirectionOfStructure, region, originBlockEntity);
+        addTemplateDataToBlockEntity(position, region, originBlockEntity);
         return true;
     }
 
-    private void addTemplateDataToBlockEntity(Vector3i position, Side frontDirectionOfStructure, Region3i region, EntityRef originBlockEntity) {
+    private void addTemplateDataToBlockEntity(Vector3i position, Region3i region, EntityRef originBlockEntity) {
         StructureTemplateEditorComponent editorComponent = originBlockEntity.getComponent(StructureTemplateEditorComponent.class);
         editorComponent.editRegion = region;
         editorComponent.origin.set(position);
         originBlockEntity.saveComponent(editorComponent);
-        editorComponent.editRegion = region;
-        editorComponent.origin.set(position);
-        // TODO remove concept of front and store it somewhere in editor
-        StructureTemplateComponent frontDirectionComponent = new StructureTemplateComponent();
-        frontDirectionComponent.front = frontDirectionOfStructure;
-        originBlockEntity.addOrSaveComponent(frontDirectionComponent);
     }
 
     private boolean placeOriginMarkerBlockWithoutData(ActivateEvent event, Vector3i position, Side frontDirectionOfStructure) {

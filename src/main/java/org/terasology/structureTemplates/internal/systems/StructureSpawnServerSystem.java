@@ -146,7 +146,8 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
             return;
         }
 
-        BlockRegionTransform blockRegionTransform = getBlockRegionTransformForStructurePlacement(event, structureTemplateComponent, blockComponent);
+        BlockRegionTransform blockRegionTransform = getBlockRegionTransformForStructurePlacement(event,
+                blockComponent);
         CheckSpawnConditionEvent checkSpawnEvent = new CheckSpawnConditionEvent(blockRegionTransform);
         entity.send(checkSpawnEvent);
         if (checkSpawnEvent.isPreventSpawn()) {
@@ -162,17 +163,15 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
     }
 
     // TODO move method into utility class:
-    public static BlockRegionTransform getBlockRegionTransformForStructurePlacement(ActivateEvent event, StructureTemplateComponent structureTemplateComponent, BlockComponent blockComponent) {
+    public static BlockRegionTransform getBlockRegionTransformForStructurePlacement(ActivateEvent event,
+                                                                                    BlockComponent blockComponent) {
         LocationComponent characterLocation = event.getInstigator().getComponent(LocationComponent.class);
         Vector3f directionVector = characterLocation.getWorldDirection();
 
         Side facedDirection = Side.inHorizontalDirection(directionVector.getX(), directionVector.getZ());
         Side wantedFrontOfStructure = facedDirection.reverse();
 
-        Side frontOfStructure = structureTemplateComponent.front;
-
-
-        return createBlockRegionTransformForCharacterTargeting(frontOfStructure,
+        return createBlockRegionTransformForCharacterTargeting(Side.FRONT,
                 wantedFrontOfStructure, blockComponent.getPosition());
     }
 

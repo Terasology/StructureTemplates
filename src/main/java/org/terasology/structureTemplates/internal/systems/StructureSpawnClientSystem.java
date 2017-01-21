@@ -47,7 +47,6 @@ import org.terasology.rendering.nui.Color;
 import org.terasology.rendering.nui.NUIManager;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent;
 import org.terasology.structureTemplates.components.SpawnStructureActionComponent;
-import org.terasology.structureTemplates.components.StructureTemplateComponent;
 import org.terasology.structureTemplates.events.CheckSpawnConditionEvent;
 import org.terasology.structureTemplates.internal.events.StructureSpawnFailedEvent;
 import org.terasology.structureTemplates.internal.ui.StructurePlacementFailureScreen;
@@ -220,11 +219,8 @@ public class StructureSpawnClientSystem extends BaseComponentSystem implements U
 
         Side wantedFrontOfStructure = directionPlayerLooksAt.reverse();
 
-        StructureTemplateComponent templateFrontDirComp = item.getComponent(StructureTemplateComponent.class);
-        Side frontOfStructure = (templateFrontDirComp != null) ? templateFrontDirComp.front : Side.FRONT;
-
         BlockRegionTransform regionTransform = StructureSpawnServerSystem.createBlockRegionTransformForCharacterTargeting(
-                frontOfStructure, wantedFrontOfStructure, spawnPosition);
+                Side.FRONT, wantedFrontOfStructure, spawnPosition);
 
         List<ColoredRegion> regionsToDraw = new ArrayList<>();
         CheckSpawnConditionEvent checkSpawnEvent = new CheckSpawnConditionEvent(regionTransform);
