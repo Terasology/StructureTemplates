@@ -52,6 +52,7 @@ import org.terasology.world.block.family.BlockFamily;
 import org.terasology.world.block.family.HorizontalBlockFamily;
 import org.terasology.world.block.items.BlockItemComponent;
 import org.terasology.world.block.items.OnBlockItemPlaced;
+import org.terasology.world.block.items.OnBlockToItem;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -190,20 +191,30 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
 
 
     @ReceiveEvent(components = {BlockItemComponent.class})
-    public void onPlaced(OnBlockItemPlaced event, EntityRef itemEntity) {
+    public void onBlockItemPlaced(OnBlockItemPlaced event, EntityRef itemEntity,
+                         StructureTemplateEditorComponent componentOfItem) {
         EntityRef placedBlockEntity = event.getPlacedBlock();
-        StructureTemplateEditorComponent structureTemplateEditorComponent = placedBlockEntity.getComponent(StructureTemplateEditorComponent.class );
-        if (structureTemplateEditorComponent == null) {
-            return;
+
+        StructureTemplateEditorComponent componentOfBlock = placedBlockEntity.getComponent(StructureTemplateEditorComponent.class );
+        if (componentOfBlock == null) {
+            componentOfBlock = new StructureTemplateEditorComponent();
         }
         Vector3i origin = new Vector3i(event.getPosition());
-        origin.subY(1); // block below marker
-        structureTemplateEditorComponent.origin = origin;
+        componentOfBlock.origin = origin;
+        componentOfBlock.editRegion = componentOfItem.editRegion;
+        placedBlockEntity.saveComponent(componentOfBlock);
+    }
 
-        Side side = placedBlockEntity.getComponent(BlockComponent.class).getBlock().getDirection();
-        structureTemplateEditorComponent.editRegion = calculateDefaultRegion(side);
-
-        placedBlockEntity.saveComponent(structureTemplateEditorComponent);
+    @ReceiveEvent(components = {})
+    public void onBlockToItem(OnBlockToItem event, EntityRef blockEntity,
+                                   StructureTemplateEditorComponent componentOfBlock) {
+        EntityRef item = event.getItem();
+        StructureTemplateEditorComponent componentOfItem = item.getComponent(StructureTemplateEditorComponent.class);
+        if (componentOfItem == null) {
+            componentOfItem = new StructureTemplateEditorComponent();
+        }
+        componentOfItem.editRegion = componentOfBlock.editRegion;
+        item.saveComponent(componentOfItem);
     }
 
     private List<RegionToFill> createRegionsToFill(StructureTemplateEditorComponent structureTemplateEditorComponent) {
