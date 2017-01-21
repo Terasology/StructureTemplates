@@ -166,13 +166,7 @@ public class StructureTemplateEditorClientSystem extends BaseComponentSystem {
         if (structureTemplateEditorComponent == null) {
             return null;
         }
-
-        if (structureTemplateEditorComponent.origin == null) {
-            return null;
-        }
-
         Region3i region = structureTemplateEditorComponent.editRegion;
-        region = region.move(structureTemplateEditorComponent.origin);
         return region;
     }
 }

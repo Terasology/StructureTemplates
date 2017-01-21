@@ -30,7 +30,7 @@ public class StructureTemplateEditorComponent implements Component {
 
 
     /**
-     * Edit region relative to origin.
+     * Edited region in absolute coordinates
      */
     @Replicate(FieldReplicateType.OWNER_TO_SERVER_TO_CLIENT)
     public Region3i editRegion = Region3i.createBounded(new Vector3i(0,0,0), new Vector3i(0,0,0));

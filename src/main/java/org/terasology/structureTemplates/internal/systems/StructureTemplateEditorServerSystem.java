@@ -102,6 +102,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         Side frontDirectionOfStructure = directionStructureIsIn.reverse();
 
         Region3i region = calculateDefaultRegion(frontDirectionOfStructure);
+        region = region.move(position);
 
         boolean originPlaced = placeOriginMarkerWithTemplateData(event, position, frontDirectionOfStructure, region);
         if (!originPlaced) {
@@ -207,7 +208,6 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
 
     private List<RegionToFill> createRegionsToFill(StructureTemplateEditorComponent structureTemplateEditorComponent) {
         Region3i absoluteRegion = structureTemplateEditorComponent.editRegion;
-        absoluteRegion = absoluteRegion.move(structureTemplateEditorComponent.origin);
         List<RegionToFill> regionsToFill = new ArrayList<>();
         for (Vector3i absolutePosition : absoluteRegion) {
             Block block = worldProvider.getBlock(absolutePosition);
@@ -351,9 +351,10 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         // TODO check for code sharing with StructureTemplateEditorServerSystem#onActivate
         HorizontalBlockRegionRotation rotation = HorizontalBlockRegionRotation.createRotationFromSideToSide(Side.FRONT,
                 frontDirectionOfStructure);
-        Region3i region = rotation.transformRegion(unrotatedRegion);
+        Region3i absoluteRegion = rotation.transformRegion(unrotatedRegion);
+        absoluteRegion = absoluteRegion.move(position);
 
-        boolean originPlaced = placeOriginMarkerWithTemplateData(event, position, frontDirectionOfStructure, region);
+        boolean originPlaced = placeOriginMarkerWithTemplateData(event, position, frontDirectionOfStructure, absoluteRegion);
         if (!originPlaced) {
             return;
         }
