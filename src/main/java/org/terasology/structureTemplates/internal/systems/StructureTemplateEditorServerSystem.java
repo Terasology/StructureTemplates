@@ -19,7 +19,6 @@ import org.terasology.entitySystem.entity.EntityBuilder;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.event.ReceiveEvent;
-import org.terasology.entitySystem.metadata.ComponentLibrary;
 import org.terasology.entitySystem.metadata.EntitySystemLibrary;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
@@ -30,6 +29,7 @@ import org.terasology.math.Region3i;
 import org.terasology.math.Side;
 import org.terasology.math.geom.Vector3f;
 import org.terasology.math.geom.Vector3i;
+import org.terasology.network.ClientComponent;
 import org.terasology.registry.In;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent.RegionToFill;
@@ -164,18 +164,18 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
     @ReceiveEvent
     public void onCreateStructureSpawnItemRequest(CreateStructureSpawnItemRequest event, EntityRef entity,
                                                   StructureTemplateEditorComponent structureTemplateEditorComponent,
-                                                  StructureTemplateComponent structureTemplateComponent) {
+                                                  BlockComponent blockComponent) {
         EntityBuilder entityBuilder = entityManager.newBuilder("StructureTemplates:structureSpawnItem");
         SpawnBlockRegionsComponent spawnBlockRegionsComponent = new SpawnBlockRegionsComponent();
         spawnBlockRegionsComponent.regionsToFill = createRegionsToFill(structureTemplateEditorComponent);
         entityBuilder.addOrSaveComponent(spawnBlockRegionsComponent);
 
-        ComponentLibrary componentLibrary = entitySystemLibrary.getComponentLibrary();
-        StructureTemplateComponent structureTemplateComponentCopy = componentLibrary.copy(structureTemplateComponent);
-        entityBuilder.addOrSaveComponent(structureTemplateComponentCopy);
+        StructureTemplateComponent structureTemplateComponent = new StructureTemplateComponent();
+        structureTemplateComponent.front = blockComponent.getBlock().getDirection();
+        entityBuilder.addOrSaveComponent(structureTemplateComponent);
         EntityRef structureSpawnItem = entityBuilder.build();
 
-        EntityRef character = event.getInstigator();
+        EntityRef character = event.getInstigator().getOwner().getComponent(ClientComponent.class).character;
         // TODO check permission once PermissionManager is public API
         inventoryManager.giveItem(character, EntityRef.NULL, structureSpawnItem);
     }
