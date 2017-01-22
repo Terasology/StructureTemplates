@@ -16,6 +16,8 @@
 package org.terasology.structureTemplates.internal.systems;
 
 import com.google.common.collect.Lists;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.terasology.entitySystem.entity.EntityBuilder;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
@@ -75,6 +77,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
     private static final Comparator<RegionToFill> REGION_BY_MIN_Y_COMPARATOR = Comparator.comparing(r -> r.region.minY());
     private static final Comparator<RegionToFill> REGION_BY_MIN_Z_COMPARATOR = Comparator.comparing(r -> r.region.minZ());
     private static final Comparator<RegionToFill> REGION_BY_BLOCK_TYPE_COMPARATOR = Comparator.comparing(r -> r.blockType.getURI().toString());
+    private static final Logger LOGGER = LoggerFactory.getLogger(StructureTemplateEditorServerSystem.class);
 
     @In
     private WorldProvider worldProvider;
@@ -335,14 +338,12 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
 
         List<Region3i> absoluteRegions = getAbsolutePlacementRegionsOfTemplate(entity, position, frontDirectionOfStructure);
 
-        boolean originPlaced = placeOriginMarkerWithTemplateData(event, position, frontDirectionOfStructure, absoluteRegions);
-        if (!originPlaced) {
-            return;
-        }
+
         BlockRegionTransform blockRegionTransform = StructureSpawnServerSystem.getBlockRegionTransformForStructurePlacement(
                 event, blockComponent);
         entity.send(new SpawnTemplateEvent(blockRegionTransform));
 
+        placeOriginMarkerWithTemplateData(event, position, frontDirectionOfStructure, absoluteRegions);
         // TODO check if consuming event and making item consumable works too e.g. event.consume();
         entity.destroy();
     }
@@ -398,6 +399,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
     boolean placeOriginMarkerWithTemplateData(ActivateEvent event, Vector3i position, Side frontDirectionOfStructure, List<Region3i> regions) {
         boolean originPlaced = placeOriginMarkerBlockWithoutData(event, position, frontDirectionOfStructure);
         if (!originPlaced) {
+            LOGGER.info("Structure template origin placement got denied");
             return false;
         }
         EntityRef originBlockEntity = blockEntityRegistry.getBlockEntityAt(position);
