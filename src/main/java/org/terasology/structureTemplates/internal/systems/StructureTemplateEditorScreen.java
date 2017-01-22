@@ -30,6 +30,8 @@ import org.terasology.structureTemplates.internal.events.CopyBlockRegionRequest;
 import org.terasology.structureTemplates.internal.events.CreateStructureSpawnItemRequest;
 import org.terasology.structureTemplates.internal.events.MakeBoxShapedRequest;
 import org.terasology.structureTemplates.internal.ui.StructureTemplateRegionScreen;
+import org.terasology.structureTemplates.util.transform.BlockRegionTransform;
+import org.terasology.world.block.BlockComponent;
 
 /**
  * Main structure template editor UI
@@ -116,12 +118,19 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
     private void onMakeBoxShapedButton(UIWidget button) {
         EntityRef entity = getInteractionTarget();
         StructureTemplateEditorComponent component = entity.getComponent(StructureTemplateEditorComponent.class);
-        Region3i region = component.editRegion;
+        Region3i absoluteRegion = component.editRegion;
         StructureTemplateRegionScreen regionScreen = getManager().pushScreen(
                 "StructureTemplates:StructureTemplateRegionScreen", StructureTemplateRegionScreen.class);
-        regionScreen.setRegion(region);
-        regionScreen.setOkHandler((Region3i r) -> {
-            getInteractionTarget().send(new MakeBoxShapedRequest(localPlayer.getCharacterEntity(), r));
+
+        BlockComponent blockComponent = entity.getComponent(BlockComponent.class);
+        BlockRegionTransform transformToRelative = StructureTemplateEditorServerSystem.createAbsoluteToRelativeTransform(blockComponent);
+        BlockRegionTransform transformToAbsolute = StructureTemplateEditorServerSystem.createRelativeToAbsoluteTransform(blockComponent);
+
+        Region3i relativeRegion = transformToRelative.transformRegion(absoluteRegion);
+        regionScreen.setRegion(relativeRegion);
+        regionScreen.setOkHandler((Region3i relativeNewRegion) -> {
+            Region3i absoluteNewRegion = transformToAbsolute.transformRegion(relativeNewRegion);
+            getInteractionTarget().send(new MakeBoxShapedRequest(localPlayer.getCharacterEntity(), absoluteNewRegion));
         });
     }
 

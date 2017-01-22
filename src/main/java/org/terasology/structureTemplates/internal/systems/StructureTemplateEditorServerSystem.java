@@ -232,19 +232,13 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
 
     private List<RegionToFill> createRegionsToFill(StructureTemplateEditorComponent structureTemplateEditorComponent, BlockComponent blockComponent) {
         Region3i absoluteRegion = structureTemplateEditorComponent.editRegion;
-        Side front = blockComponent.getBlock().getDirection();
-        BlockRegionTransformationList transformList = new BlockRegionTransformationList();
-        Vector3i minusOrigin = new Vector3i(0, 0, 0);
-        minusOrigin.sub(blockComponent.getPosition());
-        transformList.addTransformation(new BlockRegionMovement(minusOrigin));
-        transformList.addTransformation(
-                HorizontalBlockRegionRotation.createRotationFromSideToSide(front, Side.FRONT));
+        BlockRegionTransform transformToRelative = createAbsoluteToRelativeTransform(blockComponent);
 
         List<RegionToFill> regionsToFill = new ArrayList<>();
         for (Vector3i absolutePosition : absoluteRegion) {
             Block block = worldProvider.getBlock(absolutePosition);
             RegionToFill regionToFill = new RegionToFill();
-            Vector3i relativePosition = transformList.transformVector3i(absolutePosition);
+            Vector3i relativePosition = transformToRelative.transformVector3i(absolutePosition);
             Region3i region = Region3i.createBounded(relativePosition, relativePosition);
             regionToFill.region = region;
             regionToFill.blockType = block;
@@ -257,6 +251,27 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
                 .thenComparing(REGION_BY_MIN_X_COMPARATOR).thenComparing(REGION_BY_MIN_Y_COMPARATOR));
         return regionsToFill;
     }
+
+    // TODO move 2 methods to utility class
+    public static BlockRegionTransform createAbsoluteToRelativeTransform(BlockComponent blockComponent) {
+        Side front = blockComponent.getBlock().getDirection();
+        BlockRegionTransformationList transformList = new BlockRegionTransformationList();
+        Vector3i minusOrigin = new Vector3i(0, 0, 0);
+        minusOrigin.sub(blockComponent.getPosition());
+        transformList.addTransformation(new BlockRegionMovement(minusOrigin));
+        transformList.addTransformation(
+                HorizontalBlockRegionRotation.createRotationFromSideToSide(front, Side.FRONT));
+        return transformList;
+    }
+    public static BlockRegionTransform createRelativeToAbsoluteTransform(BlockComponent blockComponent) {
+        Side front = blockComponent.getBlock().getDirection();
+        BlockRegionTransformationList transformList = new BlockRegionTransformationList();
+        transformList.addTransformation(
+                HorizontalBlockRegionRotation.createRotationFromSideToSide(Side.FRONT, front));
+        transformList.addTransformation(new BlockRegionMovement(new Vector3i(blockComponent.getPosition())));
+        return transformList;
+    }
+
 
     static Region3i regionWithMaxXSetTo(Region3i region, int newMaxX) {
         Vector3i max = new Vector3i(newMaxX, region.maxY(), region.maxZ());
