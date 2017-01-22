@@ -151,29 +151,4 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
         getInteractionTarget().send(new CopyBlockRegionRequest(localPlayer.getCharacterEntity()));
     }
 
-    private abstract class AbstractIntEditorPropertyBinding implements Binding<String> {
-        public abstract int getInt(StructureTemplateEditorComponent editorComponent);
-        public abstract void setInt(StructureTemplateEditorComponent editorComponent,
-                                    int value);
-        @Override
-        public String get() {
-            EntityRef entity = getInteractionTarget();
-            StructureTemplateEditorComponent component = entity.getComponent(StructureTemplateEditorComponent.class);
-            return Integer.toString(getInt(component));
-        }
-
-        @Override
-        public void set(String value) {
-            int intValue;
-            try {
-                intValue = Integer.parseInt(value);
-            } catch (NumberFormatException e) {
-                return; // do nothing (ignore invalid change request and keep old valid value)
-            }
-            EntityRef entity = getInteractionTarget();
-            StructureTemplateEditorComponent component = entity.getComponent(StructureTemplateEditorComponent.class);
-            setInt(component ,intValue);
-            entity.saveComponent(component);
-        }
-    }
 }
