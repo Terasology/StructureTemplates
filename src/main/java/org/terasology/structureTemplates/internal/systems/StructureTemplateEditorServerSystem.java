@@ -247,9 +247,9 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
                 regionsToFill.add(regionToFill);
             }
         }
-        mergeRegionsByX(regionsToFill);
-        mergeRegionsByY(regionsToFill);
-        mergeRegionsByZ(regionsToFill);
+        mergeRegionsToFillByX(regionsToFill);
+        mergeRegionsToFillByY(regionsToFill);
+        mergeRegionsToFillByZ(regionsToFill);
         regionsToFill.sort(REGION_BY_BLOCK_TYPE_COMPARATOR.thenComparing(REGION_BY_MIN_Z_COMPARATOR)
                 .thenComparing(REGION_BY_MIN_X_COMPARATOR).thenComparing(REGION_BY_MIN_Y_COMPARATOR));
         return regionsToFill;
@@ -292,19 +292,87 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         return Region3i.createBounded(region.min(), max);
     }
 
+    private enum RegionDimension {
+        X {
+            public int getMin(Region3i r) {
+                return r.minX();
+            }
 
-    static void mergeRegionsByX(List<RegionToFill> regions) {
-        regions.sort(REGION_BY_MIN_Y_COMPARATOR.thenComparing(REGION_BY_MIN_Z_COMPARATOR).
-                thenComparing(REGION_BY_MIN_X_COMPARATOR));
+            public int getMax(Region3i r) {
+                return r.maxX();
+            }
+
+            public Region3i regionCopyWithMaxSetTo(Region3i r, int newMax) {
+                Vector3i max = new Vector3i(newMax, r.maxY(), r.maxZ());
+                return Region3i.createBounded(r.min(), max);
+            }
+
+            public Comparator<RegionToFill> regionToFillComparator() {
+                return Comparator.comparing(r -> r.region.minX());
+            }
+        },
+        Y {
+            public int getMin(Region3i r) {
+                return r.minY();
+            }
+
+            public int getMax(Region3i r) {
+                return r.maxY();
+            }
+
+            public Region3i regionCopyWithMaxSetTo(Region3i r, int newMax) {
+                Vector3i max = new Vector3i(r.maxX(), newMax, r.maxZ());
+                return Region3i.createBounded(r.min(), max);
+            }
+
+            public Comparator<RegionToFill> regionToFillComparator() {
+                return Comparator.comparing(r -> r.region.minY());
+            }
+        },
+        Z {
+            public int getMin(Region3i r) {
+                return r.minZ();
+            }
+
+            public int getMax(Region3i r) {
+                return r.maxZ();
+            }
+
+            public Region3i regionCopyWithMaxSetTo(Region3i r, int newMax) {
+                Vector3i max = new Vector3i(r.maxX(), r.maxY(), newMax);
+                return Region3i.createBounded(r.min(), max);
+            }
+
+            public Comparator<RegionToFill> regionToFillComparator() {
+                return Comparator.comparing(r -> r.region.minZ());
+            }
+        };
+        public abstract int getMin(Region3i r);
+        public abstract int getMax(Region3i r);
+        public abstract Region3i regionCopyWithMaxSetTo(Region3i r, int newMax);
+        public Region3i regionCopyWithMaxOfSecond(Region3i regionToCopy, Region3i regionWithMax) {
+            int newMax = getMax(regionWithMax);
+            return regionCopyWithMaxSetTo(regionToCopy, newMax);
+        }
+        public abstract Comparator<RegionToFill> regionToFillComparator();
+
+
+    }
+    static void mergeRegionsToFill(List<RegionToFill> regions, RegionDimension dimensionToMerge,
+                                RegionDimension secondaryDimension, RegionDimension thirdDimension) {
+        regions.sort(secondaryDimension.regionToFillComparator().thenComparing(thirdDimension.regionToFillComparator()).
+                thenComparing(dimensionToMerge.regionToFillComparator()));
         List<RegionToFill> newList = new ArrayList<>();
         RegionToFill previous = null;
         for (RegionToFill r: regions) {
-            boolean canMerge = previous != null && previous.region.maxX() == r.region.minX() -1
-                    && r.region.minY() == previous.region.minY() && r.region.maxY() == previous.region.maxY()
-                    && r.region.minZ() == previous.region.minZ() && r.region.maxZ() == previous.region.maxZ()
+            boolean canMerge = previous != null && dimensionToMerge.getMax(previous.region) == dimensionToMerge.getMin(r.region) -1
+                    && secondaryDimension.getMin(r.region) == secondaryDimension.getMin(previous.region)
+                    && secondaryDimension.getMax(r.region) == secondaryDimension.getMax(previous.region)
+                    && thirdDimension.getMin(r.region) == thirdDimension.getMin(previous.region)
+                    && thirdDimension.getMax(r.region) == thirdDimension.getMax(previous.region)
                     && r.blockType.equals(previous.blockType);
             if (canMerge) {
-                previous.region = regionWithMaxXSetTo(previous.region, r.region.maxX());
+                previous.region = dimensionToMerge.regionCopyWithMaxSetTo(previous.region, dimensionToMerge.getMax(r.region));
             } else {
                 newList.add(r);
                 previous = r;
@@ -314,46 +382,16 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         regions.addAll(newList);
     }
 
-    static void mergeRegionsByY(List<RegionToFill> regions) {
-        regions.sort(REGION_BY_MIN_X_COMPARATOR.thenComparing(REGION_BY_MIN_Z_COMPARATOR).
-                thenComparing(REGION_BY_MIN_Y_COMPARATOR));
-        List<RegionToFill> newList = new ArrayList<>();
-        RegionToFill previous = null;
-        for (RegionToFill r: regions) {
-            boolean canMerge = previous != null && previous.region.maxY() == r.region.minY() -1
-                    && r.region.minX() == previous.region.minX() && r.region.maxX() == previous.region.maxX()
-                    && r.region.minZ() == previous.region.minZ() && r.region.maxZ() == previous.region.maxZ()
-                    && r.blockType.equals(previous.blockType);
-            if (canMerge) {
-                previous.region = regionWithMaxYSetTo(previous.region, r.region.maxY());
-            } else {
-                newList.add(r);
-                previous = r;
-            }
-        }
-        regions.clear();
-        regions.addAll(newList);
+    static void mergeRegionsToFillByX(List<RegionToFill> regions) {
+        mergeRegionsToFill(regions, RegionDimension.X, RegionDimension.Y, RegionDimension.Z);
     }
 
-    static void mergeRegionsByZ(List<RegionToFill> regions) {
-        regions.sort(REGION_BY_MIN_X_COMPARATOR.thenComparing(REGION_BY_MIN_Y_COMPARATOR).
-                thenComparing(REGION_BY_MIN_Y_COMPARATOR));
-        List<RegionToFill> newList = new ArrayList<>();
-        RegionToFill previous = null;
-        for (RegionToFill r: regions) {
-            boolean canMerge = previous != null && previous.region.maxZ() == r.region.minZ() -1
-                    && r.region.minX() == previous.region.minX() && r.region.maxX() == previous.region.maxX()
-                    && r.region.minY() == previous.region.minY() && r.region.maxY() == previous.region.maxY()
-                    && r.blockType.equals(previous.blockType);
-            if (canMerge) {
-                previous.region = regionWithMaxZSetTo(previous.region, r.region.maxZ());
-            } else {
-                newList.add(r);
-                previous = r;
-            }
-        }
-        regions.clear();
-        regions.addAll(newList);
+    static void mergeRegionsToFillByY(List<RegionToFill> regions) {
+        mergeRegionsToFill(regions, RegionDimension.Y, RegionDimension.Z, RegionDimension.X);
+    }
+
+    static void mergeRegionsToFillByZ(List<RegionToFill> regions) {
+        mergeRegionsToFill(regions, RegionDimension.Z, RegionDimension.X, RegionDimension.Y);
     }
 
     static String formatAsString(List<RegionToFill> regionsToFill) {
