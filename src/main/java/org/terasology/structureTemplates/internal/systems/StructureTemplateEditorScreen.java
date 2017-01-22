@@ -19,29 +19,22 @@ import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.logic.clipboard.ClipboardManager;
 import org.terasology.logic.players.LocalPlayer;
 import org.terasology.math.Region3i;
-import org.terasology.math.geom.Vector3i;
 import org.terasology.registry.In;
 import org.terasology.rendering.nui.BaseInteractionScreen;
 import org.terasology.rendering.nui.UIWidget;
 import org.terasology.rendering.nui.databinding.Binding;
 import org.terasology.rendering.nui.widgets.UIButton;
 import org.terasology.rendering.nui.widgets.UICheckbox;
-import org.terasology.rendering.nui.widgets.UIText;
-import org.terasology.structureTemplates.internal.events.CreateStructureSpawnItemRequest;
 import org.terasology.structureTemplates.internal.components.EditsCopyRegionComponent;
 import org.terasology.structureTemplates.internal.events.CopyBlockRegionRequest;
+import org.terasology.structureTemplates.internal.events.CreateStructureSpawnItemRequest;
+import org.terasology.structureTemplates.internal.events.MakeBoxShapedRequest;
+import org.terasology.structureTemplates.internal.ui.StructureTemplateRegionScreen;
 
 /**
  * Main structure template editor UI
  */
 public class StructureTemplateEditorScreen extends BaseInteractionScreen {
-
-    private UIText minXField;
-    private UIText minYField;
-    private UIText minZField;
-    private UIText maxXField;
-    private UIText maxYField;
-    private UIText maxZField;
     private UIButton copyToClipboardButton;
     private UIButton createSpawnerButton;
     private UIButton copyGroundConditionButton;
@@ -53,6 +46,7 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
 
     @In
     private LocalPlayer localPlayer;
+    private UIButton makeBoxShapedButton;
 
 
     @Override
@@ -62,102 +56,6 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
 
     @Override
     public void initialise() {
-        minXField = find("minXField", UIText.class);
-        minXField.bindText(new AbstractIntEditorPropertyBinding() {
-            @Override
-            public int getInt(StructureTemplateEditorComponent editorComponent) {
-                return editorComponent.editRegion.minX();
-            }
-
-            @Override
-            public void setInt(StructureTemplateEditorComponent editorComponent, int value) {
-                Region3i region = editorComponent.editRegion;
-                Vector3i min = new Vector3i(value, region.minY(), region.minZ());
-                Vector3i max = region.max();
-                editorComponent.editRegion = Region3i.createBounded(min, max);
-            }
-        });
-
-        minYField = find("minYField", UIText.class);
-        minYField.bindText(new AbstractIntEditorPropertyBinding() {
-            @Override
-            public int getInt(StructureTemplateEditorComponent editorComponent) {
-                return editorComponent.editRegion.minY();
-            }
-
-            @Override
-            public void setInt(StructureTemplateEditorComponent editorComponent, int value) {
-                Region3i region = editorComponent.editRegion;
-                Vector3i min = new Vector3i( region.minX(), value, region.minZ());
-                Vector3i max = region.max();
-                editorComponent.editRegion = Region3i.createBounded(min, max);
-            }
-        });
-
-        minZField = find("minZField", UIText.class);
-        minZField.bindText(new AbstractIntEditorPropertyBinding() {
-            @Override
-            public int getInt(StructureTemplateEditorComponent editorComponent) {
-                return editorComponent.editRegion.minZ();
-            }
-
-            @Override
-            public void setInt(StructureTemplateEditorComponent editorComponent, int value) {
-                Region3i region = editorComponent.editRegion;
-                Vector3i min = new Vector3i( region.minX(), region.minY(), value);
-                Vector3i max = region.max();
-                editorComponent.editRegion = Region3i.createBounded(min, max);
-            }
-        });
-
-        maxXField = find("maxXField", UIText.class);
-        maxXField.bindText(new AbstractIntEditorPropertyBinding() {
-            @Override
-            public int getInt(StructureTemplateEditorComponent editorComponent) {
-                return editorComponent.editRegion.maxX();
-            }
-
-            @Override
-            public void setInt(StructureTemplateEditorComponent editorComponent, int value) {
-                Region3i region = editorComponent.editRegion;
-                Vector3i min = region.min();
-                Vector3i max = new Vector3i(value, region.maxY(), region.maxZ());
-                editorComponent.editRegion = Region3i.createBounded(min, max);
-            }
-        });
-
-        maxYField = find("maxYField", UIText.class);
-        maxYField.bindText(new AbstractIntEditorPropertyBinding() {
-            @Override
-            public int getInt(StructureTemplateEditorComponent editorComponent) {
-                return editorComponent.editRegion.maxY();
-            }
-
-            @Override
-            public void setInt(StructureTemplateEditorComponent editorComponent, int value) {
-                Region3i region = editorComponent.editRegion;
-                Vector3i min = region.min();
-                Vector3i max = new Vector3i(region.maxX(), value, region.maxZ());
-                editorComponent.editRegion = Region3i.createBounded(min, max);
-            }
-        });
-
-        maxZField = find("maxZField", UIText.class);
-        maxZField.bindText(new AbstractIntEditorPropertyBinding() {
-            @Override
-            public int getInt(StructureTemplateEditorComponent editorComponent) {
-                return editorComponent.editRegion.maxZ();
-            }
-
-            @Override
-            public void setInt(StructureTemplateEditorComponent editorComponent, int value) {
-                Region3i region = editorComponent.editRegion;
-                Vector3i min = region.min();
-                Vector3i max = new Vector3i(region.maxX(), region.maxY(), value);
-                editorComponent.editRegion = Region3i.createBounded(min, max);
-            }
-        });
-
         copyToClipboardButton = find("copyToClipboardButton", UIButton.class);
         if (copyToClipboardButton != null) {
             copyToClipboardButton.subscribe(this::onCopyToClipboardClicked);
@@ -171,6 +69,11 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
         copyGroundConditionButton = find("copyGroundConditionButton", UIButton.class);
         if (copyGroundConditionButton != null) {
             copyGroundConditionButton.subscribe(this::onCopyGroundConditionButton);
+        }
+
+        makeBoxShapedButton = find("makeBoxShapedButton", UIButton.class);
+        if (makeBoxShapedButton != null) {
+            makeBoxShapedButton.subscribe(this::onMakeBoxShapedButton);
         }
 
         editCopyRegionsCheckBox = find("editCopyRegionsCheckBox", UICheckbox.class);
@@ -208,6 +111,18 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
             });
         }
 
+    }
+
+    private void onMakeBoxShapedButton(UIWidget button) {
+        EntityRef entity = getInteractionTarget();
+        StructureTemplateEditorComponent component = entity.getComponent(StructureTemplateEditorComponent.class);
+        Region3i region = component.editRegion;
+        StructureTemplateRegionScreen regionScreen = getManager().pushScreen(
+                "StructureTemplates:StructureTemplateRegionScreen", StructureTemplateRegionScreen.class);
+        regionScreen.setRegion(region);
+        regionScreen.setOkHandler((Region3i r) -> {
+            getInteractionTarget().send(new MakeBoxShapedRequest(localPlayer.getCharacterEntity(), r));
+        });
     }
 
     private void onCopyGroundConditionButton(UIWidget button) {

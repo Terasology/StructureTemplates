@@ -1,0 +1,107 @@
+{
+  "skin": "engine:default",
+  "type": "StructureTemplateRegionScreen",
+  "contents": {
+    "type": "RelativeLayout",
+    "contents": [
+      {
+        "type": "engine:UIBox",
+        "layoutInfo": {
+          "use-content-height": true,
+          "width": 240,
+          "position-vertical-center": {},
+          "position-horizontal-center": {}
+        },
+        "content": {
+          "type": "ColumnLayout",
+          "contents": [
+            {
+              "type": "RowLayout",
+              "contents": [
+                {
+                  "type": "UILabel",
+                  "text": "Make edit region box-shaped",
+                  "layoutInfo": {}
+                }
+              ]
+            },
+            {
+              "type": "RowLayout",
+              "horizontalSpacing": 4,
+              "contents": [
+                {
+                  "type": "UILabel",
+                  "text": "Min",
+                  "id": "minLabel"
+                },
+                {
+                  "type": "UIText",
+                  "readOnly": false,
+                  "multiline": false,
+                  "id": "minXField"
+                },
+                {
+                  "type": "UIText",
+                  "readOnly": false,
+                  "multiline": false,
+                  "id": "minYField"
+                },
+                {
+                  "type": "UIText",
+                  "readOnly": false,
+                  "multiline": false,
+                  "id": "minZField"
+                }
+              ]
+            },
+            {
+              "type": "RowLayout",
+              "horizontalSpacing": 4,
+              "contents": [
+                {
+                  "type": "UILabel",
+                  "text": "Size",
+                  "id": "sizeLabel"
+                },
+                {
+                  "type": "UIText",
+                  "readOnly": false,
+                  "multiline": false,
+                  "id": "sizeXField"
+                },
+                {
+                  "type": "UIText",
+                  "readOnly": false,
+                  "multiline": false,
+                  "id": "sizeYField"
+                },
+                {
+                  "type": "UIText",
+                  "readOnly": false,
+                  "multiline": false,
+                  "id": "sizeZField"
+                }
+              ]
+            },
+            {
+              "type": "RowLayout",
+              "verticalSpacing": 4,
+              "contents": [
+                {
+                  "type": "UIButton",
+                  "text": "Cancel",
+                  "id": "cancelButton"
+                },
+                {
+                  "type": "UIButton",
+                  "text": "Ok",
+                  "id": "okButton"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
