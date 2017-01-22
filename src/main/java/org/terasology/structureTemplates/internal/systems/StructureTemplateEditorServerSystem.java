@@ -42,6 +42,7 @@ import org.terasology.structureTemplates.internal.events.CopyBlockRegionRequest;
 import org.terasology.structureTemplates.internal.events.CopyBlockRegionResultEvent;
 import org.terasology.structureTemplates.internal.events.CreateStructureSpawnItemRequest;
 import org.terasology.structureTemplates.internal.events.MakeBoxShapedRequest;
+import org.terasology.structureTemplates.util.RegionMergeUtil;
 import org.terasology.structureTemplates.util.transform.BlockRegionMovement;
 import org.terasology.structureTemplates.util.transform.BlockRegionTransform;
 import org.terasology.structureTemplates.util.transform.BlockRegionTransformationList;
@@ -61,7 +62,6 @@ import org.terasology.world.block.items.OnBlockToItem;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -149,24 +149,17 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         EntityRef editorEnitity = editsCopyRegionComponent.structureTemplateEditor;
         StructureTemplateEditorComponent editorComponent = editorEnitity.getComponent(StructureTemplateEditorComponent.class);
 
-        Set<Vector3i> positionsInTemplate = new HashSet<>();
-        for (Region3i region: editorComponent.absoluteRegionsWithTemplate) {
-            for (Vector3i position: region) {
-                positionsInTemplate.add(position);
-            }
-        }
+        List<Region3i> originalRegions = editorComponent.absoluteRegionsWithTemplate;
+        Set<Vector3i> positionsInTemplate = RegionMergeUtil.positionsOfRegions(originalRegions);
         if (positionsInTemplate.containsAll(placeBlocks.getBlocks().keySet())) {
             return; // nothing to do
         }
         positionsInTemplate.addAll(placeBlocks.getBlocks().keySet());
-        List<Region3i> newTemplateRegions = new ArrayList<>();
-        for (Vector3i position: positionsInTemplate) {
-            newTemplateRegions.add(Region3i.createFromMinMax(position, position));
-        }
-        mergeRegions(newTemplateRegions);
+        List<Region3i> newTemplateRegions = RegionMergeUtil.mergePositionsIntoRegions(positionsInTemplate);
         editorComponent.absoluteRegionsWithTemplate = newTemplateRegions;
         editorEnitity.saveComponent(editorComponent);
     }
+
 
     @ReceiveEvent
     public void onCreateStructureSpawnItemRequest(CreateStructureSpawnItemRequest event, EntityRef entity,
@@ -248,7 +241,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
                 regionsToFill.add(regionToFill);
             }
         }
-        mergeRegionsToFill(regionsToFill);
+        RegionMergeUtil.mergeRegionsToFill(regionsToFill);
         regionsToFill.sort(REGION_BY_BLOCK_TYPE_COMPARATOR.thenComparing(REGION_BY_MIN_Z_COMPARATOR)
                 .thenComparing(REGION_BY_MIN_X_COMPARATOR).thenComparing(REGION_BY_MIN_Y_COMPARATOR));
         return regionsToFill;
@@ -276,170 +269,6 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         return transformList;
     }
 
-    private enum RegionDimension {
-        X {
-            public int getMin(Region3i r) {
-                return r.minX();
-            }
-
-            public int getMax(Region3i r) {
-                return r.maxX();
-            }
-
-            public Region3i regionCopyWithMaxSetTo(Region3i r, int newMax) {
-                Vector3i max = new Vector3i(newMax, r.maxY(), r.maxZ());
-                return Region3i.createBounded(r.min(), max);
-            }
-
-            public Comparator<RegionToFill> regionToFillComparator() {
-                return Comparator.comparing(r -> r.region.minX());
-            }
-
-            public Comparator<Region3i> regionComparator() {
-                return Comparator.comparing(r -> r.minX());
-            }
-        },
-        Y {
-            public int getMin(Region3i r) {
-                return r.minY();
-            }
-
-            public int getMax(Region3i r) {
-                return r.maxY();
-            }
-
-            public Region3i regionCopyWithMaxSetTo(Region3i r, int newMax) {
-                Vector3i max = new Vector3i(r.maxX(), newMax, r.maxZ());
-                return Region3i.createBounded(r.min(), max);
-            }
-
-            public Comparator<RegionToFill> regionToFillComparator() {
-                return Comparator.comparing(r -> r.region.minY());
-            }
-
-            public Comparator<Region3i> regionComparator() {
-                return Comparator.comparing(r -> r.minY());
-            }
-        },
-        Z {
-            public int getMin(Region3i r) {
-                return r.minZ();
-            }
-
-            public int getMax(Region3i r) {
-                return r.maxZ();
-            }
-
-            public Region3i regionCopyWithMaxSetTo(Region3i r, int newMax) {
-                Vector3i max = new Vector3i(r.maxX(), r.maxY(), newMax);
-                return Region3i.createBounded(r.min(), max);
-            }
-
-            public Comparator<RegionToFill> regionToFillComparator() {
-                return Comparator.comparing(r -> r.region.minZ());
-            }
-
-            public Comparator<Region3i> regionComparator() {
-                return Comparator.comparing(r -> r.minZ());
-            }
-        };
-        public abstract int getMin(Region3i r);
-        public abstract int getMax(Region3i r);
-        public abstract Region3i regionCopyWithMaxSetTo(Region3i r, int newMax);
-        public Region3i regionCopyWithMaxOfSecond(Region3i regionToCopy, Region3i regionWithMax) {
-            int newMax = getMax(regionWithMax);
-            return regionCopyWithMaxSetTo(regionToCopy, newMax);
-        }
-        public abstract Comparator<RegionToFill> regionToFillComparator();
-        public abstract Comparator<Region3i> regionComparator();
-    }
-
-    static void mergeRegionsToFillByDimension(List<RegionToFill> regions, RegionDimension dimensionToMerge,
-                                              RegionDimension secondaryDimension, RegionDimension thirdDimension) {
-        regions.sort(secondaryDimension.regionToFillComparator().thenComparing(thirdDimension.regionToFillComparator()).
-                thenComparing(dimensionToMerge.regionToFillComparator()));
-        List<RegionToFill> newList = new ArrayList<>();
-        RegionToFill previous = null;
-        for (RegionToFill r: regions) {
-            boolean canMerge = previous != null && dimensionToMerge.getMax(previous.region) == dimensionToMerge.getMin(r.region) -1
-                    && secondaryDimension.getMin(r.region) == secondaryDimension.getMin(previous.region)
-                    && secondaryDimension.getMax(r.region) == secondaryDimension.getMax(previous.region)
-                    && thirdDimension.getMin(r.region) == thirdDimension.getMin(previous.region)
-                    && thirdDimension.getMax(r.region) == thirdDimension.getMax(previous.region)
-                    && r.blockType.equals(previous.blockType);
-            if (canMerge) {
-                previous.region = dimensionToMerge.regionCopyWithMaxSetTo(previous.region, dimensionToMerge.getMax(r.region));
-            } else {
-                newList.add(r);
-                previous = r;
-            }
-        }
-        regions.clear();
-        regions.addAll(newList);
-    }
-
-    static void mergeRegionsByDimension(List<Region3i> regions, RegionDimension dimensionToMerge,
-                                        RegionDimension secondaryDimension, RegionDimension thirdDimension) {
-        regions.sort(secondaryDimension.regionComparator().thenComparing(thirdDimension.regionComparator()).
-                thenComparing(dimensionToMerge.regionComparator()));
-        List<Region3i> newList = new ArrayList<>();
-        Region3i previous = null;
-        for (Region3i r: regions) {
-            boolean canMerge = previous != null && dimensionToMerge.getMax(previous) == dimensionToMerge.getMin(r) -1
-                    && secondaryDimension.getMin(r) == secondaryDimension.getMin(previous)
-                    && secondaryDimension.getMax(r) == secondaryDimension.getMax(previous)
-                    && thirdDimension.getMin(r) == thirdDimension.getMin(previous)
-                    && thirdDimension.getMax(r) == thirdDimension.getMax(previous);
-            if (canMerge) {
-                // Remove previous:
-                newList.remove(newList.size()-1);
-                previous = dimensionToMerge.regionCopyWithMaxOfSecond(previous, r);
-                newList.add(previous);
-            } else {
-                newList.add(r);
-                previous = r;
-            }
-        }
-        regions.clear();
-        regions.addAll(newList);
-    }
-
-    private void mergeRegionsToFill(List<RegionToFill> regionsToFill) {
-        mergeRegionsToFillByX(regionsToFill);
-        mergeRegionsToFillByY(regionsToFill);
-        mergeRegionsToFillByZ(regionsToFill);
-    }
-
-    static void mergeRegionsToFillByX(List<RegionToFill> regions) {
-        mergeRegionsToFillByDimension(regions, RegionDimension.X, RegionDimension.Y, RegionDimension.Z);
-    }
-
-    static void mergeRegionsToFillByY(List<RegionToFill> regions) {
-        mergeRegionsToFillByDimension(regions, RegionDimension.Y, RegionDimension.Z, RegionDimension.X);
-    }
-
-    static void mergeRegionsToFillByZ(List<RegionToFill> regions) {
-        mergeRegionsToFillByDimension(regions, RegionDimension.Z, RegionDimension.X, RegionDimension.Y);
-    }
-
-
-    private void mergeRegions(List<Region3i> regions) {
-        mergeRegionsByX(regions);
-        mergeRegionsByY(regions);
-        mergeRegionsByZ(regions);
-    }
-
-    static void mergeRegionsByX(List<Region3i> regions) {
-        mergeRegionsByDimension(regions, RegionDimension.X, RegionDimension.Y, RegionDimension.Z);
-    }
-
-    static void mergeRegionsByY(List<Region3i> regions) {
-        mergeRegionsByDimension(regions, RegionDimension.Y, RegionDimension.Z, RegionDimension.X);
-    }
-
-    static void mergeRegionsByZ(List<Region3i> regions) {
-        mergeRegionsByDimension(regions, RegionDimension.Z, RegionDimension.X, RegionDimension.Y);
-    }
 
 
     static String formatAsString(List<RegionToFill> regionsToFill) {
@@ -506,7 +335,10 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
             absoluteRegion = absoluteRegion.move(position);
             absoluteRegions.add(absoluteRegion);
         }
-        return absoluteRegions;
+
+        Set<Vector3i> positionsInTemplate = RegionMergeUtil.positionsOfRegions(absoluteRegions);
+        List<Region3i> newTemplateRegions = RegionMergeUtil.mergePositionsIntoRegions(positionsInTemplate);
+        return newTemplateRegions;
     }
 
     private List<Region3i> getPlacementRegionsOfTemplate(EntityRef entity) {
