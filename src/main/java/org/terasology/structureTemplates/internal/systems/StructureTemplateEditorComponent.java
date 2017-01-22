@@ -15,12 +15,14 @@
  */
 package org.terasology.structureTemplates.internal.systems;
 
+import com.google.common.collect.Lists;
 import org.terasology.entitySystem.Component;
 import org.terasology.math.Region3i;
-import org.terasology.math.geom.Vector3i;
 import org.terasology.network.FieldReplicateType;
 import org.terasology.network.Replicate;
 import org.terasology.world.block.ForceBlockActive;
+
+import java.util.List;
 
 /**
  * Used to describe an block region location
@@ -30,9 +32,9 @@ public class StructureTemplateEditorComponent implements Component {
 
 
     /**
-     * Edited region in absolute coordinates
+     * Edited regions in absolute coordinates
      */
-    @Replicate(FieldReplicateType.OWNER_TO_SERVER_TO_CLIENT)
-    public Region3i editRegion = Region3i.createBounded(new Vector3i(0,0,0), new Vector3i(0,0,0));
+    @Replicate(FieldReplicateType.SERVER_TO_CLIENT)
+    public List<Region3i> absoluteRegionsWithTemplate = Lists.newArrayList();
 
 }

@@ -35,6 +35,10 @@ import org.terasology.rendering.logic.RegionOutlineComponent;
 import org.terasology.structureTemplates.internal.components.EditsCopyRegionComponent;
 import org.terasology.structureTemplates.internal.events.CopyBlockRegionResultEvent;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * Handles the result of the activation of the copyBlockRegionTool item.
  */
@@ -53,7 +57,7 @@ public class StructureTemplateEditorClientSystem extends BaseComponentSystem {
     @In
     private InventoryManager inventoryManager;
 
-    private EntityRef regionOutlineEntity = EntityRef.NULL;
+    private List<EntityRef> regionOutlineEntities = new ArrayList<>();
     private EntityRef highlightedEditorEntity = EntityRef.NULL;
 
 
@@ -104,48 +108,33 @@ public class StructureTemplateEditorClientSystem extends BaseComponentSystem {
         }
     }
 
-    public void destoryOutlineEntiy() {
-        if (regionOutlineEntity.exists()) {
-            regionOutlineEntity.destroy();
+    public void destoryOutlineEntities() {
+        for (EntityRef regionOutlineEntity : regionOutlineEntities) {
+            if (regionOutlineEntity.exists()) {
+                regionOutlineEntity.destroy();
+            }
         }
-        highlightedEditorEntity = EntityRef.NULL;
     }
 
-    public void updateOutlineEntity() {
-        Region3i region3i = getRegionToDraw();
-        if (region3i == null) {
-            destoryOutlineEntiy();
-        } else {
-            if (regionOutlineEntity.exists()) {
-                RegionOutlineComponent oldComponent = regionOutlineEntity.getComponent(RegionOutlineComponent.class);
-                if (oldComponent != null && oldComponent.corner1 != null && oldComponent.corner2 != null) {
-                    Region3i oldRegion = Region3i.createBounded(oldComponent.corner1, oldComponent.corner2);
-                    if (oldRegion.equals(region3i)) {
-                        return;
-                    }
-                }
-            }
-            if (regionOutlineEntity.exists()) {
-                RegionOutlineComponent regionOutlineComponent = regionOutlineEntity.getComponent(RegionOutlineComponent.class);
-                regionOutlineComponent.corner1 = new Vector3i(region3i.min());
-                regionOutlineComponent.corner2 = new Vector3i(region3i.max());
-                regionOutlineEntity.saveComponent(regionOutlineComponent);
-            } else {
-                EntityBuilder entityBuilder = entityManager.newBuilder();
-                entityBuilder.setPersistent(false);
-                RegionOutlineComponent regionOutlineComponent = new RegionOutlineComponent();
-                regionOutlineComponent.corner1 = new Vector3i(region3i.min());
-                regionOutlineComponent.corner2 = new Vector3i(region3i.max());
-                entityBuilder.addComponent(regionOutlineComponent);
-                regionOutlineEntity = entityBuilder.build();
-            }
+    public void updateOutlineEntities() {
+        List<Region3i> regionsToDraw = getRegionsToDraw();
+        destoryOutlineEntities();
+
+        for (Region3i regionToDraw: regionsToDraw) {
+            EntityBuilder entityBuilder = entityManager.newBuilder();
+            entityBuilder.setPersistent(false);
+            RegionOutlineComponent regionOutlineComponent = new RegionOutlineComponent();
+            regionOutlineComponent.corner1 = new Vector3i(regionToDraw.min());
+            regionOutlineComponent.corner2 = new Vector3i(regionToDraw.max());
+            entityBuilder.addComponent(regionOutlineComponent);
+            regionOutlineEntities.add(entityBuilder.build());
         }
     }
 
 
     private void setHighlightedEditorEntity(EntityRef entityRef) {
         highlightedEditorEntity = entityRef;
-        updateOutlineEntity();
+        updateOutlineEntities();
     }
 
     private void updateHighlightedEditorEntity() {
@@ -160,13 +149,12 @@ public class StructureTemplateEditorClientSystem extends BaseComponentSystem {
     }
 
 
-    private Region3i getRegionToDraw() {
+    private List<Region3i> getRegionsToDraw() {
 
         StructureTemplateEditorComponent structureTemplateEditorComponent = highlightedEditorEntity.getComponent(StructureTemplateEditorComponent.class);
         if (structureTemplateEditorComponent == null) {
-            return null;
+            return Collections.emptyList();
         }
-        Region3i region = structureTemplateEditorComponent.editRegion;
-        return region;
+        return new ArrayList<>(structureTemplateEditorComponent.absoluteRegionsWithTemplate);
     }
 }

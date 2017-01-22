@@ -15,6 +15,7 @@
  */
 package org.terasology.structureTemplates.internal.systems;
 
+import com.google.common.collect.Lists;
 import org.terasology.entitySystem.entity.EntityBuilder;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
@@ -58,9 +59,11 @@ import org.terasology.world.block.items.OnBlockItemPlaced;
 import org.terasology.world.block.items.OnBlockToItem;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 /**
  * Handles the activation of the copyBlockRegionTool item.
@@ -97,7 +100,6 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         if (blockComponent == null) {
             return;
         }
-        EntityRef owner = entity.getOwner();
         Vector3i position = blockComponent.getPosition();
 
 
@@ -105,10 +107,9 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         Side directionStructureIsIn = Side.inHorizontalDirection(directionVector.getX(), directionVector.getZ());
         Side frontDirectionOfStructure = directionStructureIsIn.reverse();
 
-        Region3i region = calculateDefaultRegion(frontDirectionOfStructure);
-        region = region.move(position);
 
-        boolean originPlaced = placeOriginMarkerWithTemplateData(event, position, frontDirectionOfStructure, region);
+        boolean originPlaced = placeOriginMarkerWithTemplateData(event, position, frontDirectionOfStructure,
+                Lists.newArrayList());
         if (!originPlaced) {
             return;
         }
@@ -147,23 +148,23 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         }
         EntityRef editorEnitity = editsCopyRegionComponent.structureTemplateEditor;
         StructureTemplateEditorComponent editorComponent = editorEnitity.getComponent(StructureTemplateEditorComponent.class);
-        Region3i region3i = editorComponent.editRegion;
-        BlockComponent blockComponent = editorEnitity.getComponent(BlockComponent.class);
 
-
-        final Map<Vector3i, Block> blocksMap = placeBlocks.getBlocks();
-        for (Map.Entry<Vector3i, Block> blockEntry : blocksMap.entrySet()) {
-            final Vector3i absolutePosition = blockEntry.getKey();
-            final Vector3i relativePosition = new Vector3i(absolutePosition);
-            relativePosition.sub(blockComponent.getPosition());
-            if (!region3i.encompasses(relativePosition)) {
-                region3i = region3i.expandToContain( relativePosition);
+        Set<Vector3i> positionsInTemplate = new HashSet<>();
+        for (Region3i region: editorComponent.absoluteRegionsWithTemplate) {
+            for (Vector3i position: region) {
+                positionsInTemplate.add(position);
             }
         }
-        if (!editorComponent.editRegion.equals(region3i)) {
-            editorComponent.editRegion = region3i;
-            editorEnitity.saveComponent(editorComponent);
+        if (positionsInTemplate.containsAll(placeBlocks.getBlocks().keySet())) {
+            return; // nothing to do
         }
+        positionsInTemplate.addAll(placeBlocks.getBlocks().keySet());
+        List<Region3i> newTemplateRegtions = new ArrayList<>();
+        for (Vector3i position: positionsInTemplate) {
+            newTemplateRegtions.add(Region3i.createFromMinMax(position, position));
+        }
+        editorComponent.absoluteRegionsWithTemplate = newTemplateRegtions;
+        editorEnitity.saveComponent(editorComponent);
     }
 
     @ReceiveEvent
@@ -199,7 +200,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
     @ReceiveEvent
     public void onMakeBoxShapedRequest(MakeBoxShapedRequest event, EntityRef entity,
                                        StructureTemplateEditorComponent structureTemplateEditorComponent) {
-        structureTemplateEditorComponent.editRegion = event.getRegion();
+        structureTemplateEditorComponent.absoluteRegionsWithTemplate = new ArrayList<>(Arrays.asList(event.getRegion()));
         entity.saveComponent(structureTemplateEditorComponent);
     }
 
@@ -214,7 +215,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
             componentOfBlock = new StructureTemplateEditorComponent();
         }
         Vector3i origin = new Vector3i(event.getPosition());
-        componentOfBlock.editRegion = componentOfItem.editRegion;
+        componentOfBlock.absoluteRegionsWithTemplate = new ArrayList<>(componentOfItem.absoluteRegionsWithTemplate);
         placedBlockEntity.saveComponent(componentOfBlock);
     }
 
@@ -226,23 +227,25 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         if (componentOfItem == null) {
             componentOfItem = new StructureTemplateEditorComponent();
         }
-        componentOfItem.editRegion = componentOfBlock.editRegion;
+        componentOfItem.absoluteRegionsWithTemplate = new ArrayList<>(componentOfBlock.absoluteRegionsWithTemplate);
         item.saveComponent(componentOfItem);
     }
 
     private List<RegionToFill> createRegionsToFill(StructureTemplateEditorComponent structureTemplateEditorComponent, BlockComponent blockComponent) {
-        Region3i absoluteRegion = structureTemplateEditorComponent.editRegion;
+        List<Region3i> absoluteRegions = structureTemplateEditorComponent.absoluteRegionsWithTemplate;
         BlockRegionTransform transformToRelative = createAbsoluteToRelativeTransform(blockComponent);
 
         List<RegionToFill> regionsToFill = new ArrayList<>();
-        for (Vector3i absolutePosition : absoluteRegion) {
-            Block block = worldProvider.getBlock(absolutePosition);
-            RegionToFill regionToFill = new RegionToFill();
-            Vector3i relativePosition = transformToRelative.transformVector3i(absolutePosition);
-            Region3i region = Region3i.createBounded(relativePosition, relativePosition);
-            regionToFill.region = region;
-            regionToFill.blockType = block;
-            regionsToFill.add(regionToFill);
+        for (Region3i absoluteRegion: absoluteRegions) {
+            for (Vector3i absolutePosition : absoluteRegion) {
+                Block block = worldProvider.getBlock(absolutePosition);
+                RegionToFill regionToFill = new RegionToFill();
+                Vector3i relativePosition = transformToRelative.transformVector3i(absolutePosition);
+                Region3i region = Region3i.createBounded(relativePosition, relativePosition);
+                regionToFill.region = region;
+                regionToFill.blockType = block;
+                regionsToFill.add(regionToFill);
+            }
         }
         mergeRegionsByX(regionsToFill);
         mergeRegionsByY(regionsToFill);
@@ -391,15 +394,9 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         Side frontDirectionOfStructure = directionStructureIsIn.reverse();
 
 
-        Region3i unrotatedRegion = getPlacementBoundingsOfTemplate(entity);
+        List<Region3i> absoluteRegions = getAbsolutePlacementRegionsOfTemplate(entity, position, frontDirectionOfStructure);
 
-        // TODO check for code sharing with StructureTemplateEditorServerSystem#onActivate
-        HorizontalBlockRegionRotation rotation = HorizontalBlockRegionRotation.createRotationFromSideToSide(Side.FRONT,
-                frontDirectionOfStructure);
-        Region3i absoluteRegion = rotation.transformRegion(unrotatedRegion);
-        absoluteRegion = absoluteRegion.move(position);
-
-        boolean originPlaced = placeOriginMarkerWithTemplateData(event, position, frontDirectionOfStructure, absoluteRegion);
+        boolean originPlaced = placeOriginMarkerWithTemplateData(event, position, frontDirectionOfStructure, absoluteRegions);
         if (!originPlaced) {
             return;
         }
@@ -409,6 +406,32 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
 
         // TODO check if consuming event and making item consumable works too e.g. event.consume();
         entity.destroy();
+    }
+
+    List<Region3i> getAbsolutePlacementRegionsOfTemplate(EntityRef entity, Vector3i position, Side frontDirectionOfStructure) {
+        List<Region3i> relativeRegions = getPlacementRegionsOfTemplate(entity);
+
+        // TODO reuse createRelativeToAbsoluteTransform
+        HorizontalBlockRegionRotation rotation = HorizontalBlockRegionRotation.createRotationFromSideToSide(Side.FRONT,
+                frontDirectionOfStructure);
+        List<Region3i> absoluteRegions = new ArrayList<>();
+        for (Region3i relativeRegion: relativeRegions) {
+            Region3i absoluteRegion = rotation.transformRegion(relativeRegion);
+            absoluteRegion = absoluteRegion.move(position);
+            absoluteRegions.add(absoluteRegion);
+        }
+        return absoluteRegions;
+    }
+
+    private List<Region3i> getPlacementRegionsOfTemplate(EntityRef entity) {
+        List<Region3i> relativeRegions = Lists.newArrayList();
+        SpawnBlockRegionsComponent blockRegionsComponent = entity.getComponent(SpawnBlockRegionsComponent.class);
+        if (blockRegionsComponent != null) {
+            for (RegionToFill regionToFill : blockRegionsComponent.regionsToFill) {
+                relativeRegions.add(regionToFill.region);
+            }
+        }
+        return relativeRegions;
     }
 
     private Region3i getPlacementBoundingsOfTemplate(EntityRef entity) {
@@ -430,19 +453,19 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         return unrotatedRegion;
     }
 
-    boolean placeOriginMarkerWithTemplateData(ActivateEvent event, Vector3i position, Side frontDirectionOfStructure, Region3i region) {
+    boolean placeOriginMarkerWithTemplateData(ActivateEvent event, Vector3i position, Side frontDirectionOfStructure, List<Region3i> regions) {
         boolean originPlaced = placeOriginMarkerBlockWithoutData(event, position, frontDirectionOfStructure);
         if (!originPlaced) {
             return false;
         }
         EntityRef originBlockEntity = blockEntityRegistry.getBlockEntityAt(position);
-        addTemplateDataToBlockEntity(position, region, originBlockEntity);
+        addTemplateDataToBlockEntity(position, regions, originBlockEntity);
         return true;
     }
 
-    private void addTemplateDataToBlockEntity(Vector3i position, Region3i region, EntityRef originBlockEntity) {
+    private void addTemplateDataToBlockEntity(Vector3i position, List<Region3i> regions, EntityRef originBlockEntity) {
         StructureTemplateEditorComponent editorComponent = originBlockEntity.getComponent(StructureTemplateEditorComponent.class);
-        editorComponent.editRegion = region;
+        editorComponent.absoluteRegionsWithTemplate = new ArrayList<>(regions);
         originBlockEntity.saveComponent(editorComponent);
     }
 

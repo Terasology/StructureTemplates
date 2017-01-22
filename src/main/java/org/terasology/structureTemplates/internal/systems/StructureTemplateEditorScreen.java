@@ -19,6 +19,7 @@ import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.logic.clipboard.ClipboardManager;
 import org.terasology.logic.players.LocalPlayer;
 import org.terasology.math.Region3i;
+import org.terasology.math.geom.Vector3i;
 import org.terasology.registry.In;
 import org.terasology.rendering.nui.BaseInteractionScreen;
 import org.terasology.rendering.nui.UIWidget;
@@ -32,6 +33,8 @@ import org.terasology.structureTemplates.internal.events.MakeBoxShapedRequest;
 import org.terasology.structureTemplates.internal.ui.StructureTemplateRegionScreen;
 import org.terasology.structureTemplates.util.transform.BlockRegionTransform;
 import org.terasology.world.block.BlockComponent;
+
+import java.util.List;
 
 /**
  * Main structure template editor UI
@@ -118,7 +121,7 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
     private void onMakeBoxShapedButton(UIWidget button) {
         EntityRef entity = getInteractionTarget();
         StructureTemplateEditorComponent component = entity.getComponent(StructureTemplateEditorComponent.class);
-        Region3i absoluteRegion = component.editRegion;
+        Region3i absoluteRegion = getBoundingRegion(component.absoluteRegionsWithTemplate);
         StructureTemplateRegionScreen regionScreen = getManager().pushScreen(
                 "StructureTemplates:StructureTemplateRegionScreen", StructureTemplateRegionScreen.class);
 
@@ -134,10 +137,29 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
         });
     }
 
+    private Region3i getBoundingRegion(List<Region3i> regions) {
+        if (regions.size() == 0) {
+            return Region3i.EMPTY;
+        }
+        Vector3i min = new Vector3i(regions.get(0).min());
+        Vector3i max = new Vector3i(regions.get(0).max());
+        for (Region3i region: regions) {
+            min.min(region.min());
+            max.max(region.max());
+        }
+        return Region3i.createFromMinMax(min, max);
+    }
+
+    // TODO add item that can do this job or introduce a better way that makes it superflous
     private void onCopyGroundConditionButton(UIWidget button) {
         EntityRef entity = getInteractionTarget();
         StructureTemplateEditorComponent component = entity.getComponent(StructureTemplateEditorComponent.class);
-        Region3i region = component.editRegion;
+        Region3i absoluteRegion = getBoundingRegion(component.absoluteRegionsWithTemplate);
+        BlockComponent blockComponent = entity.getComponent(BlockComponent.class);
+        BlockRegionTransform transformToRelative = StructureTemplateEditorServerSystem.createAbsoluteToRelativeTransform(blockComponent);
+
+        Region3i region = transformToRelative.transformRegion(absoluteRegion);
+
         clipboardManager.setClipboardContents(String.format(
                 "{\"condition\": \"StructureTemplates:IsGroundLike\", \"region\" :{\"min\": [%d, %d, %d], \"size\": [%d, %d, %d]}}",
                 region.minX(),region.minY(), region.minZ(),region.sizeX(), region.sizeY(), region.sizeZ()));
