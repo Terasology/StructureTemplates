@@ -25,6 +25,7 @@ import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.logic.common.ActivateEvent;
+import org.terasology.logic.health.DoDestroyEvent;
 import org.terasology.logic.inventory.InventoryManager;
 import org.terasology.math.Region3i;
 import org.terasology.math.Side;
@@ -162,9 +163,32 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
 
 
     @ReceiveEvent
+    public void onDestroyed(DoDestroyEvent event, EntityRef entity, BlockComponent blockComponent) {
+        EntityRef player = event.getInstigator().getOwner();
+        EditsCopyRegionComponent editsCopyRegionComponent = player.getComponent(EditsCopyRegionComponent.class);
+        if (editsCopyRegionComponent == null) {
+            return;
+        }
+
+        EntityRef editorEnitity = editsCopyRegionComponent.structureTemplateEditor;
+        StructureTemplateEditorComponent editorComponent = editorEnitity.getComponent(StructureTemplateEditorComponent.class);
+
+        List<Region3i> originalRegions = editorComponent.absoluteRegionsWithTemplate;
+        Set<Vector3i> positionsInTemplate = RegionMergeUtil.positionsOfRegions(originalRegions);
+        if (!positionsInTemplate.contains(blockComponent.getPosition())) {
+            return; // nothing to do
+        }
+        positionsInTemplate.remove(blockComponent.getPosition());
+        List<Region3i> newTemplateRegions = RegionMergeUtil.mergePositionsIntoRegions(positionsInTemplate);
+        editorComponent.absoluteRegionsWithTemplate = newTemplateRegions;
+        editorEnitity.saveComponent(editorComponent);
+    }
+
+
+                            @ReceiveEvent
     public void onCreateStructureSpawnItemRequest(CreateStructureSpawnItemRequest event, EntityRef entity,
-                                                  StructureTemplateEditorComponent structureTemplateEditorComponent,
-                                                  BlockComponent blockComponent) {
+                            StructureTemplateEditorComponent structureTemplateEditorComponent,
+                            BlockComponent blockComponent) {
         EntityBuilder entityBuilder = entityManager.newBuilder("StructureTemplates:structureSpawnItem");
         SpawnBlockRegionsComponent spawnBlockRegionsComponent = new SpawnBlockRegionsComponent();
         spawnBlockRegionsComponent.regionsToFill = createRegionsToFill(structureTemplateEditorComponent, blockComponent);
