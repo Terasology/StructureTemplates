@@ -28,8 +28,8 @@
             },
             {
               "type": "UIButton",
-              "text": "Copy region as ground condition",
-              "id": "copyGroundConditionButton"
+              "text": "Copy \"is underground\" condition",
+              "id": "copyInGroundConditionButton"
             },
             {
               "type": "UIButton",

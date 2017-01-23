@@ -15,6 +15,7 @@
  */
 package org.terasology.structureTemplates.internal.systems;
 
+import com.google.common.collect.Lists;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.logic.clipboard.ClipboardManager;
 import org.terasology.logic.players.LocalPlayer;
@@ -31,10 +32,12 @@ import org.terasology.structureTemplates.internal.events.CopyBlockRegionRequest;
 import org.terasology.structureTemplates.internal.events.CreateStructureSpawnItemRequest;
 import org.terasology.structureTemplates.internal.events.MakeBoxShapedRequest;
 import org.terasology.structureTemplates.internal.ui.StructureTemplateRegionScreen;
+import org.terasology.structureTemplates.util.RegionMergeUtil;
 import org.terasology.structureTemplates.util.transform.BlockRegionTransform;
 import org.terasology.world.block.BlockComponent;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Main structure template editor UI
@@ -42,7 +45,7 @@ import java.util.List;
 public class StructureTemplateEditorScreen extends BaseInteractionScreen {
     private UIButton copyToClipboardButton;
     private UIButton createSpawnerButton;
-    private UIButton copyGroundConditionButton;
+    private UIButton copyInGroundConditionButton;
     private UICheckbox editCopyRegionsCheckBox;
 
     @In
@@ -71,9 +74,9 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
             createSpawnerButton.subscribe(this::onCreateSpawnerButton);
         }
 
-        copyGroundConditionButton = find("copyGroundConditionButton", UIButton.class);
-        if (copyGroundConditionButton != null) {
-            copyGroundConditionButton.subscribe(this::onCopyGroundConditionButton);
+        copyInGroundConditionButton = find("copyInGroundConditionButton", UIButton.class);
+        if (copyInGroundConditionButton != null) {
+            copyInGroundConditionButton.subscribe(this::onCopyInGroundConditionButton);
         }
 
         makeBoxShapedButton = find("makeBoxShapedButton", UIButton.class);
@@ -151,18 +154,41 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
     }
 
     // TODO add item that can do this job or introduce a better way that makes it superflous
-    private void onCopyGroundConditionButton(UIWidget button) {
+    private void onCopyInGroundConditionButton(UIWidget button) {
         EntityRef entity = getInteractionTarget();
         StructureTemplateEditorComponent component = entity.getComponent(StructureTemplateEditorComponent.class);
-        Region3i absoluteRegion = getBoundingRegion(component.absoluteRegionsWithTemplate);
+        List<Region3i> regionsOneHigher = Lists.newArrayList();
+
         BlockComponent blockComponent = entity.getComponent(BlockComponent.class);
         BlockRegionTransform transformToRelative = StructureTemplateEditorServerSystem.createAbsoluteToRelativeTransform(blockComponent);
 
-        Region3i region = transformToRelative.transformRegion(absoluteRegion);
 
-        clipboardManager.setClipboardContents(String.format(
-                "{\"condition\": \"StructureTemplates:IsGroundLike\", \"region\" :{\"min\": [%d, %d, %d], \"size\": [%d, %d, %d]}}",
-                region.minX(),region.minY(), region.minZ(),region.sizeX(), region.sizeY(), region.sizeZ()));
+        for (Region3i absoluteRegion: component.absoluteRegionsWithTemplate) {
+            Region3i relativeRegion = transformToRelative.transformRegion(absoluteRegion);
+            Vector3i max = new Vector3i(relativeRegion.max());
+            max.addY(1);
+            regionsOneHigher.add(Region3i.createFromMinMax(relativeRegion.min(), max));
+        }
+
+        Set<Vector3i> positions = RegionMergeUtil.positionsOfRegions(regionsOneHigher);
+        List<Region3i> regions = RegionMergeUtil.mergePositionsIntoRegions(positions);
+
+        String string = formatRegionsAsGroundCondition(regions);
+        clipboardManager.setClipboardContents(string);
+    }
+
+    private String formatRegionsAsGroundCondition(List<Region3i> regions) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("    \"CheckBlockRegionCondition\" : {\n");
+        stringBuilder.append("        \"checksToPerform\": [\n");
+        for (Region3i region: regions) {
+            stringBuilder.append(String.format(
+                    "            {\"condition\": \"StructureTemplates:IsGroundLike\", \"region\" :{\"min\": [%d, %d, %d], \"size\": [%d, %d, %d]}}\n",
+                    region.minX(),region.minY(), region.minZ(),region.sizeX(), region.sizeY(), region.sizeZ()));
+        }
+        stringBuilder.append("        ]\n");
+        stringBuilder.append("    },\n");
+        return stringBuilder.toString();
     }
 
     private void onCreateSpawnerButton(UIWidget button) {
