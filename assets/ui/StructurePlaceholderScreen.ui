@@ -1,0 +1,59 @@
+{
+  "type": "StructurePlaceholderScreen",
+  "contents": {
+    "type": "RelativeLayout",
+    "contents": [
+      {
+        "type": "ScrollableArea",
+        "id": "scrollArea",
+        "content": {
+          "type": "UIText",
+          "readOnly": true,
+          "multiline": true,
+          "id": "fullDescriptionLabel"
+        },
+        "layoutInfo": {
+          "height": 200,
+          "width": 400,
+          "position-horizontal-center": {},
+          "position-vertical-center": {}
+        }
+      },
+      {
+        "type": "RowLayout",
+        "contents": [
+          {
+            "type": "UILabel",
+            "text": "Spawn: ",
+            "layoutInfo": {
+              "useContentWidth": true
+            }
+          },
+          {
+            "type": "UIDropdown",
+            "multiline": false,
+            "id": "comboBox"
+          },
+          {
+            "type": "UIButton",
+            "text": "x",
+            "id": "closeButton",
+            "layoutInfo": {
+              "relativeWidth": 0.1
+            }
+          }
+        ],
+        "layoutInfo": {
+          "use-content-height": true,
+          "width": 400,
+          "position-horizontal-center": {},
+          "position-vertical-top": {},
+          "position-bottom": {
+            "widget": "scrollArea",
+            "target": "TOP"
+          }
+        }
+      }
+    ]
+  }
+}

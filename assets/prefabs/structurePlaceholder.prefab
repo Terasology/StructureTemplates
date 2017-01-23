@@ -1,0 +1,8 @@
+{
+  "Network" : {},
+  "StructurePlaceholder": {},
+  "InteractionTarget": {},
+  "InteractionScreen": {
+    "screen": "StructureTemplates:StructurePlaceholderScreen"
+  }
+}
