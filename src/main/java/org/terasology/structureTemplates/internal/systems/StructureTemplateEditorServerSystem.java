@@ -119,16 +119,6 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         }
     }
 
-    Region3i calculateDefaultRegion(Side frontDirectionOfStructure) {
-        Region3i unrotatedRegion = Region3i.createBounded(new Vector3i(0, 1, 1), new Vector3i(0, 1, 1));
-
-
-        HorizontalBlockRegionRotation rotation = HorizontalBlockRegionRotation.createRotationFromSideToSide(Side.FRONT,
-                frontDirectionOfStructure);
-        return rotation.transformRegion(unrotatedRegion);
-    }
-
-
     private float sideToAngle(Side side) {
         switch (side) {
             case LEFT:
