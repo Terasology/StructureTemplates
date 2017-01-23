@@ -152,7 +152,9 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         }
         EntityRef editorEnitity = editsCopyRegionComponent.structureTemplateEditor;
         StructureTemplateEditorComponent editorComponent = editorEnitity.getComponent(StructureTemplateEditorComponent.class);
-
+        if (editorComponent == null) {
+            return; // can happen if entity got destroyed
+        }
         List<Region3i> originalRegions = editorComponent.absoluteRegionsWithTemplate;
         Set<Vector3i> positionsInTemplate = RegionMergeUtil.positionsOfRegions(originalRegions);
         if (positionsInTemplate.containsAll(placeBlocks.getBlocks().keySet())) {
