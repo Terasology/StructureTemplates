@@ -21,8 +21,10 @@ import org.slf4j.LoggerFactory;
 import org.terasology.entitySystem.entity.EntityBuilder;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
+import org.terasology.entitySystem.event.EventPriority;
 import org.terasology.entitySystem.event.ReceiveEvent;
 import org.terasology.entitySystem.metadata.EntitySystemLibrary;
+import org.terasology.entitySystem.prefab.Prefab;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
@@ -35,6 +37,7 @@ import org.terasology.math.geom.Vector3f;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.network.ClientComponent;
 import org.terasology.registry.In;
+import org.terasology.structureTemplates.components.ScheduleStructurePlacementComponent;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent.RegionToFill;
 import org.terasology.structureTemplates.components.SpawnTemplateActionComponent;
@@ -350,6 +353,30 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         // TODO check if consuming event and making item consumable works too e.g. event.consume();
         entity.destroy();
     }
+
+    @ReceiveEvent(priority = EventPriority.PRIORITY_NORMAL)
+    public void onSpawnTemplateEventWithPlaceholderPriority(SpawnTemplateEvent event, EntityRef entity,
+                                                            ScheduleStructurePlacementComponent placementComponent) {
+        BlockRegionTransform transformation = event.getTransformation();
+        for (ScheduleStructurePlacementComponent.PlacementToSchedule placementToSchedule : placementComponent.placementsToSchedule) {
+            Vector3i actualPosition = transformation.transformVector3i(placementToSchedule.position);
+            Side side = transformation.transformSide(placementToSchedule.front);
+            Prefab selectedTemplateType = placementToSchedule.structureTemplateType;
+
+            BlockFamily blockFamily = blockManager.getBlockFamily("StructureTemplates:StructurePlaceholder");
+            HorizontalBlockFamily horizontalBlockFamily = (HorizontalBlockFamily) blockFamily;
+            Block block = horizontalBlockFamily.getBlockForSide(side);
+            Vector3i positionAbove = new Vector3i(actualPosition);
+            positionAbove.addY(1);
+            worldProvider.setBlock(positionAbove, block);
+            EntityRef blockEntity = blockEntityRegistry.getBlockEntityAt(positionAbove);
+            StructurePlaceholderComponent structurePlaceholderComponent = blockEntity.getComponent(StructurePlaceholderComponent.class);
+            structurePlaceholderComponent.selectedPrefab = selectedTemplateType;
+            blockEntity.saveComponent(structurePlaceholderComponent);
+        }
+
+    }
+
 
     List<Region3i> getAbsolutePlacementRegionsOfTemplate(EntityRef entity, Vector3i position, Side frontDirectionOfStructure) {
         List<Region3i> relativeRegions = getPlacementRegionsOfTemplate(entity);
