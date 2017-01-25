@@ -37,6 +37,7 @@ import org.terasology.math.geom.Vector3f;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.network.ClientComponent;
 import org.terasology.registry.In;
+import org.terasology.structureTemplates.components.BlockPlaceholderComponent;
 import org.terasology.structureTemplates.components.ScheduleStructurePlacementComponent;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent.RegionToFill;
@@ -265,13 +266,25 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         List<RegionToFill> regionsToFill = new ArrayList<>();
         for (Region3i absoluteRegion: absoluteRegions) {
             for (Vector3i absolutePosition : absoluteRegion) {
-                Block block = worldProvider.getBlock(absolutePosition);
+                EntityRef blockEntity = blockEntityRegistry.getBlockEntityAt(absolutePosition);
+                BlockPlaceholderComponent placeholderComponent = blockEntity.getComponent(BlockPlaceholderComponent.class);
+                Block block;
+                if (placeholderComponent != null) {
+                    block = placeholderComponent.block;
+                } else {
+                    block = worldProvider.getBlock(absolutePosition);
+                }
+                if (block == null) {
+                    continue;
+                }
                 RegionToFill regionToFill = new RegionToFill();
                 Vector3i relativePosition = transformToRelative.transformVector3i(absolutePosition);
                 Region3i region = Region3i.createBounded(relativePosition, relativePosition);
                 regionToFill.region = region;
                 regionToFill.blockType = block;
                 regionsToFill.add(regionToFill);
+
+
             }
         }
         RegionMergeUtil.mergeRegionsToFill(regionsToFill);

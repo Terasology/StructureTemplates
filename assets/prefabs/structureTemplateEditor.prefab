@@ -2,6 +2,9 @@
   "Network" : {},
   "StructureTemplateEditor": {
   },
+  "BlockPlaceholder": {
+    "block":"engine:air"
+  },
   "InteractionTarget": {},
   "InteractionScreen": {
     "screen": "StructureTemplates:StructureTemplateEditor"
