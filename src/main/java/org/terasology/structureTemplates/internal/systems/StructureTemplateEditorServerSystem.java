@@ -43,6 +43,7 @@ import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent.RegionToFill;
 import org.terasology.structureTemplates.components.SpawnTemplateActionComponent;
 import org.terasology.structureTemplates.components.StructureTemplateComponent;
+import org.terasology.structureTemplates.events.CreateStructureTemplateEvent;
 import org.terasology.structureTemplates.events.SpawnTemplateEvent;
 import org.terasology.structureTemplates.internal.components.EditsCopyRegionComponent;
 import org.terasology.structureTemplates.internal.components.StructurePlaceholderComponent;
@@ -71,7 +72,10 @@ import org.terasology.world.block.items.OnBlockToItem;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -257,6 +261,28 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         }
         componentOfItem.absoluteRegionsWithTemplate = new ArrayList<>(componentOfBlock.absoluteRegionsWithTemplate);
         item.saveComponent(componentOfItem);
+    }
+
+    // TODO remove if no further use
+    private Map<Block,Set<Vector3i>> createBlocksToPositionMap(
+            StructureTemplateEditorComponent structureTemplateEditorComponent, BlockComponent blockComponent) {
+        List<Region3i> absoluteRegions = structureTemplateEditorComponent.absoluteRegionsWithTemplate;
+        BlockRegionTransform transformToRelative = createAbsoluteToRelativeTransform(blockComponent);
+
+        Map<Block, Set<Vector3i>> map = new HashMap<>();
+        for (Region3i absoluteRegion : absoluteRegions) {
+            for (Vector3i absolutePosition : absoluteRegion) {
+                Block absoluteBlock = worldProvider.getBlock(absolutePosition);
+                Block block = transformToRelative.transformBlock(absoluteBlock);
+                Set<Vector3i> positions = map.get(block);
+                if (positions == null) {
+                    positions = new HashSet<>();
+                    map.put(block, positions);
+                }
+                Vector3i relativePosition = transformToRelative.transformVector3i(absolutePosition);
+                positions.add(relativePosition);
+            }
+        }
     }
 
     private List<RegionToFill> createRegionsToFill(StructureTemplateEditorComponent structureTemplateEditorComponent, BlockComponent blockComponent) {
