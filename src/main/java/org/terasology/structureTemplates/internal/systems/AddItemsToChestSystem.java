@@ -20,18 +20,30 @@ import org.slf4j.LoggerFactory;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.event.ReceiveEvent;
+import org.terasology.entitySystem.prefab.Prefab;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.logic.inventory.InventoryManager;
+import org.terasology.logic.inventory.ItemComponent;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.registry.In;
 import org.terasology.structureTemplates.components.AddItemsToChestComponent;
+import org.terasology.structureTemplates.events.BuildStructureTemplateEntityEvent;
 import org.terasology.structureTemplates.events.SpawnTemplateEvent;
 import org.terasology.structureTemplates.events.StructureBlocksSpawnedEvent;
+import org.terasology.structureTemplates.internal.events.BuildStructureTemplateStringEvent;
 import org.terasology.structureTemplates.util.transform.BlockRegionTransform;
 import org.terasology.world.BlockEntityRegistry;
+import org.terasology.world.block.BlockComponent;
+import org.terasology.world.block.BlockManager;
+import org.terasology.world.block.family.BlockFamily;
+import org.terasology.world.block.items.BlockItemComponent;
 import org.terasology.world.block.items.BlockItemFactory;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * System to power the {@link AddItemsToChestComponent}
@@ -49,6 +61,9 @@ public class AddItemsToChestSystem extends BaseComponentSystem {
     @In
     private InventoryManager inventoryManager;
 
+    @In
+    private BlockManager blockManager;
+
     @ReceiveEvent
     public void onSpawnStructureEvent(StructureBlocksSpawnedEvent event, EntityRef entity,
                                       AddItemsToChestComponent component) {
@@ -56,7 +71,6 @@ public class AddItemsToChestSystem extends BaseComponentSystem {
 
         addItemsToChest(component, transformation);
     }
-
 
     @ReceiveEvent
     public void onSpawnTemplateEvent(SpawnTemplateEvent event, EntityRef entity, AddItemsToChestComponent component) {
@@ -93,4 +107,159 @@ public class AddItemsToChestSystem extends BaseComponentSystem {
             inventoryManager.giveItem(chest, EntityRef.NULL, itemEntity);
         }
     }
+
+
+    @ReceiveEvent
+    public void onBuildTemplateWithScheduledStructurePlacment(BuildStructureTemplateEntityEvent event, EntityRef entity) {
+        BlockRegionTransform transformToRelative = event.getAbsoluteToRelativeTransform();
+        BlockFamily blockFamily = blockManager.getBlockFamily("Core:Chest");
+
+        List<AddItemsToChestComponent.ChestToFill> chestsToFill = describeChestContent(event, blockFamily);
+        if (chestsToFill.size() > 0) {
+            AddItemsToChestComponent addItemsComponent = new AddItemsToChestComponent();
+            addItemsComponent.chestsToFill = chestsToFill;
+            event.getTemplateEntity().addOrSaveComponent(addItemsComponent);
+        }
+    }
+
+    private List<AddItemsToChestComponent.ChestToFill> describeChestContent(BuildStructureTemplateEntityEvent event, BlockFamily blockFamily) {
+        List<AddItemsToChestComponent.ChestToFill> chestsToFill = new ArrayList<>();
+        for (Vector3i position: event.findAbsolutePositionsOf(blockFamily)) {
+            EntityRef blockEntity = blockEntityRegistry.getBlockEntityAt(position);
+            BlockComponent blockComponent = blockEntity.getComponent(BlockComponent.class);
+            List<AddItemsToChestComponent.Item> itemsToAdd = describeItemsOfEntity(blockEntity);
+            if (itemsToAdd.size() > 0) {
+                AddItemsToChestComponent.ChestToFill chestToFill = new AddItemsToChestComponent.ChestToFill();
+                Vector3i absolutePosition = new Vector3i(blockComponent.getPosition());
+                Vector3i relativePosition = event.getAbsoluteToRelativeTransform().transformVector3i(absolutePosition);
+                chestToFill.position = relativePosition;
+                chestToFill.items = itemsToAdd;
+                chestsToFill.add(chestToFill);
+            }
+        }
+        return chestsToFill;
+    }
+
+    private List<AddItemsToChestComponent.Item> describeItemsOfEntity(EntityRef blockEntity) {
+        List<AddItemsToChestComponent.Item> itemsToAdd = new ArrayList<>();
+        int numberOfSlots = inventoryManager.getNumSlots(blockEntity);
+        for (int slot = 0;slot < numberOfSlots; slot++) {
+            Optional<AddItemsToChestComponent.Item> optionalItem = describeItemInSlot(blockEntity, slot);
+            if (optionalItem.isPresent()) {
+                itemsToAdd.add(optionalItem.get());
+            }
+        }
+        return itemsToAdd;
+    }
+
+
+    private Optional<AddItemsToChestComponent.Item> describeItemInSlot(EntityRef blockEntity, int slot) {
+        EntityRef item = inventoryManager.getItemInSlot(blockEntity, slot);
+        ItemComponent itemComponent = item.getComponent(ItemComponent.class);
+        if (itemComponent == null) {
+            return Optional.empty();
+        }
+        BlockItemComponent blockItemComponent = item.getComponent(BlockItemComponent.class);
+        if (blockItemComponent != null) {
+            AddItemsToChestComponent.Item itemVO = new AddItemsToChestComponent.Item();
+            itemVO.blockFamiliy = blockItemComponent.blockFamily;
+            itemVO.amount = itemComponent.stackCount;
+            itemVO.slot = slot;
+            return Optional.of(itemVO);
+        } else {
+            Prefab prefab = item.getParentPrefab();
+            AddItemsToChestComponent.Item itemVO = new AddItemsToChestComponent.Item();
+            itemVO.itemPrefab = prefab;
+            itemVO.amount = itemComponent.stackCount;
+            itemVO.slot = slot;
+            return Optional.of(itemVO);
+        }
+    }
+
+    @ReceiveEvent
+    public void onBuildTemplateStringWithBlockRegions(BuildStructureTemplateStringEvent event, EntityRef template,
+                                                      AddItemsToChestComponent component) {
+        StringBuilder sb = event.getStringBuilder();
+        sb.append("    \"AddItemsToChest\": {\n");
+        sb.append("        \"chestsToFill\":[ {\n");
+        visitList(component.chestsToFill, (AddItemsToChestComponent.ChestToFill chestToFill, boolean lastChest) -> {
+            sb.append("            {\n");
+            sb.append("                \"position\": [");
+            sb.append(chestToFill.position.x);
+            sb.append(", ");
+            sb.append(chestToFill.position.y);
+            sb.append(", ");
+            sb.append(chestToFill.position.z);
+            sb.append("],\n");
+            sb.append("                \"items\": [\n");
+            visitList(chestToFill.items, (AddItemsToChestComponent.Item item, boolean lastItem) ->  {
+                sb.append("                        ");
+                appendItemJson(sb, item);
+                if (lastItem) {
+                    sb.append("\n");
+                } else {
+                    sb.append(",\n");
+                }
+            });
+            sb.append("                ]\n");
+            if (lastChest) {
+                sb.append("            }\n");
+            } else {
+                sb.append("            },\n");
+            }
+        });
+        sb.append("        ]\n");
+        sb.append("    },\n");
+    }
+
+    private void appendItemJson(StringBuilder sb, AddItemsToChestComponent.Item item) {
+        boolean firstProperty = true;
+        sb.append("{");
+        if (item.slot != null) {
+            sb.append("\"slot\": ");
+            sb.append(item.slot);
+            firstProperty = false;
+        }
+        if (item.itemPrefab != null) {
+            if (!firstProperty) {
+                sb.append(", ");
+            }
+            sb.append("\"itemPrefab\": \"");
+            sb.append(item.itemPrefab.getUrn().toString());
+            sb.append("\"");
+            firstProperty = false;
+        }
+        if (item.blockFamiliy != null) {
+            if (!firstProperty) {
+                sb.append(", ");
+            }
+            sb.append("\"blockFamiliy\": \"");
+            sb.append(item.blockFamiliy.getURI().toString());
+            sb.append("\"");
+            firstProperty = false;
+        }
+        if (item.amount != 1) {
+            if (!firstProperty) {
+                sb.append(", ");
+            }
+            sb.append("\"amount\": ");
+            sb.append(item.amount);
+        }
+        sb.append("}");
+    }
+
+    public static <E> void visitList(List<E> list, ListVisitor<E> visitor) {
+        int lastIndex = list.size() -1;
+        for (int i = 0; i < list.size(); i++) {
+            boolean last = (i == lastIndex);
+            visitor.visit(list.get(i), last);
+        }
+    }
+
+    @FunctionalInterface
+    public interface ListVisitor<T> {
+
+        public void visit(T item, boolean last);
+    }
+
 }
