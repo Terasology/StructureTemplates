@@ -235,7 +235,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
     @ReceiveEvent
     public void onBuildTemplateWithBlockRegions(BuildStructureTemplateEntityEvent event, EntityRef entity,
                                                 StructureTemplateEditorComponent structureTemplateEditorComponent) {
-        BlockRegionTransform transformToRelative = event.getAbsoluteToRelativeTransform();
+        BlockRegionTransform transformToRelative = event.getTransformToRelative();
         SpawnBlockRegionsComponent spawnBlockRegionsComponent = new SpawnBlockRegionsComponent();
         spawnBlockRegionsComponent.regionsToFill = createRegionsToFill(structureTemplateEditorComponent,
                 transformToRelative);
@@ -245,7 +245,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
 
     @ReceiveEvent
     public void onBuildTemplateWithScheduledStructurePlacment(BuildStructureTemplateEntityEvent event, EntityRef entity) {
-        BlockRegionTransform transformToRelative = event.getAbsoluteToRelativeTransform();
+        BlockRegionTransform transformToRelative = event.getTransformToRelative();
         BlockFamily blockFamily = blockManager.getBlockFamily("StructureTemplates:StructurePlaceholder");
 
         List<ScheduleStructurePlacementComponent.PlacementToSchedule> placementToSchedules = new ArrayList<>();

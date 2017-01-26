@@ -111,7 +111,7 @@ public class AddItemsToChestSystem extends BaseComponentSystem {
 
     @ReceiveEvent
     public void onBuildTemplateWithScheduledStructurePlacment(BuildStructureTemplateEntityEvent event, EntityRef entity) {
-        BlockRegionTransform transformToRelative = event.getAbsoluteToRelativeTransform();
+        BlockRegionTransform transformToRelative = event.getTransformToRelative();
         BlockFamily blockFamily = blockManager.getBlockFamily("Core:Chest");
 
         List<AddItemsToChestComponent.ChestToFill> chestsToFill = describeChestContent(event, blockFamily);
@@ -131,7 +131,7 @@ public class AddItemsToChestSystem extends BaseComponentSystem {
             if (itemsToAdd.size() > 0) {
                 AddItemsToChestComponent.ChestToFill chestToFill = new AddItemsToChestComponent.ChestToFill();
                 Vector3i absolutePosition = new Vector3i(blockComponent.getPosition());
-                Vector3i relativePosition = event.getAbsoluteToRelativeTransform().transformVector3i(absolutePosition);
+                Vector3i relativePosition = event.getTransformToRelative().transformVector3i(absolutePosition);
                 chestToFill.position = relativePosition;
                 chestToFill.items = itemsToAdd;
                 chestsToFill.add(chestToFill);

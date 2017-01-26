@@ -34,7 +34,7 @@ import java.util.Set;
  * a new structure template should be created from blocks that have been marked by that structure template editor.
  */
 public class BuildStructureTemplateEntityEvent implements Event {
-    private BlockRegionTransform absoluteToRelativeTransform;
+    private BlockRegionTransform transformToRelative;
     private Map<Block, Set<Vector3i>> blockToAbsolutePositionMap;
     private MutableComponentContainer templateEntity;
 
@@ -44,12 +44,12 @@ public class BuildStructureTemplateEntityEvent implements Event {
     public BuildStructureTemplateEntityEvent(MutableComponentContainer templateEntity, BlockRegionTransform transform,
                                              Map<Block, Set<Vector3i>> blockToRelativePositionMap) {
         this.templateEntity = templateEntity;
-        this.absoluteToRelativeTransform = transform;
+        this.transformToRelative = transform;
         this.blockToAbsolutePositionMap = blockToRelativePositionMap;
     }
 
-    public BlockRegionTransform getAbsoluteToRelativeTransform() {
-        return absoluteToRelativeTransform;
+    public BlockRegionTransform getTransformToRelative() {
+        return transformToRelative;
     }
 
     public MutableComponentContainer getTemplateEntity() {
