@@ -28,7 +28,7 @@ import org.terasology.rendering.nui.databinding.Binding;
 import org.terasology.rendering.nui.widgets.UIButton;
 import org.terasology.rendering.nui.widgets.UICheckbox;
 import org.terasology.structureTemplates.internal.components.EditsCopyRegionComponent;
-import org.terasology.structureTemplates.internal.events.CopyBlockRegionRequest;
+import org.terasology.structureTemplates.internal.events.StructureTemplateStringRequest;
 import org.terasology.structureTemplates.internal.events.CreateStructureSpawnItemRequest;
 import org.terasology.structureTemplates.internal.events.MakeBoxShapedRequest;
 import org.terasology.structureTemplates.internal.ui.StructureTemplateRegionScreen;
@@ -196,7 +196,7 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
     }
 
     private void onCopyToClipboardClicked(UIWidget button) {
-        getInteractionTarget().send(new CopyBlockRegionRequest(localPlayer.getCharacterEntity()));
+        getInteractionTarget().send(new StructureTemplateStringRequest(localPlayer.getCharacterEntity()));
     }
 
 }

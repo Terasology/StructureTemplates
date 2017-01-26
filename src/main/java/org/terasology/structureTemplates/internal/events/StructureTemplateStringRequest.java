@@ -20,16 +20,16 @@ import org.terasology.network.NetworkEvent;
 import org.terasology.network.ServerEvent;
 
 /**
- * Requests the server to return a copy of the region specified by the entity to the client via a
- * {@link CopyBlockRegionResultEvent} event. The event gets trigged by a button in the structure template editor.
+ * Requests the server to return a structure template in json form of the structure template editor
+ * to which this event got sent. The event gets trigged by a button in the structure template editor.
  *
  */
 @ServerEvent
-public class CopyBlockRegionRequest extends NetworkEvent {
-    public CopyBlockRegionRequest() {
+public class StructureTemplateStringRequest extends NetworkEvent {
+    public StructureTemplateStringRequest() {
     }
 
-    public CopyBlockRegionRequest(EntityRef instigator) {
+    public StructureTemplateStringRequest(EntityRef instigator) {
         super(instigator);
     }
 }

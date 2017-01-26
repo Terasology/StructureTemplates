@@ -49,7 +49,7 @@ import org.terasology.structureTemplates.events.SpawnTemplateEvent;
 import org.terasology.structureTemplates.internal.components.EditsCopyRegionComponent;
 import org.terasology.structureTemplates.internal.components.StructurePlaceholderComponent;
 import org.terasology.structureTemplates.internal.events.BuildStructureTemplateStringEvent;
-import org.terasology.structureTemplates.internal.events.CopyBlockRegionRequest;
+import org.terasology.structureTemplates.internal.events.StructureTemplateStringRequest;
 import org.terasology.structureTemplates.internal.events.CopyBlockRegionResultEvent;
 import org.terasology.structureTemplates.internal.events.CreateStructureSpawnItemRequest;
 import org.terasology.structureTemplates.internal.events.MakeBoxShapedRequest;
@@ -310,7 +310,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
     }
 
     @ReceiveEvent
-    public void onCopyBlockRegionRequest(CopyBlockRegionRequest event, EntityRef entity,
+    public void onCopyBlockRegionRequest(StructureTemplateStringRequest event, EntityRef entity,
                                          StructureTemplateEditorComponent structureTemplateEditorComponent,
                                          BlockComponent blockComponent) {
         EntityBuilder entityBuilder = entityManager.newBuilder();
