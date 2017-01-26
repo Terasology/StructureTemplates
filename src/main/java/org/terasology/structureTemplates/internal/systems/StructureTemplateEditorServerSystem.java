@@ -18,6 +18,7 @@ package org.terasology.structureTemplates.internal.systems;
 import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.entitySystem.MutableComponentContainer;
 import org.terasology.entitySystem.entity.EntityBuilder;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
@@ -43,10 +44,11 @@ import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent.RegionToFill;
 import org.terasology.structureTemplates.components.SpawnTemplateActionComponent;
 import org.terasology.structureTemplates.components.StructureTemplateComponent;
-import org.terasology.structureTemplates.events.CreateStructureTemplateEvent;
+import org.terasology.structureTemplates.events.BuildStructureTemplateEntityEvent;
 import org.terasology.structureTemplates.events.SpawnTemplateEvent;
 import org.terasology.structureTemplates.internal.components.EditsCopyRegionComponent;
 import org.terasology.structureTemplates.internal.components.StructurePlaceholderComponent;
+import org.terasology.structureTemplates.internal.events.BuildStructureTemplateStringEvent;
 import org.terasology.structureTemplates.internal.events.CopyBlockRegionRequest;
 import org.terasology.structureTemplates.internal.events.CopyBlockRegionResultEvent;
 import org.terasology.structureTemplates.internal.events.CreateStructureSpawnItemRequest;
@@ -204,12 +206,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
                             StructureTemplateEditorComponent structureTemplateEditorComponent,
                             BlockComponent blockComponent) {
         EntityBuilder entityBuilder = entityManager.newBuilder("StructureTemplates:structureSpawnItem");
-        SpawnBlockRegionsComponent spawnBlockRegionsComponent = new SpawnBlockRegionsComponent();
-        spawnBlockRegionsComponent.regionsToFill = createRegionsToFill(structureTemplateEditorComponent, blockComponent);
-        entityBuilder.addOrSaveComponent(spawnBlockRegionsComponent);
-
-        StructureTemplateComponent structureTemplateComponent = new StructureTemplateComponent();
-        entityBuilder.addOrSaveComponent(structureTemplateComponent);
+        addComponentsToTemplate(entity, structureTemplateEditorComponent, blockComponent, entityBuilder);
         EntityRef structureSpawnItem = entityBuilder.build();
 
         EntityRef character = event.getInstigator().getOwner().getComponent(ClientComponent.class).character;
@@ -217,12 +214,112 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         inventoryManager.giveItem(character, EntityRef.NULL, structureSpawnItem);
     }
 
+    private void addComponentsToTemplate(EntityRef editorEntity,
+                                         StructureTemplateEditorComponent structureTemplateEditorComponent,
+                                         BlockComponent blockComponent,
+                                         MutableComponentContainer templateEntity) {
+        BlockRegionTransform transformToRelative = createAbsoluteToRelativeTransform(blockComponent);
+
+        Map<Block, Set<Vector3i>> blockToAbsPositionsMap = createBlockToAbsolutePositionsMap(
+                structureTemplateEditorComponent);
+
+        // TODO add this components via event handler and have the event also have a map abs pos -> block?
+        StructureTemplateComponent structureTemplateComponent = new StructureTemplateComponent();
+        templateEntity.addComponent(structureTemplateComponent);
+
+        BuildStructureTemplateEntityEvent createTemplateEvent = new BuildStructureTemplateEntityEvent(templateEntity,
+                transformToRelative, blockToAbsPositionsMap);
+        editorEntity.send(createTemplateEvent);
+    }
+
+    @ReceiveEvent
+    public void onBuildTemplateWithBlockRegions(BuildStructureTemplateEntityEvent event, EntityRef entity,
+                                                StructureTemplateEditorComponent structureTemplateEditorComponent) {
+        BlockRegionTransform transformToRelative = event.getAbsoluteToRelativeTransform();
+        SpawnBlockRegionsComponent spawnBlockRegionsComponent = new SpawnBlockRegionsComponent();
+        spawnBlockRegionsComponent.regionsToFill = createRegionsToFill(structureTemplateEditorComponent,
+                transformToRelative);
+        MutableComponentContainer templateEntity = event.getTemplateEntity();
+        templateEntity.addOrSaveComponent(spawnBlockRegionsComponent);
+    }
+
+    @ReceiveEvent
+    public void onBuildTemplateWithScheduledStructurePlacment(BuildStructureTemplateEntityEvent event, EntityRef entity) {
+        BlockRegionTransform transformToRelative = event.getAbsoluteToRelativeTransform();
+        BlockFamily blockFamily = blockManager.getBlockFamily("StructureTemplates:StructurePlaceholder");
+
+        List<ScheduleStructurePlacementComponent.PlacementToSchedule> placementToSchedules = new ArrayList<>();
+        for (Vector3i position: event.findAbsolutePositionsOf(blockFamily)) {
+            EntityRef blockEntity = blockEntityRegistry.getBlockEntityAt(position);
+            StructurePlaceholderComponent structurePlaceholderComponent = blockEntity.getComponent(
+                    StructurePlaceholderComponent.class);
+            if (structurePlaceholderComponent.selectedPrefab == null) {
+                continue;
+            }
+            BlockComponent blockComponent = blockEntity.getComponent(BlockComponent.class);
+            ScheduleStructurePlacementComponent.PlacementToSchedule placementToSchedule = new ScheduleStructurePlacementComponent.PlacementToSchedule();
+            placementToSchedule.position = transformToRelative.transformVector3i(blockComponent.getPosition());
+            placementToSchedule.position.subY(1); // placeholder is on top of marked block
+            placementToSchedule.front = transformToRelative.transformSide(blockComponent.getBlock().getDirection());
+            placementToSchedule.structureTemplateType = structurePlaceholderComponent.selectedPrefab;
+            placementToSchedules.add(placementToSchedule);
+        }
+        if (placementToSchedules.size() > 0) {
+            ScheduleStructurePlacementComponent scheduleStructurePlacementComponent = new ScheduleStructurePlacementComponent();
+            scheduleStructurePlacementComponent.placementsToSchedule = placementToSchedules;
+            event.getTemplateEntity().addOrSaveComponent(scheduleStructurePlacementComponent);
+        }
+    }
+
+    @ReceiveEvent
+    public void onBuildTemplateStringWithBlockRegions(BuildStructureTemplateStringEvent event, EntityRef template,
+                                               SpawnBlockRegionsComponent component) {
+        StringBuilder sb = event.getStringBuilder();
+        sb.append("    \"SpawnBlockRegions\": {\n");
+        sb.append("        \"regionsToFill\":[ {\n");
+        sb.append(formatAsString(component.regionsToFill));
+        sb.append("        ]\n");
+        sb.append("    },\n");
+    }
+
+    @ReceiveEvent
+    public void onBuildTemplateStringWithBlockRegions(BuildStructureTemplateStringEvent event, EntityRef template,
+                                                      ScheduleStructurePlacementComponent component) {
+        StringBuilder sb = event.getStringBuilder();
+        sb.append("    \"ScheduleStructurePlacement\": {\n");
+        sb.append("        \"placementsToSchedule\":[ {\n");
+        for (ScheduleStructurePlacementComponent.PlacementToSchedule placementToSchedule: component.placementsToSchedule) {
+            sb.append("            {\n");
+            sb.append("                \"structureTemplateType\": \"");
+            sb.append(placementToSchedule.structureTemplateType.getUrn().toString());
+            sb.append("\",\n");
+            sb.append("                \"front\": \"");
+            sb.append(placementToSchedule.front.name());
+            sb.append("\",\n");
+            sb.append("                \"position\": [");
+            sb.append(placementToSchedule.position.x);
+            sb.append(",");
+            sb.append(placementToSchedule.position.y);
+            sb.append(",");
+            sb.append(placementToSchedule.position.z);
+            sb.append("            ]\n");
+            sb.append("        },\n");
+        }
+        sb.append("        ]\n");
+        sb.append("    },\n");
+    }
+
     @ReceiveEvent
     public void onCopyBlockRegionRequest(CopyBlockRegionRequest event, EntityRef entity,
                                          StructureTemplateEditorComponent structureTemplateEditorComponent,
                                          BlockComponent blockComponent) {
-        List<RegionToFill> regionsToFill = createRegionsToFill(structureTemplateEditorComponent, blockComponent);
-        String textToSend = formatAsString(regionsToFill);
+        EntityBuilder entityBuilder = entityManager.newBuilder();
+        addComponentsToTemplate(entity, structureTemplateEditorComponent, blockComponent, entityBuilder);
+        EntityRef templateEntity = entityBuilder.build();
+        StringBuilder sb = new StringBuilder();
+        templateEntity.send(new BuildStructureTemplateStringEvent(sb));
+        String textToSend = sb.toString();
+        templateEntity.destroy();
 
         CopyBlockRegionResultEvent resultEvent = new CopyBlockRegionResultEvent(textToSend);
         event.getInstigator().send(resultEvent);
@@ -263,31 +360,29 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         item.saveComponent(componentOfItem);
     }
 
-    // TODO remove if no further use
-    private Map<Block,Set<Vector3i>> createBlocksToPositionMap(
-            StructureTemplateEditorComponent structureTemplateEditorComponent, BlockComponent blockComponent) {
+    private Map<Block,Set<Vector3i>> createBlockToAbsolutePositionsMap(
+            StructureTemplateEditorComponent structureTemplateEditorComponent) {
         List<Region3i> absoluteRegions = structureTemplateEditorComponent.absoluteRegionsWithTemplate;
-        BlockRegionTransform transformToRelative = createAbsoluteToRelativeTransform(blockComponent);
 
         Map<Block, Set<Vector3i>> map = new HashMap<>();
         for (Region3i absoluteRegion : absoluteRegions) {
             for (Vector3i absolutePosition : absoluteRegion) {
-                Block absoluteBlock = worldProvider.getBlock(absolutePosition);
-                Block block = transformToRelative.transformBlock(absoluteBlock);
+                Block block = worldProvider.getBlock(absolutePosition);
                 Set<Vector3i> positions = map.get(block);
                 if (positions == null) {
                     positions = new HashSet<>();
                     map.put(block, positions);
                 }
-                Vector3i relativePosition = transformToRelative.transformVector3i(absolutePosition);
-                positions.add(relativePosition);
+                positions.add(new Vector3i(absolutePosition));
             }
         }
+        return map;
     }
 
-    private List<RegionToFill> createRegionsToFill(StructureTemplateEditorComponent structureTemplateEditorComponent, BlockComponent blockComponent) {
+
+    private List<RegionToFill> createRegionsToFill(StructureTemplateEditorComponent structureTemplateEditorComponent,
+                                                   BlockRegionTransform transformToRelative) {
         List<Region3i> absoluteRegions = structureTemplateEditorComponent.absoluteRegionsWithTemplate;
-        BlockRegionTransform transformToRelative = createAbsoluteToRelativeTransform(blockComponent);
 
         List<RegionToFill> regionsToFill = new ArrayList<>();
         for (Region3i absoluteRegion: absoluteRegions) {
