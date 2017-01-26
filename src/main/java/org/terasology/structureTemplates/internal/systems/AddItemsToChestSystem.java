@@ -27,6 +27,7 @@ import org.terasology.logic.inventory.InventoryManager;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.registry.In;
 import org.terasology.structureTemplates.components.AddItemsToChestComponent;
+import org.terasology.structureTemplates.events.SpawnTemplateEvent;
 import org.terasology.structureTemplates.events.StructureBlocksSpawnedEvent;
 import org.terasology.structureTemplates.util.transform.BlockRegionTransform;
 import org.terasology.world.BlockEntityRegistry;
@@ -53,6 +54,18 @@ public class AddItemsToChestSystem extends BaseComponentSystem {
                                       AddItemsToChestComponent component) {
         BlockRegionTransform transformation = event.getTransformation();
 
+        addItemsToChest(component, transformation);
+    }
+
+
+    @ReceiveEvent
+    public void onSpawnTemplateEvent(SpawnTemplateEvent event, EntityRef entity, AddItemsToChestComponent component) {
+        BlockRegionTransform transformation = event.getTransformation();
+
+        addItemsToChest(component, transformation);
+    }
+
+    private void addItemsToChest(AddItemsToChestComponent component, BlockRegionTransform transformation) {
         BlockItemFactory blockFactory = new BlockItemFactory(entityManager);
 
         for (AddItemsToChestComponent.ChestToFill chestToFill: component.chestsToFill) {
