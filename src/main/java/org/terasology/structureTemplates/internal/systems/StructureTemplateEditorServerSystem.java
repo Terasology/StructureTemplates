@@ -398,11 +398,12 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
                 if (block == null) {
                     continue;
                 }
+                Block relativeBlock = transformToRelative.transformBlock(block);
                 RegionToFill regionToFill = new RegionToFill();
                 Vector3i relativePosition = transformToRelative.transformVector3i(absolutePosition);
                 Region3i region = Region3i.createBounded(relativePosition, relativePosition);
                 regionToFill.region = region;
-                regionToFill.blockType = block;
+                regionToFill.blockType = relativeBlock;
                 regionsToFill.add(regionToFill);
 
 
