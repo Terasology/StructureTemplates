@@ -164,9 +164,12 @@ public class ToolboxScreen extends BaseInteractionScreen {
 
         ToolboxTree structureTemplatesTree = new ToolboxTree(new ToolboxTreeValue("Structure Spawner", texture, null));
 
-
+        Prefab structureTemplateOriginPrefab = assetManager.getAsset("StructureTemplates:StructureTemplateOrigin", Prefab.class).get();
         Iterable<Prefab> prefabs = prefabManager.listPrefabs(StructureTemplateComponent.class);
         for (Prefab prefab: prefabs) {
+            if (prefab == structureTemplateOriginPrefab) {
+                continue;
+            }
             ToolboxTree item = new ToolboxTree(new ToolboxTreeValue(prefab.getUrn().toString(), texture,
                     () -> new StructureSpawnerFromToolboxRequest(prefab)));
             structureTemplatesTree.addChild(item);
@@ -182,8 +185,12 @@ public class ToolboxScreen extends BaseInteractionScreen {
         ToolboxTree structureTemplatesTree = new ToolboxTree(new ToolboxTreeValue("Structure Templates", texture, null));
 
 
+        Prefab structureTemplateOriginPrefab = assetManager.getAsset("StructureTemplates:StructureTemplateOrigin", Prefab.class).get();
         Iterable<Prefab> prefabs = prefabManager.listPrefabs(StructureTemplateComponent.class);
         for (Prefab prefab: prefabs) {
+            if (prefab == structureTemplateOriginPrefab) {
+                continue;
+            }
             ToolboxTree item = new ToolboxTree(new ToolboxTreeValue(prefab.getUrn().toString(), texture,
                     () -> new StructureTemplateFromToolboxRequest(prefab)));
             structureTemplatesTree.addChild(item);
