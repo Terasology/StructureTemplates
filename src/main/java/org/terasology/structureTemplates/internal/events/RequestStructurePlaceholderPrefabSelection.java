@@ -25,14 +25,14 @@ import org.terasology.structureTemplates.internal.components.StructurePlaceholde
  * to a specified value.
  */
 @ServerEvent
-public class RequestPrefabSelection implements Event {
+public class RequestStructurePlaceholderPrefabSelection implements Event {
     private Prefab prefab;
 
-    public RequestPrefabSelection(Prefab prefab) {
+    public RequestStructurePlaceholderPrefabSelection(Prefab prefab) {
         this.prefab = prefab;
     }
 
-    public RequestPrefabSelection() {
+    public RequestStructurePlaceholderPrefabSelection() {
     }
 
     public Prefab getPrefab() {

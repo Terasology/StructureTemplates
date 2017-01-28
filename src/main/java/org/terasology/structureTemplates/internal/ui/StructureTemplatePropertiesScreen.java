@@ -20,17 +20,16 @@ import org.terasology.entitySystem.prefab.Prefab;
 import org.terasology.entitySystem.prefab.PrefabManager;
 import org.terasology.logic.common.DisplayNameComponent;
 import org.terasology.registry.In;
-import org.terasology.rendering.nui.BaseInteractionScreen;
+import org.terasology.rendering.nui.CoreScreenLayer;
 import org.terasology.rendering.nui.UIWidget;
 import org.terasology.rendering.nui.databinding.Binding;
-import org.terasology.rendering.nui.databinding.ReadOnlyBinding;
 import org.terasology.rendering.nui.itemRendering.StringTextRenderer;
 import org.terasology.rendering.nui.widgets.UIButton;
 import org.terasology.rendering.nui.widgets.UIDropdown;
 import org.terasology.rendering.nui.widgets.UIText;
+import org.terasology.structureTemplates.components.StructureTemplateComponent;
 import org.terasology.structureTemplates.components.StructureTemplateTypeComponent;
-import org.terasology.structureTemplates.internal.components.StructurePlaceholderComponent;
-import org.terasology.structureTemplates.internal.events.RequestStructurePlaceholderPrefabSelection;
+import org.terasology.structureTemplates.internal.events.RequestStructureTemplatePropertiesChange;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -39,27 +38,50 @@ import java.util.List;
 /**
  * Dialog for setting a region
  */
-public class StructurePlaceholderScreen extends BaseInteractionScreen {
+public class StructureTemplatePropertiesScreen extends CoreScreenLayer {
 
     private UIDropdown<Prefab> comboBox;
+    private UIText spawnChanceTextBox;
     private UIButton closeButton;
 
+    private String spawnChanceString;
     private Prefab selectedPrefab;
+
+    private EntityRef editorEntity;
 
     @In
     private PrefabManager prefabManager;
 
-    @Override
-    protected void initializeWithInteractionTarget(EntityRef interactionTarget) {
-        selectedPrefab = null;
-        StructurePlaceholderComponent comp = interactionTarget.getComponent(StructurePlaceholderComponent.class);
-        selectedPrefab = comp.selectedPrefab;
-
-
+    public EntityRef getEditorEntity() {
+        return editorEntity;
     }
+
+    public void setEditorEntity(EntityRef editorEntity) {
+        this.editorEntity = editorEntity;
+        selectedPrefab = null;
+        StructureTemplateComponent comp = editorEntity.getComponent(StructureTemplateComponent.class);
+        selectedPrefab = comp.type;
+        spawnChanceString = Integer.toString(comp.spawnChance);
+    }
+
 
     @Override
     public void initialise() {
+        spawnChanceTextBox = find("spawnChanceTextBox", UIText.class);
+        if (spawnChanceTextBox != null) {
+            spawnChanceTextBox.bindText(new Binding<String>() {
+                @Override
+                public String get() {
+                    return spawnChanceString;
+                }
+
+                @Override
+                public void set(String value) {
+                    spawnChanceString = value;
+                    requestServerToTakeOverCurrentValues();
+                }
+            });
+        }
         comboBox = find("comboBox", UIDropdown.class);
         if (comboBox != null) {
             Iterable<Prefab> prefabIterable = prefabManager.listPrefabs(StructureTemplateTypeComponent.class);
@@ -88,23 +110,10 @@ public class StructurePlaceholderScreen extends BaseInteractionScreen {
                 @Override
                 public void set(Prefab value) {
                     selectedPrefab = value;
-                    getInteractionTarget().send(new RequestStructurePlaceholderPrefabSelection(selectedPrefab));
+                    requestServerToTakeOverCurrentValues();
                 }
             });
         }
-        UIText fullDescriptionLabel = find("fullDescriptionLabel", UIText.class);
-        fullDescriptionLabel.bindText(new ReadOnlyBinding<String>() {
-            @Override
-            public String get() {
-                if (selectedPrefab == null) {
-                    return "";
-                }
-                DisplayNameComponent displayNameComponent = selectedPrefab.getComponent(DisplayNameComponent.class);
-                if (displayNameComponent == null) {
-                    return "";
-                }
-                return displayNameComponent.description;            }
-        });
 
         closeButton = find("closeButton", UIButton.class);
         if (closeButton != null) {
@@ -121,4 +130,14 @@ public class StructurePlaceholderScreen extends BaseInteractionScreen {
         getManager().popScreen();
     }
 
+    private void requestServerToTakeOverCurrentValues() {
+        Integer spawnChance = null;
+        try {
+            spawnChance = Integer.parseInt(spawnChanceString);
+        } catch (NumberFormatException e) {
+            spawnChance = 0;
+        }
+        editorEntity.send(new RequestStructureTemplatePropertiesChange(selectedPrefab, spawnChance));
+
+    }
 }

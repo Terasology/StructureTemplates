@@ -18,6 +18,11 @@
           "contents": [
             {
               "type": "UIButton",
+              "text": "Edit Structure Template Properties",
+              "id": "editTemplatePropertiesButton"
+            },
+            {
+              "type": "UIButton",
               "text": "Make edit region box-shaped",
               "id": "makeBoxShapedButton"
             },

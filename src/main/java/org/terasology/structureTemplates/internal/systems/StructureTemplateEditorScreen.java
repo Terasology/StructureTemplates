@@ -28,9 +28,10 @@ import org.terasology.rendering.nui.databinding.Binding;
 import org.terasology.rendering.nui.widgets.UIButton;
 import org.terasology.rendering.nui.widgets.UICheckbox;
 import org.terasology.structureTemplates.internal.components.EditsCopyRegionComponent;
-import org.terasology.structureTemplates.internal.events.StructureTemplateStringRequest;
 import org.terasology.structureTemplates.internal.events.CreateStructureSpawnItemRequest;
 import org.terasology.structureTemplates.internal.events.MakeBoxShapedRequest;
+import org.terasology.structureTemplates.internal.events.StructureTemplateStringRequest;
+import org.terasology.structureTemplates.internal.ui.StructureTemplatePropertiesScreen;
 import org.terasology.structureTemplates.internal.ui.StructureTemplateRegionScreen;
 import org.terasology.structureTemplates.util.ListUtil;
 import org.terasology.structureTemplates.util.RegionMergeUtil;
@@ -44,6 +45,7 @@ import java.util.Set;
  * Main structure template editor UI
  */
 public class StructureTemplateEditorScreen extends BaseInteractionScreen {
+    private UIButton editTemplatePropertiesButton;
     private UIButton copyToClipboardButton;
     private UIButton createSpawnerButton;
     private UIButton copyInGroundConditionButton;
@@ -65,6 +67,10 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
 
     @Override
     public void initialise() {
+        editTemplatePropertiesButton = find("editTemplatePropertiesButton", UIButton.class);
+        if (editTemplatePropertiesButton != null) {
+            editTemplatePropertiesButton.subscribe(this::onEditTemplatePropertiesButton);
+        }
         copyToClipboardButton = find("copyToClipboardButton", UIButton.class);
         if (copyToClipboardButton != null) {
             copyToClipboardButton.subscribe(this::onCopyToClipboardClicked);
@@ -121,6 +127,11 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
         }
 
     }
+    private void onEditTemplatePropertiesButton(UIWidget button) {
+        StructureTemplatePropertiesScreen screen = getManager().pushScreen("StructureTemplates:StructureTemplatePropertiesScreen", StructureTemplatePropertiesScreen.class);
+        screen.setEditorEntity(getInteractionTarget());
+    }
+
 
     private void onMakeBoxShapedButton(UIWidget button) {
         EntityRef entity = getInteractionTarget();
