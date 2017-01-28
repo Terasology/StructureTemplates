@@ -33,6 +33,7 @@ import org.terasology.structureTemplates.events.BuildStructureTemplateEntityEven
 import org.terasology.structureTemplates.events.SpawnTemplateEvent;
 import org.terasology.structureTemplates.events.StructureBlocksSpawnedEvent;
 import org.terasology.structureTemplates.internal.events.BuildStructureTemplateStringEvent;
+import org.terasology.structureTemplates.util.ListUtil;
 import org.terasology.structureTemplates.util.transform.BlockRegionTransform;
 import org.terasology.world.BlockEntityRegistry;
 import org.terasology.world.block.BlockComponent;
@@ -181,8 +182,8 @@ public class AddItemsToChestSystem extends BaseComponentSystem {
                                                       AddItemsToChestComponent component) {
         StringBuilder sb = event.getStringBuilder();
         sb.append("    \"AddItemsToChest\": {\n");
-        sb.append("        \"chestsToFill\":[ {\n");
-        visitList(component.chestsToFill, (AddItemsToChestComponent.ChestToFill chestToFill, boolean lastChest) -> {
+        sb.append("        \"chestsToFill\": [\n");
+        ListUtil.visitList(component.chestsToFill, (AddItemsToChestComponent.ChestToFill chestToFill, boolean lastChest) -> {
             sb.append("            {\n");
             sb.append("                \"position\": [");
             sb.append(chestToFill.position.x);
@@ -192,7 +193,7 @@ public class AddItemsToChestSystem extends BaseComponentSystem {
             sb.append(chestToFill.position.z);
             sb.append("],\n");
             sb.append("                \"items\": [\n");
-            visitList(chestToFill.items, (AddItemsToChestComponent.Item item, boolean lastItem) ->  {
+            ListUtil.visitList(chestToFill.items, (AddItemsToChestComponent.Item item, boolean lastItem) ->  {
                 sb.append("                        ");
                 appendItemJson(sb, item);
                 if (lastItem) {
@@ -248,18 +249,6 @@ public class AddItemsToChestSystem extends BaseComponentSystem {
         sb.append("}");
     }
 
-    public static <E> void visitList(List<E> list, ListVisitor<E> visitor) {
-        int lastIndex = list.size() -1;
-        for (int i = 0; i < list.size(); i++) {
-            boolean last = (i == lastIndex);
-            visitor.visit(list.get(i), last);
-        }
-    }
 
-    @FunctionalInterface
-    public interface ListVisitor<T> {
-
-        public void visit(T item, boolean last);
-    }
 
 }

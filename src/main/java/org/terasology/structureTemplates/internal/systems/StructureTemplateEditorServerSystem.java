@@ -54,6 +54,7 @@ import org.terasology.structureTemplates.internal.events.CopyBlockRegionResultEv
 import org.terasology.structureTemplates.internal.events.CreateStructureSpawnItemRequest;
 import org.terasology.structureTemplates.internal.events.MakeBoxShapedRequest;
 import org.terasology.structureTemplates.internal.events.RequestPrefabSelection;
+import org.terasology.structureTemplates.util.ListUtil;
 import org.terasology.structureTemplates.util.RegionMergeUtil;
 import org.terasology.structureTemplates.util.transform.BlockRegionMovement;
 import org.terasology.structureTemplates.util.transform.BlockRegionTransform;
@@ -276,7 +277,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
                                                SpawnBlockRegionsComponent component) {
         StringBuilder sb = event.getStringBuilder();
         sb.append("    \"SpawnBlockRegions\": {\n");
-        sb.append("        \"regionsToFill\":[ {\n");
+        sb.append("        \"regionsToFill\": [\n");
         sb.append(formatAsString(component.regionsToFill));
         sb.append("        ]\n");
         sb.append("    },\n");
@@ -287,8 +288,9 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
                                                       ScheduleStructurePlacementComponent component) {
         StringBuilder sb = event.getStringBuilder();
         sb.append("    \"ScheduleStructurePlacement\": {\n");
-        sb.append("        \"placementsToSchedule\":[ {\n");
-        for (ScheduleStructurePlacementComponent.PlacementToSchedule placementToSchedule: component.placementsToSchedule) {
+        sb.append("        \"placementsToSchedule\": [\n");
+        ListUtil.visitList(component.placementsToSchedule,
+                (ScheduleStructurePlacementComponent.PlacementToSchedule placementToSchedule, boolean last)-> {
             sb.append("            {\n");
             sb.append("                \"structureTemplateType\": \"");
             sb.append(placementToSchedule.structureTemplateType.getUrn().toString());
@@ -298,13 +300,17 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
             sb.append("\",\n");
             sb.append("                \"position\": [");
             sb.append(placementToSchedule.position.x);
-            sb.append(",");
+            sb.append(", ");
             sb.append(placementToSchedule.position.y);
-            sb.append(",");
+            sb.append(", ");
             sb.append(placementToSchedule.position.z);
-            sb.append("            ]\n");
-            sb.append("        },\n");
-        }
+            sb.append("]\n");
+            if (last) {
+                sb.append("        }\n");
+            } else {
+                sb.append("        },\n");
+            }
+        });
         sb.append("        ]\n");
         sb.append("    },\n");
     }
@@ -441,7 +447,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
 
     static String formatAsString(List<RegionToFill> regionsToFill) {
         StringBuilder sb = new StringBuilder();
-        for (RegionToFill regionToFill: regionsToFill) {
+        ListUtil.visitList(regionsToFill, (RegionToFill regionToFill, boolean last) -> {
             sb.append("            { \"blockType\": \"");
             sb.append(regionToFill.blockType);
             sb.append("\", \"region\": { \"min\": [");
@@ -456,8 +462,12 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
             sb.append(regionToFill.region.sizeY());
             sb.append(", ");
             sb.append(regionToFill.region.sizeZ());
-            sb.append("]}},\n");
-        }
+            if (last) {
+                sb.append("]}}\n");
+            } else {
+                sb.append("]}},\n");
+            }
+        });
         return sb.toString();
     }
 

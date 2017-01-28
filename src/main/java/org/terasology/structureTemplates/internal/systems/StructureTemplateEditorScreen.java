@@ -32,6 +32,7 @@ import org.terasology.structureTemplates.internal.events.StructureTemplateString
 import org.terasology.structureTemplates.internal.events.CreateStructureSpawnItemRequest;
 import org.terasology.structureTemplates.internal.events.MakeBoxShapedRequest;
 import org.terasology.structureTemplates.internal.ui.StructureTemplateRegionScreen;
+import org.terasology.structureTemplates.util.ListUtil;
 import org.terasology.structureTemplates.util.RegionMergeUtil;
 import org.terasology.structureTemplates.util.transform.BlockRegionTransform;
 import org.terasology.world.block.BlockComponent;
@@ -181,11 +182,16 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("    \"CheckBlockRegionCondition\" : {\n");
         stringBuilder.append("        \"checksToPerform\": [\n");
-        for (Region3i region: regions) {
+        ListUtil.visitList(regions, (Region3i region, boolean last) -> {
             stringBuilder.append(String.format(
-                    "            {\"condition\": \"StructureTemplates:IsGroundLike\", \"region\" :{\"min\": [%d, %d, %d], \"size\": [%d, %d, %d]}}\n",
+                    "            {\"condition\": \"StructureTemplates:IsGroundLike\", \"region\" :{\"min\": [%d, %d, %d], \"size\": [%d, %d, %d]}}",
                     region.minX(),region.minY(), region.minZ(),region.sizeX(), region.sizeY(), region.sizeZ()));
-        }
+            if (last) {
+                stringBuilder.append("\n");
+            } else {
+                stringBuilder.append(",\n");
+            }
+        });
         stringBuilder.append("        ]\n");
         stringBuilder.append("    },\n");
         return stringBuilder.toString();
