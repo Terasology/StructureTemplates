@@ -17,30 +17,11 @@ package org.terasology.structureTemplates.components;
 
 import org.terasology.entitySystem.Component;
 import org.terasology.entitySystem.prefab.Prefab;
-import org.terasology.math.Side;
-import org.terasology.math.geom.Vector3i;
 
 /**
  * All structure spawning entities should have this component.
  */
 public class StructureTemplateComponent implements Component {
-    /**
-     * Describes on which side of the structure ( in global coordinate system) the front of the building is located.
-     * locatin (The confusing thing is that the global orientation is not EAST, WEST, NORTH and SOUTH but also of
-     * type Side....).
-     */
-    public Side front;
-    /**
-     *
-     * Warning: Not fully implemented
-     *
-     * TODO implement this properly or remove it.
-     *
-     * Describes where the spawn locatin is in the template coordinate system.
-     *
-     * e.g. the block that is at this position in the template will be placed at at the selected spawn location
-     */
-    public Vector3i spawnPosition = new Vector3i(0, 0, 0);
     /**
      * Prefab of the entitiy that represents the type of this structure spawner.
      */
