@@ -147,11 +147,9 @@ public class ScheduledStructureSpawnSystem extends BaseComponentSystem implement
         StructureTemplateComponent structureTemplateComponent = structureToSpawn.getComponent(
                 StructureTemplateComponent.class);
 
-        Vector3i relSpawnPosition = new Vector3i(structureTemplateComponent.spawnPosition);
-
         // TODO remove last parameter as it is a constant
         BlockRegionTransformationList transformList = createTransformForIncomingConnectionPoint(activeEntityDirection,
-                activeEntityLocation, relSpawnPosition, Side.FRONT);
+                activeEntityLocation, new Vector3i(0, 0, 0), Side.FRONT);
 
         CheckSpawnConditionEvent checkSpawnConditionEvent = new CheckSpawnConditionEvent(transformList);
         structureToSpawn.send(checkSpawnConditionEvent);
