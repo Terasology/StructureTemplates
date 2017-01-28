@@ -273,7 +273,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         }
     }
 
-    @ReceiveEvent
+    @ReceiveEvent(priority = EventPriority.PRIORITY_HIGH)
     public void onBuildTemplateStringWithBlockRegions(BuildStructureTemplateStringEvent event, EntityRef template,
                                                SpawnBlockRegionsComponent component) {
         StringBuilder sb = new StringBuilder();
