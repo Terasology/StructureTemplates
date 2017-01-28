@@ -180,7 +180,7 @@ public class AddItemsToChestSystem extends BaseComponentSystem {
     @ReceiveEvent
     public void onBuildTemplateStringWithBlockRegions(BuildStructureTemplateStringEvent event, EntityRef template,
                                                       AddItemsToChestComponent component) {
-        StringBuilder sb = event.getStringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("    \"AddItemsToChest\": {\n");
         sb.append("        \"chestsToFill\": [\n");
         ListUtil.visitList(component.chestsToFill, (AddItemsToChestComponent.ChestToFill chestToFill, boolean lastChest) -> {
@@ -210,7 +210,8 @@ public class AddItemsToChestSystem extends BaseComponentSystem {
             }
         });
         sb.append("        ]\n");
-        sb.append("    },\n");
+        sb.append("    }");
+        event.addJsonForComponent(sb.toString(), AddItemsToChestComponent.class);
     }
 
     private void appendItemJson(StringBuilder sb, AddItemsToChestComponent.Item item) {

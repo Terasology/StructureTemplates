@@ -15,20 +15,25 @@
  */
 package org.terasology.structureTemplates.internal.events;
 
+import org.terasology.entitySystem.Component;
 import org.terasology.entitySystem.event.Event;
+
+import java.util.LinkedHashMap;
 
 /**
  * Send this to a structure template in oder to get a json representation of it.
  * Gets used by the editor.
  */
 public class BuildStructureTemplateStringEvent implements Event{
-    private StringBuilder stringBuilder;
+    private LinkedHashMap<Class<? extends Component>, String> map = new LinkedHashMap<>();
 
-    public BuildStructureTemplateStringEvent(StringBuilder stringBuilder) {
-        this.stringBuilder = stringBuilder;
+    public LinkedHashMap<Class<? extends Component>, String> getMap() {
+        return map;
     }
 
-    public StringBuilder getStringBuilder() {
-        return stringBuilder;
+    public void addJsonForComponent(String stringRepresentation, Class<? extends Component> componentClass) {
+        map.put(componentClass, stringRepresentation);
     }
+
+
 }

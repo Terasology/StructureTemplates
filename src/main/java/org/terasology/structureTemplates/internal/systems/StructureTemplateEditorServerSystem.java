@@ -80,6 +80,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Handles the activation of the copyBlockRegionTool item.
@@ -275,18 +276,19 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
     @ReceiveEvent
     public void onBuildTemplateStringWithBlockRegions(BuildStructureTemplateStringEvent event, EntityRef template,
                                                SpawnBlockRegionsComponent component) {
-        StringBuilder sb = event.getStringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("    \"SpawnBlockRegions\": {\n");
         sb.append("        \"regionsToFill\": [\n");
         sb.append(formatAsString(component.regionsToFill));
         sb.append("        ]\n");
-        sb.append("    },\n");
+        sb.append("    }");
+        event.addJsonForComponent(sb.toString(), SpawnBlockRegionsComponent.class);
     }
 
     @ReceiveEvent
     public void onBuildTemplateStringWithBlockRegions(BuildStructureTemplateStringEvent event, EntityRef template,
                                                       ScheduleStructurePlacementComponent component) {
-        StringBuilder sb = event.getStringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("    \"ScheduleStructurePlacement\": {\n");
         sb.append("        \"placementsToSchedule\": [\n");
         ListUtil.visitList(component.placementsToSchedule,
@@ -312,7 +314,9 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
             }
         });
         sb.append("        ]\n");
-        sb.append("    },\n");
+        sb.append("    }");
+        event.addJsonForComponent(sb.toString(), ScheduleStructurePlacementComponent.class);
+
     }
 
     @ReceiveEvent
@@ -323,8 +327,9 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         addComponentsToTemplate(entity, structureTemplateEditorComponent, blockComponent, entityBuilder);
         EntityRef templateEntity = entityBuilder.build();
         StringBuilder sb = new StringBuilder();
-        templateEntity.send(new BuildStructureTemplateStringEvent(sb));
-        String textToSend = sb.toString();
+        BuildStructureTemplateStringEvent buildStringEvent = new BuildStructureTemplateStringEvent();
+        templateEntity.send(buildStringEvent);
+        String textToSend = buildStringEvent.getMap().values().stream().collect(Collectors.joining(",\n", "", "\n"));
         templateEntity.destroy();
 
         CopyBlockRegionResultEvent resultEvent = new CopyBlockRegionResultEvent(textToSend);
