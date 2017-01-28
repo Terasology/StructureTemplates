@@ -135,8 +135,8 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
 
     private void onMakeBoxShapedButton(UIWidget button) {
         EntityRef entity = getInteractionTarget();
-        StructureTemplateEditorComponent component = entity.getComponent(StructureTemplateEditorComponent.class);
-        Region3i absoluteRegion = getBoundingRegion(component.absoluteRegionsWithTemplate);
+        StructureTemplateOriginComponent component = entity.getComponent(StructureTemplateOriginComponent.class);
+        Region3i absoluteRegion = getBoundingRegion(component.absoluteTemplateRegions);
         StructureTemplateRegionScreen regionScreen = getManager().pushScreen(
                 "StructureTemplates:StructureTemplateRegionScreen", StructureTemplateRegionScreen.class);
 
@@ -168,14 +168,14 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
     // TODO add item that can do this job or introduce a better way that makes it superflous
     private void onCopyInGroundConditionButton(UIWidget button) {
         EntityRef entity = getInteractionTarget();
-        StructureTemplateEditorComponent component = entity.getComponent(StructureTemplateEditorComponent.class);
+        StructureTemplateOriginComponent component = entity.getComponent(StructureTemplateOriginComponent.class);
         List<Region3i> regionsOneHigher = Lists.newArrayList();
 
         BlockComponent blockComponent = entity.getComponent(BlockComponent.class);
         BlockRegionTransform transformToRelative = StructureTemplateEditorServerSystem.createAbsoluteToRelativeTransform(blockComponent);
 
 
-        for (Region3i absoluteRegion: component.absoluteRegionsWithTemplate) {
+        for (Region3i absoluteRegion: component.absoluteTemplateRegions) {
             Region3i relativeRegion = transformToRelative.transformRegion(absoluteRegion);
             Vector3i max = new Vector3i(relativeRegion.max());
             max.addY(1);

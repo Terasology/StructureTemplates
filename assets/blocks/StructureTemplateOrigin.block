@@ -7,16 +7,16 @@
   "shadowCasting": true,
   "attachmentAllowed": true,
   "hardness": 100,
-  "displayName": "structure template editor",
+  "displayName": "structure template origin",
   "rotation": "horizontal",
   "sounds": "none",
   "shape" : "engine:cube",
   "entity": {
-    "prefab": "StructureTemplates:structureTemplateEditor"
+    "prefab": "StructureTemplates:structureTemplateOrigin"
   },
   "tiles": {
-      "topBottom": "StructureTemplates:StructureTemplateEditorTopBottom",
-      "sides": "StructureTemplates:StructureTemplateEditorSides"
+      "topBottom": "StructureTemplates:StructureTemplateOriginTopBottom",
+      "sides": "StructureTemplates:StructureTemplateOriginSides"
   },
   "inventory": {
     "stackable": false,

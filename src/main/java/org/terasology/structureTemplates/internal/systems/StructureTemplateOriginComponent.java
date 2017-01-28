@@ -28,13 +28,13 @@ import java.util.List;
  * Used to describe an block region location
  */
 @ForceBlockActive
-public class StructureTemplateEditorComponent implements Component {
+public class StructureTemplateOriginComponent implements Component {
 
 
     /**
      * Edited regions in absolute coordinates
      */
     @Replicate(FieldReplicateType.SERVER_TO_CLIENT)
-    public List<Region3i> absoluteRegionsWithTemplate = Lists.newArrayList();
+    public List<Region3i> absoluteTemplateRegions = Lists.newArrayList();
 
 }

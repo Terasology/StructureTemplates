@@ -1,6 +1,6 @@
 {
   "Network" : {},
-  "StructureTemplateEditor": {
+  "StructureTemplateOrigin": {
   },
   "BlockPlaceholder": {
     "block":"engine:air"

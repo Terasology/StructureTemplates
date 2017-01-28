@@ -176,7 +176,7 @@ public class ToolboxScreen extends BaseInteractionScreen {
     }
 
     private ToolboxTree createStructureTemplatesSubTree() {
-        Optional<TextureRegionAsset> optionalTextureRegion = assetManager.getAsset("StructureTemplates:StructureTemplateEditor", TextureRegionAsset.class);
+        Optional<TextureRegionAsset> optionalTextureRegion = assetManager.getAsset("StructureTemplates:StructureTemplateOrigin", TextureRegionAsset.class);
         TextureRegion texture = optionalTextureRegion.get();
 
         ToolboxTree structureTemplatesTree = new ToolboxTree(new ToolboxTreeValue("Structure Templates", texture, null));

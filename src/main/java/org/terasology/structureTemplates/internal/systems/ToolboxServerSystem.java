@@ -138,7 +138,7 @@ public class ToolboxServerSystem extends BaseComponentSystem {
         if (itemComponent == null) {
             itemComponent = new ItemComponent();
         }
-        Optional<TextureRegionAsset> optionalIcon = assetManager.getAsset("StructureTemplates:StructureTemplateEditor", TextureRegionAsset.class);
+        Optional<TextureRegionAsset> optionalIcon = assetManager.getAsset("StructureTemplates:StructureTemplateOrigin", TextureRegionAsset.class);
         itemComponent.icon = optionalIcon.get();
         itemComponent.damageType = assetManager.getAsset("engine:physicalDamage", Prefab.class).get();
         itemComponent.pickupPrefab = assetManager.getAsset("engine:itemPickup", Prefab.class).get();

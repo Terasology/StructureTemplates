@@ -68,19 +68,19 @@ public class StructureTemplateEditorClientSystem extends BaseComponentSystem {
 
     @ReceiveEvent
     public void onAddedCopyBlockRegionComponent(OnAddedComponent event, EntityRef entity,
-                                                StructureTemplateEditorComponent component) {
+                                                StructureTemplateOriginComponent component) {
         updateHighlightedEditorEntity();
     }
 
     @ReceiveEvent
     public void onChangedCopyBlockRegionComponent(OnChangedComponent event, EntityRef entity,
-                                             StructureTemplateEditorComponent component) {
+                                             StructureTemplateOriginComponent component) {
         updateHighlightedEditorEntity();
     }
 
     @ReceiveEvent
     public void onBeforeRemoveCopyBlockRegionComponent(BeforeRemoveComponent event, EntityRef entity,
-                                                  StructureTemplateEditorComponent component) {
+                                                  StructureTemplateOriginComponent component) {
         if (entity.equals(highlightedEditorEntity)) {
             setHighlightedEditorEntity(EntityRef.NULL);
         }
@@ -151,10 +151,10 @@ public class StructureTemplateEditorClientSystem extends BaseComponentSystem {
 
     private List<Region3i> getRegionsToDraw() {
 
-        StructureTemplateEditorComponent structureTemplateEditorComponent = highlightedEditorEntity.getComponent(StructureTemplateEditorComponent.class);
-        if (structureTemplateEditorComponent == null) {
+        StructureTemplateOriginComponent structureTemplateOriginComponent = highlightedEditorEntity.getComponent(StructureTemplateOriginComponent.class);
+        if (structureTemplateOriginComponent == null) {
             return Collections.emptyList();
         }
-        return new ArrayList<>(structureTemplateEditorComponent.absoluteRegionsWithTemplate);
+        return new ArrayList<>(structureTemplateOriginComponent.absoluteTemplateRegions);
     }
 }
