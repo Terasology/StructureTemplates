@@ -3,6 +3,7 @@
     "DisplayName": {
         "name": "Toolbox"
     },
+    "Toolbox":{},
     "Item": {
         "icon": "StructureTemplates:Toolbox32x32"
     },

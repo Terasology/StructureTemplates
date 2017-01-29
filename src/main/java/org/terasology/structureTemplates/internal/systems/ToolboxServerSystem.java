@@ -39,6 +39,7 @@ import org.terasology.structureTemplates.events.BlockFromToolboxRequest;
 import org.terasology.structureTemplates.events.ItemFromToolboxRequest;
 import org.terasology.structureTemplates.events.StructureSpawnerFromToolboxRequest;
 import org.terasology.structureTemplates.events.StructureTemplateFromToolboxRequest;
+import org.terasology.structureTemplates.internal.components.ToolboxComponent;
 import org.terasology.world.block.BlockManager;
 import org.terasology.world.block.family.BlockFamily;
 import org.terasology.world.block.items.BlockItemFactory;
@@ -101,7 +102,7 @@ public class ToolboxServerSystem extends BaseComponentSystem {
         }
     }
 
-    @ReceiveEvent
+    @ReceiveEvent(components = ToolboxComponent.class)
     public void onStructureSpawnerFromToolboxRequest(StructureSpawnerFromToolboxRequest event, EntityRef toolboxEntity) {
         EntityRef owner = toolboxEntity.getOwner();
 
@@ -130,7 +131,7 @@ public class ToolboxServerSystem extends BaseComponentSystem {
     }
 
 
-    @ReceiveEvent
+    @ReceiveEvent(components = ToolboxComponent.class)
     public void onItemFromToolboxRequest(ItemFromToolboxRequest event, EntityRef toolboxEntity) {
         EntityRef owner = toolboxEntity.getOwner();
 
@@ -145,7 +146,7 @@ public class ToolboxServerSystem extends BaseComponentSystem {
         giveItemToOwnerOrDestroyItem(item, owner);
     }
 
-    @ReceiveEvent
+    @ReceiveEvent(components = ToolboxComponent.class)
     public void onStructureTemplateFromToolboxRequest(StructureTemplateFromToolboxRequest event, EntityRef toolboxEntity) {
         EntityRef owner = toolboxEntity.getOwner();
 
