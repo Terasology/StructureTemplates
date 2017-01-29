@@ -36,6 +36,7 @@ import org.terasology.rendering.assets.texture.TextureRegionAsset;
 import org.terasology.structureTemplates.components.SpawnStructureActionComponent;
 import org.terasology.structureTemplates.components.SpawnTemplateActionComponent;
 import org.terasology.structureTemplates.events.BlockFromToolboxRequest;
+import org.terasology.structureTemplates.events.ItemFromToolboxRequest;
 import org.terasology.structureTemplates.events.StructureSpawnerFromToolboxRequest;
 import org.terasology.structureTemplates.events.StructureTemplateFromToolboxRequest;
 import org.terasology.world.block.BlockManager;
@@ -128,6 +129,21 @@ public class ToolboxServerSystem extends BaseComponentSystem {
 
     }
 
+
+    @ReceiveEvent
+    public void onItemFromToolboxRequest(ItemFromToolboxRequest event, EntityRef toolboxEntity) {
+        EntityRef owner = toolboxEntity.getOwner();
+
+        Prefab itemPrefab = event.getItemPrefab();
+        EntityBuilder entityBuilder = entityManager.newBuilder(itemPrefab);
+        ItemComponent itemComponent = entityBuilder.getComponent(ItemComponent.class);
+        if (itemComponent == null) {
+            logger.error("Received request for {} which is not an item", itemPrefab);
+            return;
+        }
+        EntityRef item = entityBuilder.build();
+        giveItemToOwnerOrDestroyItem(item, owner);
+    }
 
     @ReceiveEvent
     public void onStructureTemplateFromToolboxRequest(StructureTemplateFromToolboxRequest event, EntityRef toolboxEntity) {
