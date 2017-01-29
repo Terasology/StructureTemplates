@@ -159,6 +159,10 @@ public class ToolboxServerSystem extends BaseComponentSystem {
         itemComponent.icon = optionalIcon.get();
         itemComponent.damageType = assetManager.getAsset("engine:physicalDamage", Prefab.class).get();
         itemComponent.pickupPrefab = assetManager.getAsset("engine:itemPickup", Prefab.class).get();
+        itemComponent.stackCount = 1;
+        itemComponent.stackId = "stack";
+        itemComponent.maxStackSize =1;
+        itemComponent.consumedOnUse = true;
         entityBuilder.addOrSaveComponent(itemComponent);
         DisplayNameComponent displayNameComponent = entityBuilder.getComponent(DisplayNameComponent.class);
         if (displayNameComponent == null) {

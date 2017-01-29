@@ -560,8 +560,6 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         StructureTemplateComponent newStructureTemplateComponent = componentLibrary.copy(structureTemplateComponentOfItem);
         placeOriginMarkerWithTemplateData(event, position, frontDirectionOfStructure, absoluteRegions,
                 newStructureTemplateComponent);
-        // TODO check if consuming event and making item consumable works too e.g. event.consume();
-        entity.destroy();
     }
 
     @ReceiveEvent(priority = EventPriority.PRIORITY_NORMAL)
