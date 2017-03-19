@@ -19,6 +19,7 @@ import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.prefab.Prefab;
 import org.terasology.entitySystem.prefab.PrefabManager;
 import org.terasology.logic.common.DisplayNameComponent;
+import org.terasology.logic.players.LocalPlayer;
 import org.terasology.registry.In;
 import org.terasology.rendering.nui.CoreScreenLayer;
 import org.terasology.rendering.nui.UIWidget;
@@ -51,6 +52,9 @@ public class StructureTemplatePropertiesScreen extends CoreScreenLayer {
 
     @In
     private PrefabManager prefabManager;
+
+    @In
+    private LocalPlayer localPlayer;
 
     public EntityRef getEditorEntity() {
         return editorEntity;
@@ -137,7 +141,7 @@ public class StructureTemplatePropertiesScreen extends CoreScreenLayer {
         } catch (NumberFormatException e) {
             spawnChance = 0;
         }
-        editorEntity.send(new RequestStructureTemplatePropertiesChange(selectedPrefab, spawnChance));
+        localPlayer.getCharacterEntity().send(new RequestStructureTemplatePropertiesChange(selectedPrefab, spawnChance));
 
     }
 }

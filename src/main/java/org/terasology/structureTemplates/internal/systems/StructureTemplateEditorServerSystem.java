@@ -30,6 +30,7 @@ import org.terasology.entitySystem.prefab.Prefab;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
+import org.terasology.logic.characters.CharacterComponent;
 import org.terasology.logic.common.ActivateEvent;
 import org.terasology.logic.health.DoDestroyEvent;
 import org.terasology.logic.inventory.InventoryManager;
@@ -37,7 +38,6 @@ import org.terasology.math.Region3i;
 import org.terasology.math.Side;
 import org.terasology.math.geom.Vector3f;
 import org.terasology.math.geom.Vector3i;
-import org.terasology.network.ClientComponent;
 import org.terasology.registry.In;
 import org.terasology.structureTemplates.components.BlockPlaceholderComponent;
 import org.terasology.structureTemplates.components.ScheduleStructurePlacementComponent;
@@ -202,31 +202,60 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
     }
 
     @ReceiveEvent
-    public void onRequestStructurePlaceholderPrefabSelection(RequestStructurePlaceholderPrefabSelection event, EntityRef entity,
-                                                             StructurePlaceholderComponent component) {
-        component.selectedPrefab = event.getPrefab();
-        entity.saveComponent(component);
+    public void onRequestStructurePlaceholderPrefabSelection(RequestStructurePlaceholderPrefabSelection event, EntityRef characterEntity,
+                                                             CharacterComponent characterComponent) {
+        EntityRef interactionTarget = characterComponent.authorizedInteractionTarget;
+        StructurePlaceholderComponent structurePlaceholderComponent = interactionTarget.getComponent(StructurePlaceholderComponent.class);
+        if (structurePlaceholderComponent == null) {
+            LOGGER.error("Ignored RequestStructurePlaceholderPrefabSelection event since there was no interaction with a structure placeholder");
+            return;
+        }
+
+        structurePlaceholderComponent.selectedPrefab = event.getPrefab();
+        interactionTarget.saveComponent(structurePlaceholderComponent);
     }
 
     @ReceiveEvent
-    public void onRequestStructureTemplatePropertiesChange(RequestStructureTemplatePropertiesChange event, EntityRef entity,
-                                                           StructureTemplateComponent component) {
-        component.type = event.getPrefab();
-        component.spawnChance = event.getSpawnChance();
-        entity.saveComponent(component);
+    public void onRequestStructureTemplatePropertiesChange(RequestStructureTemplatePropertiesChange event,
+                                                           EntityRef characterEntity, CharacterComponent characterComponent) {
+        EntityRef interactionTarget = characterComponent.authorizedInteractionTarget;
+        StructureTemplateComponent structureTemplateComponent = interactionTarget.getComponent(StructureTemplateComponent.class);
+        if (structureTemplateComponent == null) {
+            LOGGER.error("Ignored RequestStructureTemplatePropertiesChange event since there was no interaction with structure template ");
+            return;
+        }
+        if (!interactionTarget.hasComponent(StructureTemplateOriginComponent.class)) {
+            LOGGER.error("Ignored RequestStructureTemplatePropertiesChange event since there was no interaction with structure template origin");
+            return;
+        }
+
+        structureTemplateComponent.type = event.getPrefab();
+        structureTemplateComponent.spawnChance = event.getSpawnChance();
+        interactionTarget.saveComponent(structureTemplateComponent);
     }
 
     @ReceiveEvent
-    public void onCreateStructureSpawnItemRequest(CreateStructureSpawnItemRequest event, EntityRef entity,
-                            StructureTemplateOriginComponent structureTemplateOriginComponent,
-                            BlockComponent blockComponent) {
+    public void onCreateStructureSpawnItemRequest(CreateStructureSpawnItemRequest event, EntityRef characterEntity,
+                                                  CharacterComponent characterComponent) {
+        EntityRef structureTemplateOriginEntity = characterComponent.authorizedInteractionTarget;
+        StructureTemplateOriginComponent structureTemplateOriginComponent = structureTemplateOriginEntity.getComponent(StructureTemplateOriginComponent.class);
+        if (structureTemplateOriginComponent == null) {
+            LOGGER.error("Ignored CreateStructureSpawnItemRequest event since there was no interaction with a structure template origin block");
+            return;
+        }
+
+        BlockComponent blockComponent = structureTemplateOriginEntity.getComponent(BlockComponent.class);
+        if (blockComponent == null) {
+            LOGGER.error("Structure template origin was not a block, ignoring event");
+            return;
+        }
+
         EntityBuilder entityBuilder = entityManager.newBuilder("StructureTemplates:structureSpawnItem");
-        addComponentsToTemplate(entity, structureTemplateOriginComponent, blockComponent, entityBuilder);
+        addComponentsToTemplate(structureTemplateOriginEntity, structureTemplateOriginComponent, blockComponent, entityBuilder);
         EntityRef structureSpawnItem = entityBuilder.build();
 
-        EntityRef character = event.getInstigator().getOwner().getComponent(ClientComponent.class).character;
         // TODO check permission once PermissionManager is public API
-        inventoryManager.giveItem(character, EntityRef.NULL, structureSpawnItem);
+        inventoryManager.giveItem(characterEntity, EntityRef.NULL, structureSpawnItem);
     }
 
     private void addComponentsToTemplate(EntityRef editorEntity,
@@ -366,28 +395,45 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
     }
 
     @ReceiveEvent
-    public void onCopyBlockRegionRequest(StructureTemplateStringRequest event, EntityRef entity,
-                                         StructureTemplateOriginComponent structureTemplateOriginComponent,
-                                         BlockComponent blockComponent) {
+    public void onCopyBlockRegionRequest(StructureTemplateStringRequest event, EntityRef characterEntity,
+                                         CharacterComponent characterComponent) {
+        EntityRef structureTemplateOriginEntity = characterComponent.authorizedInteractionTarget;
+        StructureTemplateOriginComponent structureTemplateOriginComponent = structureTemplateOriginEntity.getComponent(StructureTemplateOriginComponent.class);
+        if (structureTemplateOriginComponent == null) {
+            LOGGER.error("Ignored StructureTemplateStringRequest event since there was no interaction with a structure template origin block");
+            return;
+        }
+
+        BlockComponent blockComponent = structureTemplateOriginEntity.getComponent(BlockComponent.class);
+        if (blockComponent == null) {
+            LOGGER.error("Structure template origin was not a block, ignoring event");
+            return;
+        }
+
         EntityBuilder entityBuilder = entityManager.newBuilder();
-        addComponentsToTemplate(entity, structureTemplateOriginComponent, blockComponent, entityBuilder);
+        addComponentsToTemplate(structureTemplateOriginEntity, structureTemplateOriginComponent, blockComponent, entityBuilder);
         EntityRef templateEntity = entityBuilder.build();
-        StringBuilder sb = new StringBuilder();
         BuildStructureTemplateStringEvent buildStringEvent = new BuildStructureTemplateStringEvent();
         templateEntity.send(buildStringEvent);
         String textToSend = buildStringEvent.getMap().values().stream().collect(Collectors.joining(",\n", "{\n", "\n}\n"));
         templateEntity.destroy();
 
         CopyBlockRegionResultEvent resultEvent = new CopyBlockRegionResultEvent(textToSend);
-        event.getInstigator().send(resultEvent);
+        characterEntity.send(resultEvent);
     }
 
 
     @ReceiveEvent
-    public void onMakeBoxShapedRequest(MakeBoxShapedRequest event, EntityRef entity,
-                                       StructureTemplateOriginComponent structureTemplateOriginComponent) {
+    public void onMakeBoxShapedRequest(MakeBoxShapedRequest event, EntityRef characterEntity,
+                                       CharacterComponent characterComponent) {
+        EntityRef structureTemplateOriginEntity = characterComponent.authorizedInteractionTarget;
+        StructureTemplateOriginComponent structureTemplateOriginComponent = structureTemplateOriginEntity.getComponent(StructureTemplateOriginComponent.class);
+        if (structureTemplateOriginComponent == null) {
+            LOGGER.error("Ignored MakeBoxShapedRequest event since there was no interaction with a structure template origin block");
+            return;
+        }
         structureTemplateOriginComponent.absoluteTemplateRegions = new ArrayList<>(Arrays.asList(event.getRegion()));
-        entity.saveComponent(structureTemplateOriginComponent);
+        structureTemplateOriginEntity.saveComponent(structureTemplateOriginComponent);
     }
 
 

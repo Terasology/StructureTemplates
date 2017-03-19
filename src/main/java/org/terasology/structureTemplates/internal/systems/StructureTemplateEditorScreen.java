@@ -148,7 +148,7 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
         regionScreen.setRegion(relativeRegion);
         regionScreen.setOkHandler((Region3i relativeNewRegion) -> {
             Region3i absoluteNewRegion = transformToAbsolute.transformRegion(relativeNewRegion);
-            getInteractionTarget().send(new MakeBoxShapedRequest(localPlayer.getCharacterEntity(), absoluteNewRegion));
+            localPlayer.getCharacterEntity().send(new MakeBoxShapedRequest(absoluteNewRegion));
         });
     }
 
@@ -209,11 +209,11 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
     }
 
     private void onCreateSpawnerButton(UIWidget button) {
-        getInteractionTarget().send(new CreateStructureSpawnItemRequest(localPlayer.getCharacterEntity()));
+        localPlayer.getCharacterEntity().send(new CreateStructureSpawnItemRequest());
     }
 
     private void onCopyToClipboardClicked(UIWidget button) {
-        getInteractionTarget().send(new StructureTemplateStringRequest(localPlayer.getCharacterEntity()));
+        localPlayer.getCharacterEntity().send(new StructureTemplateStringRequest());
     }
 
 }

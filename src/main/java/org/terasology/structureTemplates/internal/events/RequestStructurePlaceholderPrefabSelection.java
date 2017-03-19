@@ -21,8 +21,13 @@ import org.terasology.network.ServerEvent;
 import org.terasology.structureTemplates.internal.components.StructurePlaceholderComponent;
 
 /**
- * Requests that the server sets the selected prefab of the entities {@link StructurePlaceholderComponent}
- * to a specified value.
+ *
+ * The event gets sent to a character entity at the server.
+ *
+ * The server will then check if the character is interacting with a entity that has the {@link StructurePlaceholderComponent}.
+ *
+ * If that is the case that component will be updated with the values of the event.
+ *
  */
 @ServerEvent
 public class RequestStructurePlaceholderPrefabSelection implements Event {

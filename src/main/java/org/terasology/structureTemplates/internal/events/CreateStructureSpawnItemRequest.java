@@ -15,12 +15,12 @@
  */
 package org.terasology.structureTemplates.internal.events;
 
-import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.network.NetworkEvent;
 import org.terasology.network.ServerEvent;
 
 /**
- *
+ * The event gets sent to a character entity when the user has requested thh creatin of a structure spawn item in
+ * the structure template editor UI that shows up when the character interacts with the structure template origin block.
  */
 @ServerEvent
 public class CreateStructureSpawnItemRequest extends NetworkEvent {
@@ -28,7 +28,4 @@ public class CreateStructureSpawnItemRequest extends NetworkEvent {
     public CreateStructureSpawnItemRequest() {
     }
 
-    public CreateStructureSpawnItemRequest(EntityRef instigator) {
-        super(instigator);
-    }
 }

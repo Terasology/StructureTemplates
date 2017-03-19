@@ -20,8 +20,13 @@ import org.terasology.network.NetworkEvent;
 import org.terasology.network.ServerEvent;
 
 /**
- * Requests the server to return a structure template in json form of the structure template editor
- * to which this event got sent. The event gets trigged by a button in the structure template editor.
+ * The event gets sent to a character entity at the server.
+ *
+ * The server will then check if the character is interacting with a structure template editor/origin.
+ *
+ * If that is the case then it will return the json representation of the structure template.
+ *
+ * The event gets trigged by a button in the structure template editor.
  *
  */
 @ServerEvent
@@ -29,7 +34,4 @@ public class StructureTemplateStringRequest extends NetworkEvent {
     public StructureTemplateStringRequest() {
     }
 
-    public StructureTemplateStringRequest(EntityRef instigator) {
-        super(instigator);
-    }
 }

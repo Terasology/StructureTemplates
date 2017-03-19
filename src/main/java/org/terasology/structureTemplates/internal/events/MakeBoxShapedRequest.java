@@ -15,13 +15,18 @@
  */
 package org.terasology.structureTemplates.internal.events;
 
-import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.math.Region3i;
 import org.terasology.network.NetworkEvent;
 import org.terasology.network.ServerEvent;
+import org.terasology.structureTemplates.internal.systems.StructureTemplateOriginComponent;
 
 /**
- * Sent by UI to server when the user clicks on the "Make box shaped" button in structure template editor.
+ * The event gets sent to a character entity at the server.
+ *
+ * The server will then check if the character is interacting with a entity that has the
+ * {@link StructureTemplateOriginComponent}.
+ *
+ * If that is the case that component will be updated with to have only the specified region
  */
 @ServerEvent
 public class MakeBoxShapedRequest extends NetworkEvent {
@@ -29,8 +34,7 @@ public class MakeBoxShapedRequest extends NetworkEvent {
     public MakeBoxShapedRequest() {
     }
 
-    public MakeBoxShapedRequest(EntityRef instigator, Region3i region) {
-        super(instigator);
+    public MakeBoxShapedRequest(Region3i region) {
         this.region = region;
     }
 

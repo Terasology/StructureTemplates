@@ -19,6 +19,7 @@ import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.prefab.Prefab;
 import org.terasology.entitySystem.prefab.PrefabManager;
 import org.terasology.logic.common.DisplayNameComponent;
+import org.terasology.logic.players.LocalPlayer;
 import org.terasology.registry.In;
 import org.terasology.rendering.nui.BaseInteractionScreen;
 import org.terasology.rendering.nui.UIWidget;
@@ -48,6 +49,10 @@ public class StructurePlaceholderScreen extends BaseInteractionScreen {
 
     @In
     private PrefabManager prefabManager;
+
+    @In
+    private LocalPlayer localPlayer;
+
 
     @Override
     protected void initializeWithInteractionTarget(EntityRef interactionTarget) {
@@ -88,7 +93,7 @@ public class StructurePlaceholderScreen extends BaseInteractionScreen {
                 @Override
                 public void set(Prefab value) {
                     selectedPrefab = value;
-                    getInteractionTarget().send(new RequestStructurePlaceholderPrefabSelection(selectedPrefab));
+                    localPlayer.getCharacterEntity().send(new RequestStructurePlaceholderPrefabSelection(selectedPrefab));
                 }
             });
         }
