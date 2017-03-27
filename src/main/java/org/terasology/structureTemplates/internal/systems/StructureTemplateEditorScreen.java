@@ -16,18 +16,22 @@
 package org.terasology.structureTemplates.internal.systems;
 
 import com.google.common.collect.Lists;
+import org.terasology.entitySystem.entity.EntityBuilder;
+import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.logic.clipboard.ClipboardManager;
 import org.terasology.logic.players.LocalPlayer;
 import org.terasology.math.Region3i;
 import org.terasology.math.geom.Vector3i;
+import org.terasology.network.NetworkComponent;
 import org.terasology.registry.In;
 import org.terasology.rendering.nui.BaseInteractionScreen;
 import org.terasology.rendering.nui.UIWidget;
 import org.terasology.rendering.nui.databinding.Binding;
 import org.terasology.rendering.nui.widgets.UIButton;
 import org.terasology.rendering.nui.widgets.UICheckbox;
-import org.terasology.structureTemplates.internal.components.EditsCopyRegionComponent;
+import org.terasology.structureTemplates.internal.components.EditTemplateRegionProcessComponent;
+import org.terasology.structureTemplates.internal.components.EditingUserComponent;
 import org.terasology.structureTemplates.internal.events.CreateStructureSpawnItemRequest;
 import org.terasology.structureTemplates.internal.events.MakeBoxShapedRequest;
 import org.terasology.structureTemplates.internal.events.StructureTemplateStringRequest;
@@ -53,6 +57,9 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
 
     @In
     private ClipboardManager clipboardManager;
+
+    @In
+    private EntityManager entityManager;
 
 
     @In
@@ -98,35 +105,60 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
                         @Override
                         public Boolean get() {
                             EntityRef client = localPlayer.getClientEntity();
-                            EditsCopyRegionComponent component = client.getComponent(EditsCopyRegionComponent.class);
-                            if (component == null) {
+                            EditingUserComponent editingUserComponent = client.getComponent(EditingUserComponent.class);
+                            if (editingUserComponent == null) {
                                 return Boolean.FALSE;
                             }
-                            return (component.structureTemplateEditor.equals(getInteractionTarget()));
+                            EditTemplateRegionProcessComponent editProcessComponent = editingUserComponent.editProcessEntity.getComponent(EditTemplateRegionProcessComponent.class);
+                            return (editProcessComponent.structureTemplateEditor.equals(getInteractionTarget()));
                         }
 
                         @Override
                         public void set(Boolean value) {
                             EntityRef client = localPlayer.getClientEntity();
                             if (Boolean.TRUE.equals(value)) {
-
-                                EditsCopyRegionComponent component = client.getComponent(EditsCopyRegionComponent.class);
-                                if (component == null) {
-                                    component = new EditsCopyRegionComponent();
-                                }
-                                component.structureTemplateEditor = getInteractionTarget();
-                                client.addOrSaveComponent(component);
+                                startEditing(client);
                             } else {
-                                EditsCopyRegionComponent component = client.getComponent(EditsCopyRegionComponent.class);
-                                if (component.structureTemplateEditor.equals(getInteractionTarget())) {
-                                    client.removeComponent(EditsCopyRegionComponent.class);
-                                }
+                                stopEditing(client);
                             }
                         }
-            });
+
+
+                    });
         }
 
     }
+
+    private void stopEditing(EntityRef client) {
+        EditingUserComponent editingUserComponent = client.getComponent(EditingUserComponent.class);
+        if (editingUserComponent != null) {
+            EditTemplateRegionProcessComponent editProcessComponent = editingUserComponent.editProcessEntity.getComponent(EditTemplateRegionProcessComponent.class);
+            if (editProcessComponent != null && editProcessComponent.structureTemplateEditor.equals(getInteractionTarget())) {
+                editingUserComponent.editProcessEntity.destroy();
+                client.removeComponent(EditingUserComponent.class);
+            }
+        }
+    }
+
+    private void startEditing(EntityRef client) {
+        EntityBuilder editProcessBuilder = entityManager.newBuilder();
+        editProcessBuilder.setPersistent(false);
+        editProcessBuilder.addComponent(new NetworkComponent());
+
+        EditTemplateRegionProcessComponent editTemplateRegionProcessComponent = new EditTemplateRegionProcessComponent();
+        editTemplateRegionProcessComponent.structureTemplateEditor = getInteractionTarget();
+        editProcessBuilder.addComponent(editTemplateRegionProcessComponent);
+
+        EditingUserComponent editingUserComponent = client.getComponent(EditingUserComponent.class);
+        if (editingUserComponent == null) {
+            editingUserComponent = new EditingUserComponent();
+        } else {
+            editingUserComponent.editProcessEntity.destroy();
+        }
+        editingUserComponent.editProcessEntity = editProcessBuilder.build();
+        client.addOrSaveComponent(editingUserComponent);
+    }
+
     private void onEditTemplatePropertiesButton(UIWidget button) {
         StructureTemplatePropertiesScreen screen = getManager().pushScreen("StructureTemplates:StructureTemplatePropertiesScreen", StructureTemplatePropertiesScreen.class);
         screen.setEditorEntity(getInteractionTarget());

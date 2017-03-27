@@ -32,7 +32,8 @@ import org.terasology.math.Region3i;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.registry.In;
 import org.terasology.rendering.logic.RegionOutlineComponent;
-import org.terasology.structureTemplates.internal.components.EditsCopyRegionComponent;
+import org.terasology.structureTemplates.internal.components.EditTemplateRegionProcessComponent;
+import org.terasology.structureTemplates.internal.components.EditingUserComponent;
 import org.terasology.structureTemplates.internal.events.CopyBlockRegionResultEvent;
 
 import java.util.ArrayList;
@@ -90,19 +91,19 @@ public class StructureTemplateEditorClientSystem extends BaseComponentSystem {
 
     @ReceiveEvent
     public void onAddedEditsCopyRegionComponent(OnAddedComponent event, EntityRef entity,
-                                                EditsCopyRegionComponent component) {
+                                                EditingUserComponent component) {
         updateHighlightedEditorEntity();
     }
 
     @ReceiveEvent
     public void onChangedEditsCopyRegionComponent(OnChangedComponent event, EntityRef entity,
-                                                  EditsCopyRegionComponent component) {
+                                                  EditingUserComponent component) {
         updateHighlightedEditorEntity();
     }
 
     @ReceiveEvent
     public void onBeforeRemoveEditsCopyRegionComponent(BeforeRemoveComponent event, EntityRef entity,
-                                                       EditsCopyRegionComponent component) {
+                                                       EditingUserComponent component) {
         if (entity.equals(locatPlayer.getClientEntity())) {
             setHighlightedEditorEntity(EntityRef.NULL);
         }
@@ -138,14 +139,23 @@ public class StructureTemplateEditorClientSystem extends BaseComponentSystem {
     }
 
     private void updateHighlightedEditorEntity() {
+        setHighlightedEditorEntity(determineEditorEntityToHighLight());
+    }
+
+    private EntityRef determineEditorEntityToHighLight() {
         EntityRef clientEntity = locatPlayer.getClientEntity();
 
-        EditsCopyRegionComponent editsCopyRegionComponent = clientEntity.getComponent(EditsCopyRegionComponent.class);
-        if (editsCopyRegionComponent == null) {
-            setHighlightedEditorEntity(EntityRef.NULL);
-        } else {
-            setHighlightedEditorEntity(editsCopyRegionComponent.structureTemplateEditor);
+        EditingUserComponent editingUserComponent = clientEntity.getComponent(EditingUserComponent.class);
+        if (editingUserComponent == null) {
+            return EntityRef.NULL;
         }
+
+        EntityRef editProcessEntity = editingUserComponent.editProcessEntity;
+        EditTemplateRegionProcessComponent editTemplateRegionProcessComponent = editProcessEntity.getComponent(EditTemplateRegionProcessComponent.class);
+        if (editTemplateRegionProcessComponent == null) {
+            return EntityRef.NULL;
+        }
+        return editTemplateRegionProcessComponent.structureTemplateEditor;
     }
 
 

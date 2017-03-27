@@ -47,7 +47,8 @@ import org.terasology.structureTemplates.components.SpawnTemplateActionComponent
 import org.terasology.structureTemplates.components.StructureTemplateComponent;
 import org.terasology.structureTemplates.events.BuildStructureTemplateEntityEvent;
 import org.terasology.structureTemplates.events.SpawnTemplateEvent;
-import org.terasology.structureTemplates.internal.components.EditsCopyRegionComponent;
+import org.terasology.structureTemplates.internal.components.EditTemplateRegionProcessComponent;
+import org.terasology.structureTemplates.internal.components.EditingUserComponent;
 import org.terasology.structureTemplates.internal.components.StructurePlaceholderComponent;
 import org.terasology.structureTemplates.internal.events.BuildStructureTemplateStringEvent;
 import org.terasology.structureTemplates.internal.events.CopyBlockRegionResultEvent;
@@ -156,11 +157,17 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
     @ReceiveEvent
     public void updateCopyRegionOnBlockPlacement(PlaceBlocks placeBlocks, EntityRef world) {
         EntityRef player = placeBlocks.getInstigator().getOwner();
-        EditsCopyRegionComponent editsCopyRegionComponent = player.getComponent(EditsCopyRegionComponent.class);
-        if (editsCopyRegionComponent == null) {
+        EditingUserComponent editingUserComponent = player.getComponent(EditingUserComponent.class);
+        if (editingUserComponent == null) {
             return;
         }
-        EntityRef editorEnitity = editsCopyRegionComponent.structureTemplateEditor;
+
+        EntityRef editProcessEntity = editingUserComponent.editProcessEntity;
+        EditTemplateRegionProcessComponent editTemplateRegionProcessComponent = editProcessEntity.getComponent(EditTemplateRegionProcessComponent.class);
+        if (editTemplateRegionProcessComponent == null) {
+            return;
+        }
+        EntityRef editorEnitity = editTemplateRegionProcessComponent.structureTemplateEditor;
         StructureTemplateOriginComponent editorComponent = editorEnitity.getComponent(StructureTemplateOriginComponent.class);
         if (editorComponent == null) {
             return; // can happen if entity got destroyed
@@ -180,12 +187,17 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
     @ReceiveEvent
     public void onDestroyed(DoDestroyEvent event, EntityRef entity, BlockComponent blockComponent) {
         EntityRef player = event.getInstigator().getOwner();
-        EditsCopyRegionComponent editsCopyRegionComponent = player.getComponent(EditsCopyRegionComponent.class);
-        if (editsCopyRegionComponent == null) {
+        EditingUserComponent editingUserComponent = player.getComponent(EditingUserComponent.class);
+        if (editingUserComponent == null) {
             return;
         }
 
-        EntityRef editorEnitity = editsCopyRegionComponent.structureTemplateEditor;
+        EntityRef editProcessEntity = editingUserComponent.editProcessEntity;
+        EditTemplateRegionProcessComponent editTemplateRegionProcessComponent = editProcessEntity.getComponent(EditTemplateRegionProcessComponent.class);
+        if (editTemplateRegionProcessComponent == null) {
+            return;
+        }
+        EntityRef editorEnitity = editTemplateRegionProcessComponent.structureTemplateEditor;
         StructureTemplateOriginComponent editorComponent = editorEnitity.getComponent(StructureTemplateOriginComponent.class);
         if (editorComponent == null) {
             return; // can happen if entity got destroyed

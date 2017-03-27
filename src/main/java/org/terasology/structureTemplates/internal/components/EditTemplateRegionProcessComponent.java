@@ -23,7 +23,9 @@ import org.terasology.network.Replicate;
 /**
  * Gets added to a client entity when that client decides to edit the copy region of a structure template..
  */
-public class EditsCopyRegionComponent implements Component {
+public class EditTemplateRegionProcessComponent implements Component {
     @Replicate(FieldReplicateType.OWNER_TO_SERVER)
     public EntityRef structureTemplateEditor = EntityRef.NULL;
+
+
 }
