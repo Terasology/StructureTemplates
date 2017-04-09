@@ -48,7 +48,7 @@
               "contents": [
                 {
                   "type": "UIButton",
-                  "text": "Place Wall",
+                  "text": "Replace Wall",
                   "id": "placeWallButton",
                   "layoutInfo": {
                     "use-content-height": true,
