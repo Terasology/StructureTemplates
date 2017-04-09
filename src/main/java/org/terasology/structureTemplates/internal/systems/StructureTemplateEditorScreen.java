@@ -53,7 +53,8 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
     private UIButton copyToClipboardButton;
     private UIButton createSpawnerButton;
     private UIButton copyInGroundConditionButton;
-    private UICheckbox editCopyRegionsCheckBox;
+    private UICheckbox recordBlockAdditionCheckBox;
+    private UICheckbox recordBlockRemovalCheckBox;
 
     @In
     private ClipboardManager clipboardManager;
@@ -98,26 +99,48 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
             makeBoxShapedButton.subscribe(this::onMakeBoxShapedButton);
         }
 
-        editCopyRegionsCheckBox = find("editCopyRegionsCheckBox", UICheckbox.class);
-        if (editCopyRegionsCheckBox != null) {
-            editCopyRegionsCheckBox.bindChecked(
+        recordBlockAdditionCheckBox = find("recordBlockAdditionCheckBox", UICheckbox.class);
+        recordBlockRemovalCheckBox = find("recordBlockRemovalCheckBox", UICheckbox.class);
+        if (recordBlockAdditionCheckBox != null && recordBlockRemovalCheckBox != null) {
+            recordBlockAdditionCheckBox.bindChecked(
                     new Binding<Boolean>() {
                         @Override
                         public Boolean get() {
-                            EntityRef client = localPlayer.getClientEntity();
-                            EditingUserComponent editingUserComponent = client.getComponent(EditingUserComponent.class);
-                            if (editingUserComponent == null) {
+                            EditTemplateRegionProcessComponent editProcessComponent = findEditProcessForInteractionTarget();
+                            if (editProcessComponent == null) {
                                 return Boolean.FALSE;
                             }
-                            EditTemplateRegionProcessComponent editProcessComponent = editingUserComponent.editProcessEntity.getComponent(EditTemplateRegionProcessComponent.class);
-                            return (editProcessComponent.structureTemplateEditor.equals(getInteractionTarget()));
+                            return editProcessComponent.recordBlockAddition;
                         }
 
                         @Override
                         public void set(Boolean value) {
                             EntityRef client = localPlayer.getClientEntity();
-                            if (Boolean.TRUE.equals(value)) {
-                                startEditing(client);
+                            if (value || recordBlockRemovalCheckBox.isChecked()) {
+                                startEditing(client, value, recordBlockRemovalCheckBox.isChecked());
+                            } else {
+                                stopEditing(client);
+                            }
+                        }
+
+
+                    });
+            recordBlockRemovalCheckBox.bindChecked(
+                    new Binding<Boolean>() {
+                        @Override
+                        public Boolean get() {
+                            EditTemplateRegionProcessComponent editProcessComponent = findEditProcessForInteractionTarget();
+                            if (editProcessComponent == null) {
+                                return Boolean.FALSE;
+                            }
+                            return editProcessComponent.recordBlockRemoval;
+                        }
+
+                        @Override
+                        public void set(Boolean value) {
+                            EntityRef client = localPlayer.getClientEntity();
+                            if (recordBlockAdditionCheckBox.isChecked() || value) {
+                                startEditing(client, recordBlockAdditionCheckBox.isChecked(), value);
                             } else {
                                 stopEditing(client);
                             }
@@ -127,6 +150,22 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
                     });
         }
 
+    }
+
+    /**
+     * Can return null.
+     */
+    private EditTemplateRegionProcessComponent findEditProcessForInteractionTarget() {
+        EntityRef client = localPlayer.getClientEntity();
+        EditingUserComponent editingUserComponent = client.getComponent(EditingUserComponent.class);
+        if (editingUserComponent == null) {
+            return null;
+        }
+        EditTemplateRegionProcessComponent editProcessComponent = editingUserComponent.editProcessEntity.getComponent(EditTemplateRegionProcessComponent.class);
+        if  (!editProcessComponent.structureTemplateEditor.equals(getInteractionTarget())) {
+            return null;
+        }
+        return editProcessComponent;
     }
 
     private void stopEditing(EntityRef client) {
@@ -140,13 +179,15 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
         }
     }
 
-    private void startEditing(EntityRef client) {
+    private void startEditing(EntityRef client, boolean recordAddition, boolean recordRemoval) {
         EntityBuilder editProcessBuilder = entityManager.newBuilder();
         editProcessBuilder.setPersistent(false);
         editProcessBuilder.addComponent(new NetworkComponent());
 
         EditTemplateRegionProcessComponent editTemplateRegionProcessComponent = new EditTemplateRegionProcessComponent();
         editTemplateRegionProcessComponent.structureTemplateEditor = getInteractionTarget();
+        editTemplateRegionProcessComponent.recordBlockAddition = recordAddition;
+        editTemplateRegionProcessComponent.recordBlockRemoval = recordRemoval;
         editProcessBuilder.addComponent(editTemplateRegionProcessComponent);
 
         EditingUserComponent editingUserComponent = client.getComponent(EditingUserComponent.class);

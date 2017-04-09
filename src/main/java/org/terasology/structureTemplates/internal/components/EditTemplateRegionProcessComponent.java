@@ -27,5 +27,9 @@ public class EditTemplateRegionProcessComponent implements Component {
     @Replicate(FieldReplicateType.OWNER_TO_SERVER)
     public EntityRef structureTemplateEditor = EntityRef.NULL;
 
+    @Replicate(FieldReplicateType.OWNER_TO_SERVER)
+    public boolean recordBlockAddition;
 
+    @Replicate(FieldReplicateType.OWNER_TO_SERVER)
+    public boolean recordBlockRemoval;
 }

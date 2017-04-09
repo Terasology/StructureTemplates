@@ -77,6 +77,7 @@ import org.terasology.world.block.items.OnBlockToItem;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -172,17 +173,13 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         if (editorComponent == null) {
             return; // can happen if entity got destroyed
         }
-        List<Region3i> originalRegions = editorComponent.absoluteTemplateRegions;
-        Set<Vector3i> positionsInTemplate = RegionMergeUtil.positionsOfRegions(originalRegions);
-        if (positionsInTemplate.containsAll(placeBlocks.getBlocks().keySet())) {
-            return; // nothing to do
+        if (editTemplateRegionProcessComponent.recordBlockAddition) {
+            addBlockPositionsToTemplate(placeBlocks.getBlocks().keySet(), editorEnitity, editorComponent);
         }
-        positionsInTemplate.addAll(placeBlocks.getBlocks().keySet());
-        List<Region3i> newTemplateRegions = RegionMergeUtil.mergePositionsIntoRegions(positionsInTemplate);
-        editorComponent.absoluteTemplateRegions = newTemplateRegions;
-        editorEnitity.saveComponent(editorComponent);
+        if (editTemplateRegionProcessComponent.recordBlockRemoval && !editTemplateRegionProcessComponent.recordBlockAddition) {
+            removeBlockPositionsFromTemplate(placeBlocks.getBlocks().keySet(), editorEnitity, editorComponent);
+        }
     }
-
 
     @ReceiveEvent
     public void onDestroyed(DoDestroyEvent event, EntityRef entity, BlockComponent blockComponent) {
@@ -202,15 +199,39 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         if (editorComponent == null) {
             return; // can happen if entity got destroyed
         }
-        List<Region3i> originalRegions = editorComponent.absoluteTemplateRegions;
-        Set<Vector3i> positionsInTemplate = RegionMergeUtil.positionsOfRegions(originalRegions);
-        if (!positionsInTemplate.contains(blockComponent.getPosition())) {
-            return; // nothing to do
+        Set<Vector3i> positionSet = Collections.singleton(blockComponent.getPosition());
+        if (editTemplateRegionProcessComponent.recordBlockAddition && !editTemplateRegionProcessComponent.recordBlockRemoval) {
+            removeBlockPositionsFromTemplate(positionSet, editorEnitity, editorComponent);
         }
-        positionsInTemplate.remove(blockComponent.getPosition());
-        List<Region3i> newTemplateRegions = RegionMergeUtil.mergePositionsIntoRegions(positionsInTemplate);
-        editorComponent.absoluteTemplateRegions = newTemplateRegions;
-        editorEnitity.saveComponent(editorComponent);
+        if (editTemplateRegionProcessComponent.recordBlockRemoval) {
+            addBlockPositionsToTemplate(positionSet, editorEnitity, editorComponent);
+        }
+    }
+
+    private void addBlockPositionsToTemplate(Set<Vector3i> positions, EntityRef templateEnitity, StructureTemplateOriginComponent templateComponent) {
+        List<Region3i> originalRegions = templateComponent.absoluteTemplateRegions;
+        Set<Vector3i> positionsInTemplate = RegionMergeUtil.positionsOfRegions(originalRegions);
+        if (positionsInTemplate.containsAll(positions)) {
+            // nothing to do
+        } else {
+            positionsInTemplate.addAll(positions);
+            List<Region3i> newTemplateRegions = RegionMergeUtil.mergePositionsIntoRegions(positionsInTemplate);
+            templateComponent.absoluteTemplateRegions = newTemplateRegions;
+            templateEnitity.saveComponent(templateComponent);
+        }
+    }
+
+    private void removeBlockPositionsFromTemplate(Set<Vector3i> positions, EntityRef templateEntity, StructureTemplateOriginComponent templateComponent) {
+        List<Region3i> originalRegions = templateComponent.absoluteTemplateRegions;
+        Set<Vector3i> positionsInTemplate = RegionMergeUtil.positionsOfRegions(originalRegions);
+        if (!positionsInTemplate.containsAll(positions)) {
+            // nothing to do
+        } else {
+            positionsInTemplate.removeAll(positions);
+            List<Region3i> newTemplateRegions = RegionMergeUtil.mergePositionsIntoRegions(positionsInTemplate);
+            templateComponent.absoluteTemplateRegions = newTemplateRegions;
+            templateEntity.saveComponent(templateComponent);
+        }
     }
 
     @ReceiveEvent

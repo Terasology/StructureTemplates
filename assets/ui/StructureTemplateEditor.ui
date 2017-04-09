@@ -48,15 +48,38 @@
               "contents": [
                 {
                   "type": "engine:UICheckbox",
-                  "id": "editCopyRegionsCheckBox",
+                  "id": "recordBlockAdditionCheckBox",
                   "layoutInfo": {
                     "relativeWidth": 0.1
                   }
                 },
                 {
                   "type": "engine:UILabel",
-                  "layoutInfo": {},
-                  "text": "Update region on block placement"
+                  "layoutInfo": {
+                    "useContentWidth": true
+                  },
+                  "text": "Record block addition"
+                }
+              ]
+            },
+            {
+              "type": "engine:RowLayout",
+              "id": "newWidget",
+              "layoutInfo": {},
+              "contents": [
+                {
+                  "type": "engine:UICheckbox",
+                  "id": "recordBlockRemovalCheckBox",
+                  "layoutInfo": {
+                    "relativeWidth": 0.1
+                  }
+                },
+                {
+                  "type": "engine:UILabel",
+                  "layoutInfo": {
+                    "useContentWidth": true
+                  },
+                  "text": "Record block removal"
                 }
               ]
             }
