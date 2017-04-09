@@ -1,0 +1,93 @@
+{
+  "type": "AddWallScreen",
+  "contents": {
+    "type": "RelativeLayout",
+    "contents": [
+      {
+        "type": "engine:UIBox",
+        "layoutInfo": {
+          "width": 400,
+          "height": 100,
+          "position-vertical-center": {},
+          "position-horizontal-center": {}
+        },
+        "content": {
+          "type": "RelativeLayout",
+          "layoutInfo": {},
+          "contents": [
+            {
+              "type": "RowLayout",
+              "contents": [
+                {
+                  "type": "UILabel",
+                  "text": "Block: ",
+                  "layoutInfo": {
+                    "useContentWidth": true
+                  }
+                },
+                {
+                  "type": "UIDropdownScrollable",
+                  "multiline": false,
+                  "id": "comboBox"
+                }
+              ],
+              "layoutInfo": {
+                "position-top": {},
+                "position-left": {
+                  "offset": 5
+                },
+                "position-right": {
+                  "offset": 5
+                },
+                "height": 30
+              },
+              "id": "header"
+            },
+            {
+              "type": "RelativeLayout",
+              "contents": [
+                {
+                  "type": "UIButton",
+                  "text": "Place Wall",
+                  "id": "placeWallButton",
+                  "layoutInfo": {
+                    "use-content-height": true,
+                    "use-content-width": true,
+                    "position-right": {},
+                    "position-bottom": {}
+                  }
+                },
+                {
+                  "type": "UIButton",
+                  "text": "Cancel",
+                  "id": "cancelButton",
+                  "layoutInfo": {
+                    "use-content-height": true,
+                    "use-content-width": true,
+                    "position-right": {
+                      "widget": "placeWallButton",
+                      "target": "LEFT",
+                      "offset": 5
+                    },
+                    "position-bottom": {}
+                  }
+                }
+              ],
+              "layoutInfo": {
+                "position-right": {
+                  "offset": 5
+                },
+                "position-bottom": {
+                  "target": "BOTTOM"
+                },
+                "use-content-height": true,
+                "use-content-width": true
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "skin": "engine:default"
+}

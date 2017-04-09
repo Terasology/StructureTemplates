@@ -1,0 +1,16 @@
+{
+    "parent": "engine:iconItem",
+    "DisplayName": {
+        "name": "Wall Adder",
+        "description": "Adds a wall to a structure template"
+    },
+    "WallAdderItem":{},
+    "Item": {
+        "icon": "StructureTemplates:wallAdder"
+    },
+    "Network":{},
+    "InteractionTarget": {},
+    "InteractionScreen": {
+        "screen": "StructureTemplates:AddWallScreen"
+    }
+}
