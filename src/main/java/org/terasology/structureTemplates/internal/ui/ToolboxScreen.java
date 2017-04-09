@@ -184,8 +184,19 @@ public class ToolboxScreen extends BaseInteractionScreen {
         tree.addChild(createBlockNode(new BlockUri("StructureTemplates:StructureTemplateOrigin")));
         tree.addChild(createItemNode(getPrefab("StructureTemplates:StructureTemplateGenerator")));
         tree.addChild(createBlockNode(new BlockUri("StructureTemplates:StructurePlaceholder")));
+        tree.addChild(createItemNodeWithIcon(getPrefab("StructureTemplates:WallReplacer"), "StructureTemplates:WallReplacer16x16"));
 
         return tree;
+    }
+
+
+
+    private ToolboxTree createItemNodeWithIcon(Prefab itemPrefab, String iconUrn) {
+        ItemComponent itemComponent = itemPrefab.getComponent(ItemComponent.class);
+        TextureRegionAsset<?> icon = assetManager.getAsset(iconUrn, Texture.class).get();
+        String text = itemPrefab.getUrn().toString();
+        return new ToolboxTree(new ToolboxTreeValue(text, icon,
+                () -> new ItemFromToolboxRequest(itemPrefab)));
     }
 
     private ToolboxTree createItemNode(Prefab itemPrefab) {
