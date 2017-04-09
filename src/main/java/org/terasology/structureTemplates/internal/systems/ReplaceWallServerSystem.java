@@ -62,7 +62,7 @@ public class ReplaceWallServerSystem extends BaseComponentSystem {
                 map.put(new Vector3i(v), block);
             }
         }
-        PlaceBlocks placeBlocks = new PlaceBlocks(map, event.getInstigator());
+        PlaceBlocks placeBlocks = new PlaceBlocks(map, item.getOwner());
         worldProvider.getWorldEntity().send(placeBlocks);
     }
 
