@@ -25,7 +25,7 @@ import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.math.Region3i;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.registry.In;
-import org.terasology.structureTemplates.internal.components.WallAdderItemComponent;
+import org.terasology.structureTemplates.internal.components.ReplaceWallItemComponent;
 import org.terasology.structureTemplates.internal.events.ReplaceBlocksRequest;
 import org.terasology.world.WorldProvider;
 import org.terasology.world.block.Block;
@@ -36,11 +36,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Server system for the item with the component {@link WallAdderItemComponent}.
+ * Server system for the item with the component {@link ReplaceWallItemComponent}.
  */
 @RegisterSystem(RegisterMode.AUTHORITY)
-public class AddWallServerSystem  extends BaseComponentSystem {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AddWallServerSystem.class);
+public class ReplaceWallServerSystem extends BaseComponentSystem {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ReplaceWallServerSystem.class);
 
     @In
     private BlockManager blockManager;
@@ -50,7 +50,7 @@ public class AddWallServerSystem  extends BaseComponentSystem {
 
     @ReceiveEvent
     public void onReplaceBlocksRequest(ReplaceBlocksRequest event, EntityRef item,
-                                       WallAdderItemComponent component) {
+                                       ReplaceWallItemComponent component) {
         if (component.wallRegions == null) {
             LOGGER.info("Can't replace blocks as requested as the wallRegions field was null");
             return;

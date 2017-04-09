@@ -27,7 +27,7 @@ import org.terasology.rendering.nui.UIWidget;
 import org.terasology.rendering.nui.databinding.Binding;
 import org.terasology.rendering.nui.widgets.UIButton;
 import org.terasology.rendering.nui.widgets.UIDropdownScrollable;
-import org.terasology.structureTemplates.internal.components.WallAdderItemComponent;
+import org.terasology.structureTemplates.internal.components.ReplaceWallItemComponent;
 import org.terasology.structureTemplates.internal.events.ReplaceBlocksRequest;
 import org.terasology.world.block.BlockExplorer;
 import org.terasology.world.block.BlockManager;
@@ -37,9 +37,9 @@ import java.util.List;
 import java.util.Set;
 
 /**
- *
+ * Screen for the wall replacer item.
  */
-public class AddWallScreen extends BaseInteractionScreen {
+public class ReplaceWallScreen extends BaseInteractionScreen {
 
     private UIDropdownScrollable<BlockUri> comboBox;
     private UIButton cancelButton;
@@ -73,12 +73,12 @@ public class AddWallScreen extends BaseInteractionScreen {
         comboBox.bindSelection(new Binding<BlockUri>() {
             @Override
             public BlockUri get() {
-                return getInteractionTarget().getComponent(WallAdderItemComponent.class).blockUri;
+                return getInteractionTarget().getComponent(ReplaceWallItemComponent.class).blockUri;
             }
 
             @Override
             public void set(BlockUri value) {
-                getInteractionTarget().getComponent(WallAdderItemComponent.class).blockUri = value;
+                getInteractionTarget().getComponent(ReplaceWallItemComponent.class).blockUri = value;
             }
         });
 

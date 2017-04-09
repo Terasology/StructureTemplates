@@ -17,10 +17,10 @@ package org.terasology.structureTemplates.internal.events;
 
 import org.terasology.network.NetworkEvent;
 import org.terasology.network.ServerEvent;
-import org.terasology.structureTemplates.internal.components.WallAdderItemComponent;
+import org.terasology.structureTemplates.internal.components.ReplaceWallItemComponent;
 
 /**
- * Sent to an item with the {@link WallAdderItemComponent} component when the
+ * Sent to an item with the {@link ReplaceWallItemComponent} component when the
  * user requests a block replacement with that item.
  */
 @ServerEvent

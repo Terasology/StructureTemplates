@@ -1,0 +1,16 @@
+{
+    "parent": "engine:iconItem",
+    "DisplayName": {
+        "name": "Wall Replacer",
+        "description": "Replaces a wall with a different one"
+    },
+    "ReplaceWallItem":{},
+    "Item": {
+        "icon": "StructureTemplates:wallReplacer32x32"
+    },
+    "Network":{},
+    "InteractionTarget": {},
+    "InteractionScreen": {
+        "screen": "StructureTemplates:ReplaceWallScreen"
+    }
+}

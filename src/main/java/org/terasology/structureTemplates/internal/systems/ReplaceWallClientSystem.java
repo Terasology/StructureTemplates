@@ -46,7 +46,7 @@ import org.terasology.rendering.logic.RegionOutlineComponent;
 import org.terasology.rendering.nui.Color;
 import org.terasology.rendering.nui.NUIManager;
 import org.terasology.structureTemplates.components.SpawnStructureActionComponent;
-import org.terasology.structureTemplates.internal.components.WallAdderItemComponent;
+import org.terasology.structureTemplates.internal.components.ReplaceWallItemComponent;
 import org.terasology.structureTemplates.internal.events.StructureSpawnFailedEvent;
 import org.terasology.structureTemplates.internal.ui.StructurePlacementFailureScreen;
 import org.terasology.structureTemplates.util.RegionMergeUtil;
@@ -66,7 +66,7 @@ import java.util.Set;
  * Shows a preview of the wall while the WallAdder items gets hold by the player.
  */
 @RegisterSystem(RegisterMode.CLIENT)
-public class AddWallClientSystem extends BaseComponentSystem implements UpdateSubscriberSystem {
+public class ReplaceWallClientSystem extends BaseComponentSystem implements UpdateSubscriberSystem {
 
     public static final String STRUCTURE_PLACEMENT_FAILURE_OVERLAY = "StructureTemplates:StructurePlacementFailureScreen";
     private static final int MAX_BLOCKS_PER_WALL = 100;
@@ -120,13 +120,13 @@ public class AddWallClientSystem extends BaseComponentSystem implements UpdateSu
 
     @ReceiveEvent
     public void onActivatedWallAdderItemComponent(OnActivatedComponent event, EntityRef entity,
-                                                         WallAdderItemComponent component) {
+                                                         ReplaceWallItemComponent component) {
         updateOutlineEntity();
     }
 
     @ReceiveEvent
     public void onBeforeDeactivateWallAdderItemComponent(BeforeDeactivateComponent event, EntityRef entity,
-                                                                WallAdderItemComponent component) {
+                                                                ReplaceWallItemComponent component) {
         updateOutlineEntity();
     }
 
@@ -159,10 +159,10 @@ public class AddWallClientSystem extends BaseComponentSystem implements UpdateSu
         List<Region3i> regions = getRegionsOfWall(item);
         replaceRegionOutlineEntitiesWith(regions);
 
-        WallAdderItemComponent wallAdderItemComponent = item.getComponent(WallAdderItemComponent.class);
-        if (wallAdderItemComponent != null) {
-            wallAdderItemComponent.wallRegions = regions;
-            item.saveComponent(wallAdderItemComponent);
+        ReplaceWallItemComponent replaceWallItemComponent = item.getComponent(ReplaceWallItemComponent.class);
+        if (replaceWallItemComponent != null) {
+            replaceWallItemComponent.wallRegions = regions;
+            item.saveComponent(replaceWallItemComponent);
         }
     }
 
@@ -237,8 +237,8 @@ public class AddWallClientSystem extends BaseComponentSystem implements UpdateSu
     }
 
     private Set<Vector3i> getWallPositions(EntityRef item) {
-        WallAdderItemComponent wallAdderItemComponent = item.getComponent(WallAdderItemComponent.class);
-        if (wallAdderItemComponent == null) {
+        ReplaceWallItemComponent replaceWallItemComponent = item.getComponent(ReplaceWallItemComponent.class);
+        if (replaceWallItemComponent == null) {
             return Collections.emptySet();
         }
 

@@ -27,7 +27,7 @@ import java.util.List;
 /**
  * Gives a "wall adder" item the ability to do it's work.
  */
-public class WallAdderItemComponent implements Component {
+public class ReplaceWallItemComponent implements Component {
     // TODO it would be saver to let the server calculate the regions
     @Replicate(FieldReplicateType.OWNER_TO_SERVER)
     public List<Region3i> wallRegions;
