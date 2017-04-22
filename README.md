@@ -31,6 +31,8 @@ If you are making an underground room it is a good idea to place the structure t
 
 IF activate both "Record block addition" and "Record block removal" then any block addition and removal will be added to the structure template.
 
+A quick way to extend underground rooms is the "Wall replacer" tool that can also be obtained form the toolbox. It allows you to replace a wall with another block including air. If you have the option "Recond block addition" active then those changes will be automatically recorded too. Independent if you add actual blocks or air.
+
 When you want to try out your modifications to the tempalte then you can use the "Create Structure Spawner" button in the structure template origin dialog to give yourself a item that spawns the structure template (in non edit mode).
 
 When you are happy with the changes you can use the "Selected -> Clipboard" button in the structure template origin dialog in order to copy a text string in json format to the clipboard that represents the structure template. This json can then be pasted in the prefab file that represents the structure template. By however careful to check what changes you made as existing structure template components may contain additional components that can not yet be represented by the template in editing mode.
