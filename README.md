@@ -29,7 +29,7 @@ To add a block to that template you would then activate the option "Record block
 
 If you are making an underground room it is a good idea to place the structure template you are editing underground. Then you can activate the option "Record block removal". With this option active any block removal you do will count result in the new air block being added to the template. Any block placement will result in the air block being removed from the structure template.
 
-IF activate both "Record block addition" and "Record block removal" then any block addition and removal will be added to the structure template.
+If both "Record block addition" and "Record block removal" have been activated then any block addition and removal will be added to the structure template.
 
 A quick way to extend underground rooms is the "Wall replacer" tool that can also be obtained form the toolbox. It allows you to replace a wall with another block including air. If you have the option "Recond block addition" active then those changes will be automatically recorded too. Independent if you add actual blocks or air.
 
