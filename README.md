@@ -17,12 +17,11 @@ Structure templates can not only spawn blocks but for example also entities. How
 
 The structure template framework can also be easily extended to add further spawn actions and conditions.
 
-
 ## Getting started by editing an existng template ingame
 
+It is possible to place structure templates in a edit mode. In that edit mode placeholders will be placed at locations where for example normally other further sturcture template spawning would have been triggered normally. To do this you first need to obtian the toolbox item ![with red toolbox icon](assets/textures/Toolbox16x16.png) via the command `give toolbox`. This item opens on activation a dialog which allows you to obtain items (Icon: ![with T icon](assets/textures/StructureTemplateOrigin.png)) that spawn structure templates in edit mode. However to actually see structure templates ingame you need to activate first a moduel like [Gooey's Quest](https://github.com/Terasology/GooeysQuests) that contains structure templates. 
 
-It is possible to place structure templates in a "edit mode". To do this you first need to obtian the "toolbox" item via the command "give toolbox". This item opens on activation a dialog which allows you to obtain items that spawn structure templates in edit mode. However to actually see structure templates ingame you need to activate first a moduel like [Gooey's Quest](https://github.com/Terasology/GooeysQuests) that contains structure templates. 
-
-Once you placed a structure template a white block with a black T will appear at the so called "origin" of the structure template.
+Once you placed a structure template a white block with a black T (Icon: ![T](assets/textures/StructureTemplateOrigin.png)
+) will  appear at the so called "origin" of the structure template.
 This structure template orign block can be activated to open a interaction dialog with the structure template.
 
