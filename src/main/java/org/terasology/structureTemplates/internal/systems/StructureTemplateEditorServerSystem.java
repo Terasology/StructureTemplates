@@ -183,7 +183,11 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
 
     @ReceiveEvent
     public void onDestroyed(DoDestroyEvent event, EntityRef entity, BlockComponent blockComponent) {
-        EntityRef player = event.getInstigator().getOwner();
+        EntityRef instigator = event.getInstigator();
+        if (instigator == null) {
+            return;
+        }
+        EntityRef player = instigator.getOwner();
         EditingUserComponent editingUserComponent = player.getComponent(EditingUserComponent.class);
         if (editingUserComponent == null) {
             return;
