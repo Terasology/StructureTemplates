@@ -7,7 +7,7 @@
         "type": "engine:UIBox",
         "layoutInfo": {
           "width": 400,
-          "height": 100,
+          "height": 120,
           "position-vertical-center": {},
           "position-horizontal-center": {}
         },
@@ -42,6 +42,44 @@
                 "height": 30
               },
               "id": "header"
+            },
+            {
+              "type": "RelativeLayout",
+              "contents": [
+                {
+                  "type": "engine:UICheckbox",
+                  "id": "addLayerCheckBox",
+                  "layoutInfo": {
+                    "position-left": {},
+                    "use-content-width": true,
+                    "use-content-height": true
+                  }
+                },
+                {
+                  "type": "engine:UILabel",
+                  "layoutInfo": {
+                    "position-left": {
+                      "target": "RIGHT",
+                      "widget": "addLayerCheckBox",
+                      "offset": 5
+                    },
+                    "use-content-width": true,
+                    "use-content-height": true
+                  },
+                  "text": "Add layer"
+                }
+              ],
+              "layoutInfo": {
+                "position-right": {
+                  "offset": 5
+                },
+                "use-content-height": true,
+                "use-content-width": true,
+                "position-top": {
+                  "offset": 40,
+                  "widget": "header"
+                }
+              }
             },
             {
               "type": "RelativeLayout",

@@ -273,7 +273,11 @@ public class ReplaceWallClientSystem extends BaseComponentSystem implements Upda
             boolean isNotPenetrable = !worldProvider.getBlock(wallPosToCheck).isPenetrable();
             boolean isValidWallPosition = infrontIsAir && isNotPenetrable;
             if (isValidWallPosition) {
-                positionsToAdd.add(wallPosToCheck);
+                if (replaceWallItemComponent.addLayer) {
+                    positionsToAdd.add(infrontPosToCheck);
+                } else {
+                    positionsToAdd.add(wallPosToCheck);
+                }
                 positionsToCheck.add(vectorCopyWithOffset(wallPosToCheck, leftDirection));
                 positionsToCheck.add(vectorCopyWithOffset(wallPosToCheck, rightDirection));
                 positionsToCheck.add(vectorCopyWithOffset(wallPosToCheck, upDirection));

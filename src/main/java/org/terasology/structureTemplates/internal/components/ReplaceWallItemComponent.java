@@ -34,4 +34,7 @@ public class ReplaceWallItemComponent implements Component {
 
     @Replicate(FieldReplicateType.OWNER_TO_SERVER)
     public BlockUri blockUri = BlockManager.AIR_ID;
+
+    @Replicate(FieldReplicateType.OWNER_TO_SERVER)
+    public boolean addLayer;
 }

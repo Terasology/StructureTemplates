@@ -26,6 +26,7 @@ import org.terasology.rendering.nui.BaseInteractionScreen;
 import org.terasology.rendering.nui.UIWidget;
 import org.terasology.rendering.nui.databinding.Binding;
 import org.terasology.rendering.nui.widgets.UIButton;
+import org.terasology.rendering.nui.widgets.UICheckbox;
 import org.terasology.rendering.nui.widgets.UIDropdownScrollable;
 import org.terasology.structureTemplates.internal.components.ReplaceWallItemComponent;
 import org.terasology.structureTemplates.internal.events.ReplaceBlocksRequest;
@@ -44,6 +45,7 @@ public class ReplaceWallScreen extends BaseInteractionScreen {
     private UIDropdownScrollable<BlockUri> comboBox;
     private UIButton cancelButton;
     private UIButton placeWallButton;
+    private UICheckbox addLayerCheckBox;
 
     private Prefab selectedPrefab;
 
@@ -90,6 +92,22 @@ public class ReplaceWallScreen extends BaseInteractionScreen {
         placeWallButton = find("placeWallButton", UIButton.class);
         if (placeWallButton != null) {
             placeWallButton.subscribe(this::onPlaceWallButton);
+        }
+
+
+        addLayerCheckBox = find("addLayerCheckBox", UICheckbox.class);
+        if (addLayerCheckBox != null) {
+            addLayerCheckBox.bindChecked(new Binding<Boolean>() {
+                @Override
+                public Boolean get() {
+                    return getInteractionTarget().getComponent(ReplaceWallItemComponent.class).addLayer;
+                }
+
+                @Override
+                public void set(Boolean value) {
+                    getInteractionTarget().getComponent(ReplaceWallItemComponent.class).addLayer = value;
+                }
+            });
         }
     }
 
