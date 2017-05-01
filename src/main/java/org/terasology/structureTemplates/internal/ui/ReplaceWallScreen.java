@@ -80,7 +80,10 @@ public class ReplaceWallScreen extends BaseInteractionScreen {
 
             @Override
             public void set(BlockUri value) {
-                getInteractionTarget().getComponent(ReplaceWallItemComponent.class).blockUri = value;
+                EntityRef entity = getInteractionTarget();
+                ReplaceWallItemComponent component = entity.getComponent(ReplaceWallItemComponent.class);
+                component.blockUri = value;
+                entity.saveComponent(component);
             }
         });
 
@@ -105,7 +108,10 @@ public class ReplaceWallScreen extends BaseInteractionScreen {
 
                 @Override
                 public void set(Boolean value) {
-                    getInteractionTarget().getComponent(ReplaceWallItemComponent.class).addLayer = value;
+                    EntityRef entity = getInteractionTarget();
+                    ReplaceWallItemComponent component = entity.getComponent(ReplaceWallItemComponent.class);
+                    component.addLayer = value;
+                    entity.saveComponent(component);
                 }
             });
         }

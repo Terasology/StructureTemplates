@@ -46,6 +46,7 @@ import org.terasology.rendering.logic.RegionOutlineComponent;
 import org.terasology.rendering.nui.Color;
 import org.terasology.rendering.nui.NUIManager;
 import org.terasology.structureTemplates.components.SpawnStructureActionComponent;
+import org.terasology.structureTemplates.components.WallPreviewComponent;
 import org.terasology.structureTemplates.internal.components.ReplaceWallItemComponent;
 import org.terasology.structureTemplates.internal.events.StructureSpawnFailedEvent;
 import org.terasology.structureTemplates.internal.ui.StructurePlacementFailureScreen;
@@ -119,13 +120,19 @@ public class ReplaceWallClientSystem extends BaseComponentSystem implements Upda
     }
 
     @ReceiveEvent
-    public void onActivatedWallAdderItemComponent(OnActivatedComponent event, EntityRef entity,
+    public void onActivatedReplaceWallItemComponent(OnActivatedComponent event, EntityRef entity,
                                                          ReplaceWallItemComponent component) {
         updateOutlineEntity();
     }
 
     @ReceiveEvent
-    public void onBeforeDeactivateWallAdderItemComponent(BeforeDeactivateComponent event, EntityRef entity,
+    public void onChangedReplaceWallItemComponent(OnChangedComponent event, EntityRef entity,
+                                                         ReplaceWallItemComponent component) {
+        updateOutlineEntity();
+    }
+
+    @ReceiveEvent
+    public void onBeforeDeactivateReplaceWallItemComponent(BeforeDeactivateComponent event, EntityRef entity,
                                                                 ReplaceWallItemComponent component) {
         updateOutlineEntity();
     }
@@ -159,11 +166,12 @@ public class ReplaceWallClientSystem extends BaseComponentSystem implements Upda
         List<Region3i> regions = getRegionsOfWall(item);
         replaceRegionOutlineEntitiesWith(regions);
 
-        ReplaceWallItemComponent replaceWallItemComponent = item.getComponent(ReplaceWallItemComponent.class);
-        if (replaceWallItemComponent != null) {
-            replaceWallItemComponent.wallRegions = regions;
-            item.saveComponent(replaceWallItemComponent);
+        WallPreviewComponent wallPreviewComponent = item.getComponent(WallPreviewComponent.class);
+        if (wallPreviewComponent == null) {
+            wallPreviewComponent = new WallPreviewComponent();
         }
+        wallPreviewComponent.wallRegions = regions;
+        item.addOrSaveComponent(wallPreviewComponent);
     }
 
     void replaceRegionOutlineEntitiesWith(Collection<Region3i> regionsToDraw) {
