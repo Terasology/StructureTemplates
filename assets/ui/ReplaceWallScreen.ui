@@ -7,7 +7,7 @@
         "type": "engine:UIBox",
         "layoutInfo": {
           "width": 400,
-          "height": 120,
+          "height": 140,
           "position-vertical-center": {},
           "position-horizontal-center": {}
         },
@@ -16,57 +16,29 @@
           "layoutInfo": {},
           "contents": [
             {
-              "type": "RowLayout",
-              "contents": [
-                {
-                  "type": "UILabel",
-                  "text": "Block: ",
-                  "layoutInfo": {
-                    "useContentWidth": true
-                  }
-                },
-                {
-                  "type": "UIDropdownScrollable",
-                  "multiline": false,
-                  "id": "comboBox"
-                }
-              ],
-              "layoutInfo": {
-                "position-top": {},
-                "position-left": {
-                  "offset": 5
-                },
-                "position-right": {
-                  "offset": 5
-                },
-                "height": 30
-              },
-              "id": "header"
-            },
-            {
               "type": "RelativeLayout",
               "contents": [
                 {
-                  "type": "engine:UICheckbox",
-                  "id": "addLayerCheckBox",
+                  "type": "engine:UILabel",
                   "layoutInfo": {
                     "position-left": {},
                     "use-content-width": true,
                     "use-content-height": true
-                  }
+                  },
+                  "text": "Replace ",
+                  "id": "replacementTypeLabel"
                 },
                 {
-                  "type": "engine:UILabel",
+                  "type": "engine:UIDropdown",
+                  "id": "replacementTypeComboBox",
                   "layoutInfo": {
                     "position-left": {
+                      "widget": "replacementTypeLabel",
                       "target": "RIGHT",
-                      "widget": "addLayerCheckBox",
                       "offset": 5
                     },
-                    "use-content-width": true,
                     "use-content-height": true
-                  },
-                  "text": "Add layer"
+                  }
                 }
               ],
               "layoutInfo": {
@@ -76,8 +48,46 @@
                 "use-content-height": true,
                 "use-content-width": true,
                 "position-top": {
-                  "offset": 40,
-                  "widget": "header"
+                  "offset": 5
+                }
+              },
+              "id": "replacementTypeRow"
+            },
+            {
+              "type": "RelativeLayout",
+              "contents": [
+                {
+                  "type": "engine:UILabel",
+                  "layoutInfo": {
+                    "position-left": {},
+                    "use-content-width": true,
+                    "use-content-height": true
+                  },
+                  "text": "with ",
+                  "id": "blockLabel"
+                },
+                {
+                  "type": "engine:UIDropdownScrollable",
+                  "id": "blockComboBox",
+                  "layoutInfo": {
+                    "position-left": {
+                      "widget": "blockLabel",
+                      "target": "RIGHT",
+                      "offset": 5
+                    },
+                    "use-content-height": true
+                  }
+                }
+              ],
+              "layoutInfo": {
+                "position-right": {
+                  "offset": 5
+                },
+                "use-content-height": true,
+                "use-content-width": true,
+                "position-top": {
+                  "offset": 45,
+                  "target": "TOP"
                 }
               }
             },

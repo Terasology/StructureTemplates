@@ -281,11 +281,8 @@ public class ReplaceWallClientSystem extends BaseComponentSystem implements Upda
             boolean isNotPenetrable = !worldProvider.getBlock(wallPosToCheck).isPenetrable();
             boolean isValidWallPosition = infrontIsAir && isNotPenetrable;
             if (isValidWallPosition) {
-                if (replaceWallItemComponent.addLayer) {
-                    positionsToAdd.add(infrontPosToCheck);
-                } else {
-                    positionsToAdd.add(wallPosToCheck);
-                }
+                addPositionsBadedReplacementType(replaceWallItemComponent, leftDirection, rightDirection, upDirection,
+                        downDirection, positionsToAdd, wallPosToCheck, infrontPosToCheck);
                 positionsToCheck.add(vectorCopyWithOffset(wallPosToCheck, leftDirection));
                 positionsToCheck.add(vectorCopyWithOffset(wallPosToCheck, rightDirection));
                 positionsToCheck.add(vectorCopyWithOffset(wallPosToCheck, upDirection));
@@ -295,9 +292,43 @@ public class ReplaceWallClientSystem extends BaseComponentSystem implements Upda
         return positionsToAdd;
     }
 
+
+    private void addPositionsBadedReplacementType(ReplaceWallItemComponent replaceWallItemComponent,
+                                                  Vector3i leftDirection, Vector3i rightDirection,
+                                                  Vector3i upDirection, Vector3i downDirection,
+                                                  Collection<Vector3i> collectionToExtend,
+                                                  Vector3i wallPos, Vector3i infrontWallPos) {
+        switch(replaceWallItemComponent.replacementType) {
+            case AIR_INFRONT_OF_WALL:
+                collectionToExtend.add(infrontWallPos);
+                break;
+            case WALL:
+                collectionToExtend.add(wallPos);
+                break;
+            case WALL_WITH_BORDER:
+                collectionToExtend.add(wallPos);
+                collectionToExtend.add(vectorCopyWithOffset(wallPos, leftDirection));
+                collectionToExtend.add(vectorCopyWithOffset(wallPos, rightDirection));
+                collectionToExtend.add(vectorCopyWithOffset(wallPos, upDirection));
+                collectionToExtend.add(vectorCopyWithOffset(wallPos, downDirection));
+                collectionToExtend.add(vectorCopyWithOffsets(wallPos, leftDirection, upDirection));
+                collectionToExtend.add(vectorCopyWithOffsets(wallPos, leftDirection, downDirection));
+                collectionToExtend.add(vectorCopyWithOffsets(wallPos, rightDirection, upDirection));
+                collectionToExtend.add(vectorCopyWithOffsets(wallPos, rightDirection, downDirection));
+                break;
+        }
+    }
+
     private Vector3i vectorCopyWithOffset(Vector3i vectorToCopy, Vector3i offset) {
         Vector3i vector = new Vector3i(vectorToCopy);
         vector.add(offset);
+        return vector;
+    }
+
+    private Vector3i vectorCopyWithOffsets(Vector3i vectorToCopy, Vector3i offset1, Vector3i offset2) {
+        Vector3i vector = new Vector3i(vectorToCopy);
+        vector.add(offset1);
+        vector.add(offset2);
         return vector;
     }
 

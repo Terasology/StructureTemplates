@@ -26,7 +26,7 @@ import org.terasology.rendering.nui.BaseInteractionScreen;
 import org.terasology.rendering.nui.UIWidget;
 import org.terasology.rendering.nui.databinding.Binding;
 import org.terasology.rendering.nui.widgets.UIButton;
-import org.terasology.rendering.nui.widgets.UICheckbox;
+import org.terasology.rendering.nui.widgets.UIDropdown;
 import org.terasology.rendering.nui.widgets.UIDropdownScrollable;
 import org.terasology.structureTemplates.internal.components.ReplaceWallItemComponent;
 import org.terasology.structureTemplates.internal.events.ReplaceBlocksRequest;
@@ -34,6 +34,7 @@ import org.terasology.world.block.BlockExplorer;
 import org.terasology.world.block.BlockManager;
 import org.terasology.world.block.BlockUri;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -42,10 +43,10 @@ import java.util.Set;
  */
 public class ReplaceWallScreen extends BaseInteractionScreen {
 
-    private UIDropdownScrollable<BlockUri> comboBox;
+    private UIDropdownScrollable<BlockUri> blockComboBox;
+    private UIDropdown<ReplaceWallItemComponent.ReplacementType> replacementTypeComboBox;
     private UIButton cancelButton;
     private UIButton placeWallButton;
-    private UICheckbox addLayerCheckBox;
 
     private Prefab selectedPrefab;
 
@@ -65,14 +66,14 @@ public class ReplaceWallScreen extends BaseInteractionScreen {
 
     @Override
     public void initialise() {
-        comboBox = find("comboBox", UIDropdownScrollable.class);
+        blockComboBox = find("blockComboBox", UIDropdownScrollable.class);
         BlockExplorer blockExplorer = new BlockExplorer(assetManager);
         Set<BlockUri> blocks = blockExplorer.getFreeformBlockFamilies();
         blocks.add(BlockManager.AIR_ID);
         List<BlockUri> blockList = Lists.newArrayList(blocks);
         blockList.sort((BlockUri o1, BlockUri o2) -> o1.toString().compareTo(o2.toString()));
-        comboBox.setOptions(blockList);
-        comboBox.bindSelection(new Binding<BlockUri>() {
+        blockComboBox.setOptions(blockList);
+        blockComboBox.bindSelection(new Binding<BlockUri>() {
             @Override
             public BlockUri get() {
                 return getInteractionTarget().getComponent(ReplaceWallItemComponent.class).blockUri;
@@ -98,23 +99,26 @@ public class ReplaceWallScreen extends BaseInteractionScreen {
         }
 
 
-        addLayerCheckBox = find("addLayerCheckBox", UICheckbox.class);
-        if (addLayerCheckBox != null) {
-            addLayerCheckBox.bindChecked(new Binding<Boolean>() {
+
+        replacementTypeComboBox = find("replacementTypeComboBox", UIDropdown.class);
+        if (replacementTypeComboBox != null) {
+            replacementTypeComboBox.setOptions(Arrays.asList(ReplaceWallItemComponent.ReplacementType.values()));
+            replacementTypeComboBox.bindSelection(new Binding<ReplaceWallItemComponent.ReplacementType>() {
                 @Override
-                public Boolean get() {
-                    return getInteractionTarget().getComponent(ReplaceWallItemComponent.class).addLayer;
+                public ReplaceWallItemComponent.ReplacementType get() {
+                    return getInteractionTarget().getComponent(ReplaceWallItemComponent.class).replacementType;
                 }
 
                 @Override
-                public void set(Boolean value) {
+                public void set(ReplaceWallItemComponent.ReplacementType value) {
                     EntityRef entity = getInteractionTarget();
                     ReplaceWallItemComponent component = entity.getComponent(ReplaceWallItemComponent.class);
-                    component.addLayer = value;
+                    component.replacementType = value;
                     entity.saveComponent(component);
                 }
             });
         }
+
     }
 
     private void onPlaceWallButton(UIWidget button) {
