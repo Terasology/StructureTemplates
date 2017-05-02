@@ -53,7 +53,6 @@ import org.terasology.structureTemplates.internal.ui.StructurePlacementFailureSc
 import org.terasology.structureTemplates.util.RegionMergeUtil;
 import org.terasology.world.WorldProvider;
 import org.terasology.world.block.BlockComponent;
-import org.terasology.world.block.BlockManager;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -277,9 +276,9 @@ public class ReplaceWallClientSystem extends BaseComponentSystem implements Upda
             positionsChecked.add(wallPosToCheck);
             Vector3i infrontPosToCheck = new Vector3i(wallPosToCheck);
             infrontPosToCheck.add(infrontDirection);
-            boolean infrontIsAir = worldProvider.getBlock(infrontPosToCheck).getURI().equals(BlockManager.AIR_ID);
-            boolean isNotPenetrable = !worldProvider.getBlock(wallPosToCheck).isPenetrable();
-            boolean isValidWallPosition = infrontIsAir && isNotPenetrable;
+            boolean infrontIsPenetratable = worldProvider.getBlock(infrontPosToCheck).isPenetrable();
+            boolean isWall = !worldProvider.getBlock(wallPosToCheck).isPenetrable();
+            boolean isValidWallPosition = infrontIsPenetratable && isWall;
             if (isValidWallPosition) {
                 addPositionsBadedReplacementType(replaceWallItemComponent, leftDirection, rightDirection, upDirection,
                         downDirection, positionsToAdd, wallPosToCheck, infrontPosToCheck);
