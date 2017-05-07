@@ -16,14 +16,12 @@
 package org.terasology.structureTemplates.internal.systems;
 
 import com.google.common.collect.Lists;
-import org.terasology.entitySystem.entity.EntityBuilder;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.logic.clipboard.ClipboardManager;
 import org.terasology.logic.players.LocalPlayer;
 import org.terasology.math.Region3i;
 import org.terasology.math.geom.Vector3i;
-import org.terasology.network.NetworkComponent;
 import org.terasology.registry.In;
 import org.terasology.rendering.nui.BaseInteractionScreen;
 import org.terasology.rendering.nui.UIWidget;
@@ -32,8 +30,10 @@ import org.terasology.rendering.nui.widgets.UIButton;
 import org.terasology.rendering.nui.widgets.UICheckbox;
 import org.terasology.structureTemplates.internal.components.EditTemplateRegionProcessComponent;
 import org.terasology.structureTemplates.internal.components.EditingUserComponent;
+import org.terasology.structureTemplates.internal.events.CreateEditTemplateRegionProcessRequest;
 import org.terasology.structureTemplates.internal.events.CreateStructureSpawnItemRequest;
 import org.terasology.structureTemplates.internal.events.MakeBoxShapedRequest;
+import org.terasology.structureTemplates.internal.events.StopEditingProcessRequest;
 import org.terasology.structureTemplates.internal.events.StructureTemplateStringRequest;
 import org.terasology.structureTemplates.internal.ui.StructureTemplatePropertiesScreen;
 import org.terasology.structureTemplates.internal.ui.StructureTemplateRegionScreen;
@@ -67,10 +67,21 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
     private LocalPlayer localPlayer;
     private UIButton makeBoxShapedButton;
 
+    private boolean recordBlockAddition;
+    private boolean recordBlockRemoval;
+
 
     @Override
     protected void initializeWithInteractionTarget(EntityRef interactionTarget) {
-        // nothing to do
+        EditTemplateRegionProcessComponent editProcessComponent = findEditProcessForInteractionTarget();
+        if (editProcessComponent != null) {
+            recordBlockAddition =  editProcessComponent.recordBlockAddition;
+            recordBlockRemoval =  editProcessComponent.recordBlockRemoval;
+        } else {
+            recordBlockAddition = false;
+            recordBlockRemoval = false;
+        }
+
     }
 
     @Override
@@ -106,46 +117,28 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
                     new Binding<Boolean>() {
                         @Override
                         public Boolean get() {
-                            EditTemplateRegionProcessComponent editProcessComponent = findEditProcessForInteractionTarget();
-                            if (editProcessComponent == null) {
-                                return Boolean.FALSE;
-                            }
-                            return editProcessComponent.recordBlockAddition;
+                            return recordBlockAddition;
                         }
 
                         @Override
                         public void set(Boolean value) {
-                            EntityRef client = localPlayer.getClientEntity();
-                            if (value || recordBlockRemovalCheckBox.isChecked()) {
-                                startEditing(client, value, recordBlockRemovalCheckBox.isChecked());
-                            } else {
-                                stopEditing(client);
-                            }
+                            recordBlockAddition = value;
+                            updateBlockEditingProcessOnServer();
                         }
-
 
                     });
             recordBlockRemovalCheckBox.bindChecked(
                     new Binding<Boolean>() {
                         @Override
                         public Boolean get() {
-                            EditTemplateRegionProcessComponent editProcessComponent = findEditProcessForInteractionTarget();
-                            if (editProcessComponent == null) {
-                                return Boolean.FALSE;
-                            }
-                            return editProcessComponent.recordBlockRemoval;
+                            return recordBlockRemoval;
                         }
 
                         @Override
                         public void set(Boolean value) {
-                            EntityRef client = localPlayer.getClientEntity();
-                            if (recordBlockAdditionCheckBox.isChecked() || value) {
-                                startEditing(client, recordBlockAdditionCheckBox.isChecked(), value);
-                            } else {
-                                stopEditing(client);
-                            }
+                            recordBlockRemoval = value;
+                            updateBlockEditingProcessOnServer();
                         }
-
 
                     });
         }
@@ -168,36 +161,13 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
         return editProcessComponent;
     }
 
-    private void stopEditing(EntityRef client) {
-        EditingUserComponent editingUserComponent = client.getComponent(EditingUserComponent.class);
-        if (editingUserComponent != null) {
-            EditTemplateRegionProcessComponent editProcessComponent = editingUserComponent.editProcessEntity.getComponent(EditTemplateRegionProcessComponent.class);
-            if (editProcessComponent != null && editProcessComponent.structureTemplateEditor.equals(getInteractionTarget())) {
-                editingUserComponent.editProcessEntity.destroy();
-                client.removeComponent(EditingUserComponent.class);
-            }
-        }
-    }
-
-    private void startEditing(EntityRef client, boolean recordAddition, boolean recordRemoval) {
-        EntityBuilder editProcessBuilder = entityManager.newBuilder();
-        editProcessBuilder.setPersistent(false);
-        editProcessBuilder.addComponent(new NetworkComponent());
-
-        EditTemplateRegionProcessComponent editTemplateRegionProcessComponent = new EditTemplateRegionProcessComponent();
-        editTemplateRegionProcessComponent.structureTemplateEditor = getInteractionTarget();
-        editTemplateRegionProcessComponent.recordBlockAddition = recordAddition;
-        editTemplateRegionProcessComponent.recordBlockRemoval = recordRemoval;
-        editProcessBuilder.addComponent(editTemplateRegionProcessComponent);
-
-        EditingUserComponent editingUserComponent = client.getComponent(EditingUserComponent.class);
-        if (editingUserComponent == null) {
-            editingUserComponent = new EditingUserComponent();
+    private void updateBlockEditingProcessOnServer() {
+        if (recordBlockAddition || recordBlockRemoval) {
+            localPlayer.getCharacterEntity().send(new CreateEditTemplateRegionProcessRequest(recordBlockAddition,
+                    recordBlockRemoval));
         } else {
-            editingUserComponent.editProcessEntity.destroy();
+            localPlayer.getClientEntity().send(new StopEditingProcessRequest());
         }
-        editingUserComponent.editProcessEntity = editProcessBuilder.build();
-        client.addOrSaveComponent(editingUserComponent);
     }
 
     private void onEditTemplatePropertiesButton(UIWidget button) {

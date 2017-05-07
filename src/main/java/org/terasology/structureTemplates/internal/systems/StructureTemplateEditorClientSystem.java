@@ -118,7 +118,7 @@ public class StructureTemplateEditorClientSystem extends BaseComponentSystem {
     }
 
     public void updateOutlineEntities() {
-        List<Region3i> regionsToDraw = getRegionsToDraw();
+            List<Region3i> regionsToDraw = getRegionsToDraw();
         destoryOutlineEntities();
 
         for (Region3i regionToDraw: regionsToDraw) {

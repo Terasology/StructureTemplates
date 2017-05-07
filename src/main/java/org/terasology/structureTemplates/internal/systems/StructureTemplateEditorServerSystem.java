@@ -38,6 +38,7 @@ import org.terasology.math.Region3i;
 import org.terasology.math.Side;
 import org.terasology.math.geom.Vector3f;
 import org.terasology.math.geom.Vector3i;
+import org.terasology.network.NetworkComponent;
 import org.terasology.registry.In;
 import org.terasology.structureTemplates.components.BlockPlaceholderComponent;
 import org.terasology.structureTemplates.components.ScheduleStructurePlacementComponent;
@@ -52,10 +53,12 @@ import org.terasology.structureTemplates.internal.components.EditingUserComponen
 import org.terasology.structureTemplates.internal.components.StructurePlaceholderComponent;
 import org.terasology.structureTemplates.internal.events.BuildStructureTemplateStringEvent;
 import org.terasology.structureTemplates.internal.events.CopyBlockRegionResultEvent;
+import org.terasology.structureTemplates.internal.events.CreateEditTemplateRegionProcessRequest;
 import org.terasology.structureTemplates.internal.events.CreateStructureSpawnItemRequest;
 import org.terasology.structureTemplates.internal.events.MakeBoxShapedRequest;
 import org.terasology.structureTemplates.internal.events.RequestStructurePlaceholderPrefabSelection;
 import org.terasology.structureTemplates.internal.events.RequestStructureTemplatePropertiesChange;
+import org.terasology.structureTemplates.internal.events.StopEditingProcessRequest;
 import org.terasology.structureTemplates.internal.events.StructureTemplateStringRequest;
 import org.terasology.structureTemplates.util.ListUtil;
 import org.terasology.structureTemplates.util.RegionMergeUtil;
@@ -269,6 +272,53 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         structureTemplateComponent.type = event.getPrefab();
         structureTemplateComponent.spawnChance = event.getSpawnChance();
         interactionTarget.saveComponent(structureTemplateComponent);
+    }
+
+    @ReceiveEvent
+    public void onCreateEditTemplateRegionProcessRequest(CreateEditTemplateRegionProcessRequest event,
+                                                         EntityRef characterEntity, CharacterComponent characterComponent) {
+        EntityRef interactionTarget = characterComponent.authorizedInteractionTarget;
+        StructureTemplateComponent structureTemplateComponent = interactionTarget.getComponent(StructureTemplateComponent.class);
+        if (structureTemplateComponent == null) {
+            LOGGER.error("Ignored CreateEditTemplateRegionProcessRequest event since there was no interaction with structure template ");
+            return;
+        }
+        if (!interactionTarget.hasComponent(StructureTemplateOriginComponent.class)) {
+            LOGGER.error("Ignored CreateEditTemplateRegionProcessRequest event since there was no interaction with structure template origin");
+            return;
+        }
+        EntityRef client = characterEntity.getOwner();
+        startEditingProcess(event, interactionTarget, client);
+    }
+
+    private void startEditingProcess(CreateEditTemplateRegionProcessRequest event, EntityRef interactionTarget, EntityRef client) {
+        EntityBuilder editProcessBuilder = entityManager.newBuilder();
+        editProcessBuilder.setPersistent(false);
+        editProcessBuilder.addComponent(new NetworkComponent());
+        editProcessBuilder.setOwner(client);
+        EditTemplateRegionProcessComponent editTemplateRegionProcessComponent = new EditTemplateRegionProcessComponent();
+        editTemplateRegionProcessComponent.structureTemplateEditor = interactionTarget;
+        editTemplateRegionProcessComponent.recordBlockAddition = event.isRecordBlockAddition();
+        editTemplateRegionProcessComponent.recordBlockRemoval = event.isRecordBlockRemoval();
+        editProcessBuilder.addComponent(editTemplateRegionProcessComponent);
+        EditingUserComponent editingUserComponent = client.getComponent(EditingUserComponent.class);
+        if (editingUserComponent == null) {
+            editingUserComponent = new EditingUserComponent();
+        } else {
+            editingUserComponent.editProcessEntity.destroy();
+        }
+        editingUserComponent.editProcessEntity = editProcessBuilder.build();
+        client.addOrSaveComponent(editingUserComponent);
+    }
+
+    @ReceiveEvent
+    public void onStopEditingProcessRequest(StopEditingProcessRequest event, EntityRef client) {
+        EditingUserComponent editingUserComponent = client.getComponent(EditingUserComponent.class);
+        if (editingUserComponent != null) {
+            EditTemplateRegionProcessComponent editProcessComponent = editingUserComponent.editProcessEntity.getComponent(EditTemplateRegionProcessComponent.class);
+            editingUserComponent.editProcessEntity.destroy();
+            client.removeComponent(EditingUserComponent.class);
+        }
     }
 
     @ReceiveEvent

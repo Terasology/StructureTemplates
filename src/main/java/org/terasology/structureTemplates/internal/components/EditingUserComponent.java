@@ -31,7 +31,7 @@ public class EditingUserComponent implements Component {
      *
      * It should be a non persistent entity that has this entity as owner.
      */
-    @Replicate(FieldReplicateType.OWNER_TO_SERVER)
+    @Replicate(FieldReplicateType.SERVER_TO_OWNER)
     public EntityRef editProcessEntity = EntityRef.NULL;
 
 
