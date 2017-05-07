@@ -78,14 +78,14 @@ public class ReplaceWallScreen extends BaseInteractionScreen {
         blockComboBox.bindSelection(new Binding<BlockUri>() {
             @Override
             public BlockUri get() {
-                return getInteractionTarget().getComponent(ReplaceWallItemComponent.class).blockUri;
+                return new BlockUri(getInteractionTarget().getComponent(ReplaceWallItemComponent.class).blockUri);
             }
 
             @Override
             public void set(BlockUri value) {
                 EntityRef entity = getInteractionTarget();
                 ReplaceWallItemComponent component = entity.getComponent(ReplaceWallItemComponent.class);
-                component.blockUri = value;
+                component.blockUri = value.toString();
                 entity.saveComponent(component);
             }
         });

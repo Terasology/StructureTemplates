@@ -26,8 +26,11 @@ import org.terasology.world.block.BlockUri;
  */
 public class ReplaceWallItemComponent implements Component {
 
+    /**
+     * A {@link BlockUri} transfered as string as transferring block uris is not supported yet.
+     */
     @Replicate(FieldReplicateType.OWNER_TO_SERVER)
-    public BlockUri blockUri = BlockManager.AIR_ID;
+    public String blockUri = BlockManager.AIR_ID.toString();
 
     @Replicate(FieldReplicateType.OWNER_TO_SERVER)
     public ReplacementType replacementType = ReplacementType.WALL;
