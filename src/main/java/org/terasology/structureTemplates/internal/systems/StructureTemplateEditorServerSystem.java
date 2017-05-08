@@ -57,6 +57,7 @@ import org.terasology.structureTemplates.internal.events.BuildStructureTemplateS
 import org.terasology.structureTemplates.internal.events.CopyBlockRegionResultEvent;
 import org.terasology.structureTemplates.internal.events.CreateEditTemplateRegionProcessRequest;
 import org.terasology.structureTemplates.internal.events.CreateStructureSpawnItemRequest;
+import org.terasology.structureTemplates.internal.events.CreateStructureTemplateItemRequest;
 import org.terasology.structureTemplates.internal.events.MakeBoxShapedRequest;
 import org.terasology.structureTemplates.internal.events.RequestStructurePlaceholderPrefabSelection;
 import org.terasology.structureTemplates.internal.events.RequestStructureTemplatePropertiesChange;
@@ -340,6 +341,31 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         }
 
         EntityBuilder entityBuilder = entityManager.newBuilder("StructureTemplates:structureSpawnItem");
+        addComponentsToTemplate(structureTemplateOriginEntity, structureTemplateOriginComponent, blockComponent, entityBuilder);
+        EntityRef structureSpawnItem = entityBuilder.build();
+
+        // TODO check permission once PermissionManager is public API
+        inventoryManager.giveItem(characterEntity, EntityRef.NULL, structureSpawnItem);
+    }
+
+
+    @ReceiveEvent
+    public void onCreateStructureTemplateItemRequest(CreateStructureTemplateItemRequest event, EntityRef characterEntity,
+                                                     CharacterComponent characterComponent) {
+        EntityRef structureTemplateOriginEntity = characterComponent.authorizedInteractionTarget;
+        StructureTemplateOriginComponent structureTemplateOriginComponent = structureTemplateOriginEntity.getComponent(StructureTemplateOriginComponent.class);
+        if (structureTemplateOriginComponent == null) {
+            LOGGER.error("Ignored CreateStructureTemplateItemRequest event since there was no interaction with a structure template origin block");
+            return;
+        }
+
+        BlockComponent blockComponent = structureTemplateOriginEntity.getComponent(BlockComponent.class);
+        if (blockComponent == null) {
+            LOGGER.error("Structure template origin was not a block, ignoring event");
+            return;
+        }
+
+        EntityBuilder entityBuilder = entityManager.newBuilder("StructureTemplates:structureTemplateItem");
         addComponentsToTemplate(structureTemplateOriginEntity, structureTemplateOriginComponent, blockComponent, entityBuilder);
         EntityRef structureSpawnItem = entityBuilder.build();
 

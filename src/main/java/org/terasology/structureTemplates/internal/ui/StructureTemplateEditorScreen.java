@@ -32,6 +32,7 @@ import org.terasology.structureTemplates.internal.components.EditTemplateRegionP
 import org.terasology.structureTemplates.internal.components.EditingUserComponent;
 import org.terasology.structureTemplates.internal.events.CreateEditTemplateRegionProcessRequest;
 import org.terasology.structureTemplates.internal.events.CreateStructureSpawnItemRequest;
+import org.terasology.structureTemplates.internal.events.CreateStructureTemplateItemRequest;
 import org.terasology.structureTemplates.internal.events.MakeBoxShapedRequest;
 import org.terasology.structureTemplates.internal.events.StopEditingProcessRequest;
 import org.terasology.structureTemplates.internal.events.StructureTemplateStringRequest;
@@ -52,6 +53,7 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
     private UIButton editTemplatePropertiesButton;
     private UIButton copyToClipboardButton;
     private UIButton createSpawnerButton;
+    private UIButton createTemplateButton;
     private UIButton copyInGroundConditionButton;
     private UICheckbox recordBlockAdditionCheckBox;
     private UICheckbox recordBlockRemovalCheckBox;
@@ -98,6 +100,11 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
         createSpawnerButton = find("createSpawnerButton", UIButton.class);
         if (createSpawnerButton != null) {
             createSpawnerButton.subscribe(this::onCreateSpawnerButton);
+        }
+
+        createTemplateButton= find("createTemplateButton", UIButton.class);
+        if (createTemplateButton != null) {
+            createTemplateButton.subscribe(this::onCreateTemplateItemButton);
         }
 
         copyInGroundConditionButton = find("copyInGroundConditionButton", UIButton.class);
@@ -253,6 +260,10 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
 
     private void onCreateSpawnerButton(UIWidget button) {
         localPlayer.getCharacterEntity().send(new CreateStructureSpawnItemRequest());
+    }
+
+    private void onCreateTemplateItemButton(UIWidget button) {
+        localPlayer.getCharacterEntity().send(new CreateStructureTemplateItemRequest());
     }
 
     private void onCopyToClipboardClicked(UIWidget button) {

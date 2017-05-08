@@ -42,6 +42,11 @@
               "id": "createSpawnerButton"
             },
             {
+              "type": "UIButton",
+              "text": "Create Structure Template Item",
+              "id": "createTemplateButton"
+            },
+            {
               "type": "engine:RowLayout",
               "id": "newWidget",
               "layoutInfo": {},
