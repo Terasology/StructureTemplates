@@ -19,7 +19,7 @@ import org.terasology.entitySystem.event.Event;
 import org.terasology.entitySystem.prefab.Prefab;
 import org.terasology.network.ServerEvent;
 import org.terasology.structureTemplates.components.StructureTemplateComponent;
-import org.terasology.structureTemplates.internal.systems.StructureTemplateOriginComponent;
+import org.terasology.structureTemplates.internal.components.StructureTemplateOriginComponent;
 
 /**
  * The event gets sent to a character entity at the server.

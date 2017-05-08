@@ -34,6 +34,7 @@ import org.terasology.registry.In;
 import org.terasology.rendering.logic.RegionOutlineComponent;
 import org.terasology.structureTemplates.internal.components.EditTemplateRegionProcessComponent;
 import org.terasology.structureTemplates.internal.components.EditingUserComponent;
+import org.terasology.structureTemplates.internal.components.StructureTemplateOriginComponent;
 import org.terasology.structureTemplates.internal.events.CopyBlockRegionResultEvent;
 
 import java.util.ArrayList;

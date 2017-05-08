@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 MovingBlocks
+ * Copyright 2017 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.structureTemplates.internal.systems;
+package org.terasology.structureTemplates.internal.ui;
 
 import com.google.common.collect.Lists;
 import org.terasology.entitySystem.entity.EntityManager;
@@ -35,8 +35,8 @@ import org.terasology.structureTemplates.internal.events.CreateStructureSpawnIte
 import org.terasology.structureTemplates.internal.events.MakeBoxShapedRequest;
 import org.terasology.structureTemplates.internal.events.StopEditingProcessRequest;
 import org.terasology.structureTemplates.internal.events.StructureTemplateStringRequest;
-import org.terasology.structureTemplates.internal.ui.StructureTemplatePropertiesScreen;
-import org.terasology.structureTemplates.internal.ui.StructureTemplateRegionScreen;
+import org.terasology.structureTemplates.internal.systems.StructureTemplateEditorServerSystem;
+import org.terasology.structureTemplates.internal.components.StructureTemplateOriginComponent;
 import org.terasology.structureTemplates.util.ListUtil;
 import org.terasology.structureTemplates.util.RegionMergeUtil;
 import org.terasology.structureTemplates.util.transform.BlockRegionTransform;

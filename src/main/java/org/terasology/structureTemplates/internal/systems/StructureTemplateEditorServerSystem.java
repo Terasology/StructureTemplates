@@ -51,6 +51,8 @@ import org.terasology.structureTemplates.events.SpawnTemplateEvent;
 import org.terasology.structureTemplates.internal.components.EditTemplateRegionProcessComponent;
 import org.terasology.structureTemplates.internal.components.EditingUserComponent;
 import org.terasology.structureTemplates.internal.components.StructurePlaceholderComponent;
+import org.terasology.structureTemplates.internal.components.StructureTemplateGeneratorComponent;
+import org.terasology.structureTemplates.internal.components.StructureTemplateOriginComponent;
 import org.terasology.structureTemplates.internal.events.BuildStructureTemplateStringEvent;
 import org.terasology.structureTemplates.internal.events.CopyBlockRegionResultEvent;
 import org.terasology.structureTemplates.internal.events.CreateEditTemplateRegionProcessRequest;
