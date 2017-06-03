@@ -24,6 +24,9 @@ import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.logic.location.LocationComponent;
+import org.terasology.math.Side;
+import org.terasology.math.geom.Quat4f;
+import org.terasology.math.geom.Vector3f;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.registry.In;
 import org.terasology.structureTemplates.components.SpawnPrefabsComponent;
@@ -39,25 +42,46 @@ public class SpawnPrefabServerSystem extends BaseComponentSystem {
 
     @In
     private EntityManager entityManager;
-
     @In
     private AssetManager assetManager;
-
     @In
     private WorldProvider worldProvider;
 
     @ReceiveEvent
     public void onSpawnStructureWithPrefabSpawn(StructureBlocksSpawnedEvent event, EntityRef entity,
                                                 SpawnPrefabsComponent component) {
-        for (SpawnPrefabsComponent.PrefabToSpawn prefabToSpawn: component.prefabsToSpawn) {
+        for (SpawnPrefabsComponent.PrefabToSpawn prefabToSpawn : component.prefabsToSpawn) {
             Vector3i position = event.getTransformation().transformVector3i(prefabToSpawn.position);
+            Quat4f rotation = calculateRotation(event.getTransformation().transformSide(Side.FRONT), prefabToSpawn.rotation);
+
             EntityBuilder entityBuilder = entityManager.newBuilder(prefabToSpawn.prefab);
             LocationComponent locationComponent = entityBuilder.getComponent(LocationComponent.class);
             locationComponent.setWorldPosition(position.toVector3f());
+            locationComponent.setWorldRotation(rotation);
 
             entityBuilder.build();
         }
 
+    }
+
+    private Quat4f calculateRotation(Side side, Quat4f rotation) {
+        Quat4f calculatedRotation = new Quat4f(0, 0, 0, 0);
+        switch (side) {
+            case FRONT:
+                calculatedRotation = new Quat4f(Vector3f.up(), (float) Math.toRadians(0));
+                break;
+            case RIGHT:
+                calculatedRotation = new Quat4f(Vector3f.up(), (float) Math.toRadians(90));
+                break;
+            case BACK:
+                calculatedRotation = new Quat4f(Vector3f.up(), (float) Math.toRadians(180));
+                break;
+            case LEFT:
+                calculatedRotation = new Quat4f(Vector3f.up(), (float) Math.toRadians(270));
+                break;
+        }
+        calculatedRotation.mul(rotation);
+        return calculatedRotation;
     }
 
 
