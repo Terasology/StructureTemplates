@@ -26,12 +26,13 @@ import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.logic.location.LocationComponent;
 import org.terasology.math.Side;
 import org.terasology.math.geom.Quat4f;
-import org.terasology.math.geom.Vector3f;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.registry.In;
 import org.terasology.structureTemplates.components.SpawnPrefabsComponent;
 import org.terasology.structureTemplates.events.StructureBlocksSpawnedEvent;
 import org.terasology.world.WorldProvider;
+
+import static org.terasology.structureTemplates.util.transform.EntityRotationTransform.calculateRotation;
 
 
 /**
@@ -63,26 +64,4 @@ public class SpawnPrefabServerSystem extends BaseComponentSystem {
         }
 
     }
-
-    private Quat4f calculateRotation(Side side, Quat4f rotation) {
-        Quat4f calculatedRotation = new Quat4f(0, 0, 0, 0);
-        switch (side) {
-            case FRONT:
-                calculatedRotation = new Quat4f(Vector3f.up(), (float) Math.toRadians(0));
-                break;
-            case RIGHT:
-                calculatedRotation = new Quat4f(Vector3f.up(), (float) Math.toRadians(90));
-                break;
-            case BACK:
-                calculatedRotation = new Quat4f(Vector3f.up(), (float) Math.toRadians(180));
-                break;
-            case LEFT:
-                calculatedRotation = new Quat4f(Vector3f.up(), (float) Math.toRadians(270));
-                break;
-        }
-        calculatedRotation.mul(rotation);
-        return calculatedRotation;
-    }
-
-
 }
