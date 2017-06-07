@@ -17,6 +17,8 @@ package org.terasology.structureTemplates.util.transform;
 
 import org.terasology.math.Region3i;
 import org.terasology.math.Side;
+import org.terasology.math.geom.Quat4f;
+import org.terasology.math.geom.Vector3f;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.world.block.Block;
 
@@ -30,6 +32,30 @@ public interface BlockRegionTransform {
     Side transformSide(Side side);
 
     Vector3i transformVector3i(Vector3i position);
+
+    /**
+     * Describes the rotation for spawnPrefabs to maintain orientation of entity along with the structure.
+     */
+    default Quat4f calculateRotation(Quat4f rotation) {
+        Side side = transformSide(Side.FRONT);
+        Quat4f calculatedRotation = new Quat4f(0, 0, 0, 0);
+        switch (side) {
+            case FRONT:
+                calculatedRotation = new Quat4f(Vector3f.up(), (float) Math.toRadians(0));
+                break;
+            case RIGHT:
+                calculatedRotation = new Quat4f(Vector3f.up(), (float) Math.toRadians(90));
+                break;
+            case BACK:
+                calculatedRotation = new Quat4f(Vector3f.up(), (float) Math.toRadians(180));
+                break;
+            case LEFT:
+                calculatedRotation = new Quat4f(Vector3f.up(), (float) Math.toRadians(270));
+                break;
+        }
+        calculatedRotation.mul(rotation);
+        return calculatedRotation;
+    }
 
 
     default Region3i transformRegion(Region3i region) {

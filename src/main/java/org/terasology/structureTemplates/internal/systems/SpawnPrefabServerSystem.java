@@ -24,15 +24,12 @@ import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.logic.location.LocationComponent;
-import org.terasology.math.Side;
 import org.terasology.math.geom.Quat4f;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.registry.In;
 import org.terasology.structureTemplates.components.SpawnPrefabsComponent;
 import org.terasology.structureTemplates.events.StructureBlocksSpawnedEvent;
 import org.terasology.world.WorldProvider;
-
-import static org.terasology.structureTemplates.util.transform.HorizontalBlockRegionRotation.calculateRotation;
 
 
 /**
@@ -53,7 +50,7 @@ public class SpawnPrefabServerSystem extends BaseComponentSystem {
                                                 SpawnPrefabsComponent component) {
         for (SpawnPrefabsComponent.PrefabToSpawn prefabToSpawn : component.prefabsToSpawn) {
             Vector3i position = event.getTransformation().transformVector3i(prefabToSpawn.position);
-            Quat4f rotation = calculateRotation(event.getTransformation().transformSide(Side.FRONT), prefabToSpawn.rotation);
+            Quat4f rotation = event.getTransformation().calculateRotation(prefabToSpawn.rotation);
 
             EntityBuilder entityBuilder = entityManager.newBuilder(prefabToSpawn.prefab);
             LocationComponent locationComponent = entityBuilder.getComponent(LocationComponent.class);
