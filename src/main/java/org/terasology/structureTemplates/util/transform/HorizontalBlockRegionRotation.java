@@ -17,6 +17,8 @@ package org.terasology.structureTemplates.util.transform;
 
 import org.terasology.math.Region3i;
 import org.terasology.math.Side;
+import org.terasology.math.geom.Quat4f;
+import org.terasology.math.geom.Vector3f;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.world.block.Block;
 import org.terasology.world.block.family.AttachedToSurfaceFamily;
@@ -74,6 +76,29 @@ public class HorizontalBlockRegionRotation implements BlockRegionTransform {
             result.setZ(xBackup);
         }
         return result;
+    }
+
+    /**
+     * Describes the rotation for spawnPrefabs to maintain orientation of entity along with the structure.
+     */
+    public static Quat4f calculateRotation(Side side, Quat4f rotation) {
+        Quat4f calculatedRotation = new Quat4f(0, 0, 0, 0);
+        switch (side) {
+            case FRONT:
+                calculatedRotation = new Quat4f(Vector3f.up(), (float) Math.toRadians(0));
+                break;
+            case RIGHT:
+                calculatedRotation = new Quat4f(Vector3f.up(), (float) Math.toRadians(90));
+                break;
+            case BACK:
+                calculatedRotation = new Quat4f(Vector3f.up(), (float) Math.toRadians(180));
+                break;
+            case LEFT:
+                calculatedRotation = new Quat4f(Vector3f.up(), (float) Math.toRadians(270));
+                break;
+        }
+        calculatedRotation.mul(rotation);
+        return calculatedRotation;
     }
 
     private static int sideToCounterClockwiseTurnsFromRight(Side side) {

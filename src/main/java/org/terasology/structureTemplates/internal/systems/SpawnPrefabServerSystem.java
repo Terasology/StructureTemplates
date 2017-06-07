@@ -32,7 +32,7 @@ import org.terasology.structureTemplates.components.SpawnPrefabsComponent;
 import org.terasology.structureTemplates.events.StructureBlocksSpawnedEvent;
 import org.terasology.world.WorldProvider;
 
-import static org.terasology.structureTemplates.util.transform.EntityRotationTransform.calculateRotation;
+import static org.terasology.structureTemplates.util.transform.HorizontalBlockRegionRotation.calculateRotation;
 
 
 /**
