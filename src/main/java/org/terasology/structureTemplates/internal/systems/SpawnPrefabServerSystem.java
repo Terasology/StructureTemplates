@@ -50,7 +50,7 @@ public class SpawnPrefabServerSystem extends BaseComponentSystem {
                                                 SpawnPrefabsComponent component) {
         for (SpawnPrefabsComponent.PrefabToSpawn prefabToSpawn : component.prefabsToSpawn) {
             Vector3i position = event.getTransformation().transformVector3i(prefabToSpawn.position);
-            Quat4f rotation = event.getTransformation().calculateRotation(prefabToSpawn.rotation);
+            Quat4f rotation = event.getTransformation().transformRotation(prefabToSpawn.rotation);
 
             EntityBuilder entityBuilder = entityManager.newBuilder(prefabToSpawn.prefab);
             LocationComponent locationComponent = entityBuilder.getComponent(LocationComponent.class);

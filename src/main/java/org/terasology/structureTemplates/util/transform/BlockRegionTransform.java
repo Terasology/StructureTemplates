@@ -33,10 +33,7 @@ public interface BlockRegionTransform {
 
     Vector3i transformVector3i(Vector3i position);
 
-    /**
-     * Describes the rotation for spawnPrefabs to maintain orientation of entity along with the structure.
-     */
-    default Quat4f calculateRotation(Quat4f rotation) {
+    default Quat4f transformRotation(Quat4f rotation) {
         Side side = transformSide(Side.FRONT);
         Quat4f calculatedRotation = new Quat4f(0, 0, 0, 0);
         switch (side) {
