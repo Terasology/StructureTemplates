@@ -33,47 +33,12 @@ public class HorizontalBlockRegionRotation implements BlockRegionTransform {
     private int counterClockWiseHorizontal90DegreeRotations = 0;
 
 
-    public static HorizontalBlockRegionRotation createRotationFromSideToSide(Side startSide, Side targetSide) {
-        return new HorizontalBlockRegionRotation(counterClockWiseTurnsFromSideToSide(startSide, targetSide));
-    }
-
     public HorizontalBlockRegionRotation(int counterClockWiseHorizontal90DegreeRotations) {
         this.counterClockWiseHorizontal90DegreeRotations = counterClockWiseHorizontal90DegreeRotations;
     }
 
-    @Override
-    public Region3i transformRegion(Region3i region) {
-        return Region3i.createBounded(transformVector3i(region.min()), transformVector3i(region.max()));
-    }
-
-    @Override
-    public Block transformBlock(Block block) {
-        BlockFamily blockFamily = block.getBlockFamily();
-        if (blockFamily instanceof SideDefinedBlockFamily) {
-            SideDefinedBlockFamily sideDefinedBlockFamily = (SideDefinedBlockFamily) blockFamily;
-            return sideDefinedBlockFamily.getBlockForSide(transformSide(block.getDirection()));
-        } else if (blockFamily instanceof AttachedToSurfaceFamily) {
-            // TODO add some proper method to block famility to not have to do this hack
-            return blockFamily.getBlockForPlacement(null, null,null, transformSide(block.getDirection()), null);
-        }
-        return block;
-    }
-
-    @Override
-    public Side transformSide(Side side) {
-        return side.yawClockwise(4 - counterClockWiseHorizontal90DegreeRotations);
-    }
-
-    @Override
-    public Vector3i transformVector3i(Vector3i position) {
-        Vector3i result = new Vector3i(position);
-        for (int i = 0; i < counterClockWiseHorizontal90DegreeRotations; i++) {
-            int xBackup = result.x();
-            int zBackup = result.z();
-            result.setX(-zBackup);
-            result.setZ(xBackup);
-        }
-        return result;
+    public static HorizontalBlockRegionRotation createRotationFromSideToSide(Side startSide, Side targetSide) {
+        return new HorizontalBlockRegionRotation(counterClockWiseTurnsFromSideToSide(startSide, targetSide));
     }
 
     private static int sideToCounterClockwiseTurnsFromRight(Side side) {
@@ -99,5 +64,40 @@ public class HorizontalBlockRegionRotation implements BlockRegionTransform {
             turns += 4;
         }
         return turns;
+    }
+
+    @Override
+    public Region3i transformRegion(Region3i region) {
+        return Region3i.createBounded(transformVector3i(region.min()), transformVector3i(region.max()));
+    }
+
+    @Override
+    public Block transformBlock(Block block) {
+        BlockFamily blockFamily = block.getBlockFamily();
+        if (blockFamily instanceof SideDefinedBlockFamily) {
+            SideDefinedBlockFamily sideDefinedBlockFamily = (SideDefinedBlockFamily) blockFamily;
+            return sideDefinedBlockFamily.getBlockForSide(transformSide(block.getDirection()));
+        } else if (blockFamily instanceof AttachedToSurfaceFamily) {
+            // TODO add some proper method to block famility to not have to do this hack
+            return blockFamily.getBlockForPlacement(null, null, null, transformSide(block.getDirection()), null);
+        }
+        return block;
+    }
+
+    @Override
+    public Side transformSide(Side side) {
+        return side.yawClockwise(4 - counterClockWiseHorizontal90DegreeRotations);
+    }
+
+    @Override
+    public Vector3i transformVector3i(Vector3i position) {
+        Vector3i result = new Vector3i(position);
+        for (int i = 0; i < counterClockWiseHorizontal90DegreeRotations; i++) {
+            int xBackup = result.x();
+            int zBackup = result.z();
+            result.setX(-zBackup);
+            result.setZ(xBackup);
+        }
+        return result;
     }
 }
