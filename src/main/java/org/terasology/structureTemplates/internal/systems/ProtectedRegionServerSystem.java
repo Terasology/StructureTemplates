@@ -27,6 +27,7 @@ import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.logic.characters.events.ActivationPredicted;
+import org.terasology.logic.characters.events.ActivationRequestDenied;
 import org.terasology.logic.characters.events.AttackEvent;
 import org.terasology.logic.common.ActivateEvent;
 import org.terasology.logic.common.lifespan.LifespanComponent;
@@ -112,6 +113,7 @@ public class ProtectedRegionServerSystem extends BaseComponentSystem {
         Vector3f position = event.getTarget().getComponent(LocationComponent.class).getWorldPosition();
         Vector3i roundedPosition = new Vector3i(Math.round(position.x), Math.round(position.y), Math.round(position.z));
         if (isInProtectedRegion(Collections.singleton(roundedPosition))) {
+            event.getInstigator().send(new ActivationRequestDenied(event.getActivationId()));
             event.consume();
         }
     }
