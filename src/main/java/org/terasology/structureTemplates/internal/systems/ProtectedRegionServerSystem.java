@@ -28,6 +28,7 @@ import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.logic.characters.events.ActivationPredicted;
 import org.terasology.logic.characters.events.AttackEvent;
+import org.terasology.logic.common.ActivateEvent;
 import org.terasology.logic.common.lifespan.LifespanComponent;
 import org.terasology.logic.location.LocationComponent;
 import org.terasology.math.Region3i;
@@ -104,7 +105,15 @@ public class ProtectedRegionServerSystem extends BaseComponentSystem {
         if (isInProtectedRegion(Collections.singleton(roundedPosition))) {
             event.consume();
         }
+    }
 
+    @ReceiveEvent(priority = EventPriority.PRIORITY_CRITICAL, components = {NoInteractionWhenProtected.class})
+    public void onActivation(ActivateEvent event, EntityRef target) {
+        Vector3f position = event.getTarget().getComponent(LocationComponent.class).getWorldPosition();
+        Vector3i roundedPosition = new Vector3i(Math.round(position.x), Math.round(position.y), Math.round(position.z));
+        if (isInProtectedRegion(Collections.singleton(roundedPosition))) {
+            event.consume();
+        }
     }
 
     @ReceiveEvent(priority = EventPriority.PRIORITY_LOW)

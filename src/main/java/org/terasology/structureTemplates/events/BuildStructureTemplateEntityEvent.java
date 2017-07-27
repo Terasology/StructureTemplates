@@ -59,10 +59,7 @@ public class BuildStructureTemplateEntityEvent implements Event {
     public Collection<Vector3i> findAbsolutePositionsOf(BlockFamily blockFamily) {
         List<Vector3i> positions = new ArrayList<>();
         for (Block block: blockFamily.getBlocks()) {
-            Collection<Vector3i> positionsOfBlock = blockToAbsolutePositionMap.get(block);
-            if (positionsOfBlock == null) {
-                positionsOfBlock = Collections.emptyList();
-            }
+            Collection<Vector3i> positionsOfBlock = blockToAbsolutePositionMap.getOrDefault(block, Collections.emptySet());
             positions.addAll(positionsOfBlock);
         }
         return positions;
