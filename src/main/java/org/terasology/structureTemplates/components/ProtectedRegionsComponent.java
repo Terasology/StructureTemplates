@@ -17,12 +17,14 @@ package org.terasology.structureTemplates.components;
 
 import org.terasology.entitySystem.Component;
 import org.terasology.math.Region3i;
+import org.terasology.network.Replicate;
 
 import java.util.List;
 
 /**
  * Prevents modification of certain absolute regions as long as the entity that owns it exists.
  */
+@Replicate
 public class ProtectedRegionsComponent implements Component {
     public List<Region3i> regions;
 
