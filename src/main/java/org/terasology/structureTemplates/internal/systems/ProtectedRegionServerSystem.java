@@ -70,7 +70,9 @@ public class ProtectedRegionServerSystem extends BaseComponentSystem {
 
     private boolean isInProtectedRegion(Collection<Vector3i> positions) {
         for (EntityRef regionEntity : entityManager.getEntitiesWith(ProtectedRegionsComponent.class)) {
-            ProtectedRegionUtility.isInProtectedRegion(positions, regionEntity);
+            if (ProtectedRegionUtility.isInProtectedRegion(positions, regionEntity)) {
+                return true;
+            }
         }
         return false;
     }
