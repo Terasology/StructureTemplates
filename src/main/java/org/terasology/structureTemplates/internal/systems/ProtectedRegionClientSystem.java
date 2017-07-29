@@ -86,14 +86,4 @@ public class ProtectedRegionClientSystem extends BaseComponentSystem {
             event.consume();
         }
     }
-
-    @ReceiveEvent(priority = EventPriority.PRIORITY_CRITICAL, components = {NoInteractionWhenProtected.class})
-    public void onActivation(ActivateEvent event, EntityRef target) {
-        Vector3f position = event.getTarget().getComponent(LocationComponent.class).getWorldPosition();
-        Vector3i roundedPosition = new Vector3i(Math.round(position.x), Math.round(position.y), Math.round(position.z));
-        if (isInProtectedRegion(Collections.singleton(roundedPosition))) {
-            event.getInstigator().send(new ActivationRequestDenied(event.getActivationId()));
-            event.consume();
-        }
-    }
 }
