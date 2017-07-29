@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 MovingBlocks
+ * Copyright 2017 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,22 +51,13 @@ import java.util.List;
 /**
  * System to make {@link ProtectedRegionsComponent} work.
  */
-@RegisterSystem(RegisterMode.AUTHORITY)
-public class ProtectedRegionServerSystem extends BaseComponentSystem {
+@RegisterSystem(RegisterMode.CLIENT)
+public class ProtectedRegionClientSystem extends BaseComponentSystem {
 
-    private static final Logger logger = LoggerFactory.getLogger(ProtectedRegionServerSystem.class);
+    private static final Logger logger = LoggerFactory.getLogger(ProtectedRegionClientSystem.class);
 
     @In
     private EntityManager entityManager;
-
-    @ReceiveEvent(priority = EventPriority.PRIORITY_CRITICAL)
-    public void onAttackEntity(AttackEvent event, EntityRef targetEntity, BlockComponent blockComponent) {
-        Vector3i pos = blockComponent.getPosition();
-
-        if (isInProtectedRegion(Collections.singleton(pos))) {
-            event.consume();
-        }
-    }
 
     private boolean isInProtectedRegion(Collection<Vector3i> positions) {
 
@@ -86,15 +77,12 @@ public class ProtectedRegionServerSystem extends BaseComponentSystem {
         return false;
     }
 
-
-    @ReceiveEvent(priority = EventPriority.PRIORITY_CRITICAL)
-    public void onPlaceBlocks(PlaceBlocks event, EntityRef entity) {
-        EntityRef instigator = event.getInstigator();
-        EntityRef player = instigator.getOwner();
-        if (!player.hasComponent(ClientComponent.class)) {
-            return;
-        }
-        if (isInProtectedRegion(event.getBlocks().keySet())) {
+    @ReceiveEvent(priority = EventPriority.PRIORITY_CRITICAL, components = {NoInteractionWhenProtected.class})
+    public void onActivationPredicted(ActivationPredicted event, EntityRef target) {
+        Vector3f position = event.getTarget().getComponent(LocationComponent.class).getWorldPosition();
+        Vector3i roundedPosition = new Vector3i(Math.round(position.x), Math.round(position.y), Math.round(position.z));
+        logger.info(roundedPosition + " " + isInProtectedRegion(Collections.singleton(roundedPosition)));
+        if (isInProtectedRegion(Collections.singleton(roundedPosition))) {
             event.consume();
         }
     }
@@ -108,25 +96,4 @@ public class ProtectedRegionServerSystem extends BaseComponentSystem {
             event.consume();
         }
     }
-
-    @ReceiveEvent(priority = EventPriority.PRIORITY_LOW)
-    public void onStructureBlocksSpawnedEvent(StructureBlocksSpawnedEvent event, EntityRef entity,
-                                              ProtectRegionsForAFewHoursComponent component) {
-        EntityBuilder entityBuilder = entityManager.newBuilder();
-        entityBuilder.setPersistent(true);
-        entityBuilder.addOrSaveComponent(component);
-        List<Region3i> absoluteRegions = Lists.newArrayList();
-        for (Region3i relativeRegion : component.regions) {
-            absoluteRegions.add(event.getTransformation().transformRegion(relativeRegion));
-        }
-        ProtectedRegionsComponent protectedRegionsComponent = new ProtectedRegionsComponent();
-        protectedRegionsComponent.regions = absoluteRegions;
-        entityBuilder.addOrSaveComponent(protectedRegionsComponent);
-
-        LifespanComponent lifespanComponent = new LifespanComponent();
-        lifespanComponent.lifespan = component.hoursToProtect * 3600;
-        entityBuilder.addOrSaveComponent(lifespanComponent);
-        entityBuilder.build();
-    }
-
 }

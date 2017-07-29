@@ -26,6 +26,7 @@ import java.util.List;
  */
 @Replicate
 public class ProtectedRegionsComponent implements Component {
+    @Replicate
     public List<Region3i> regions;
 
 }
