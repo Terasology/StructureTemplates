@@ -24,7 +24,6 @@ import java.util.List;
 /**
  * Prevents modification of certain absolute regions as long as the entity that owns it exists.
  */
-@Replicate
 public class ProtectedRegionsComponent implements Component {
     @Replicate
     public List<Region3i> regions;
