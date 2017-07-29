@@ -26,7 +26,6 @@ import org.terasology.entitySystem.event.ReceiveEvent;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
-import org.terasology.logic.characters.events.ActivationPredicted;
 import org.terasology.logic.characters.events.ActivationRequestDenied;
 import org.terasology.logic.characters.events.AttackEvent;
 import org.terasology.logic.common.ActivateEvent;
@@ -41,6 +40,7 @@ import org.terasology.structureTemplates.components.ProtectRegionsForAFewHoursCo
 import org.terasology.structureTemplates.components.ProtectedRegionsComponent;
 import org.terasology.structureTemplates.events.StructureBlocksSpawnedEvent;
 import org.terasology.structureTemplates.internal.components.NoInteractionWhenProtected;
+import org.terasology.structureTemplates.util.ProtectedRegionUtility;
 import org.terasology.world.block.BlockComponent;
 import org.terasology.world.block.entity.placement.PlaceBlocks;
 
@@ -69,19 +69,8 @@ public class ProtectedRegionServerSystem extends BaseComponentSystem {
     }
 
     private boolean isInProtectedRegion(Collection<Vector3i> positions) {
-
-        for (EntityRef entity : entityManager.getEntitiesWith(ProtectedRegionsComponent.class)) {
-            ProtectedRegionsComponent protectedRegionsComponent = entity.getComponent(ProtectedRegionsComponent.class);
-            List<Region3i> protectedRegions = protectedRegionsComponent.regions;
-            if (protectedRegions != null) {
-                for (Region3i region : protectedRegions) {
-                    for (Vector3i position : positions) {
-                        if (region.encompasses(position)) {
-                            return true;
-                        }
-                    }
-                }
-            }
+        for (EntityRef regionEntity : entityManager.getEntitiesWith(ProtectedRegionsComponent.class)) {
+            ProtectedRegionUtility.isInProtectedRegion(positions, regionEntity);
         }
         return false;
     }
