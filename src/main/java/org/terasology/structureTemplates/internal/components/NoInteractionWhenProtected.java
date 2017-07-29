@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 MovingBlocks
+ * Copyright 2017 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,19 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.structureTemplates.components;
+package org.terasology.structureTemplates.internal.components;
 
 import org.terasology.entitySystem.Component;
-import org.terasology.math.Region3i;
-import org.terasology.network.Replicate;
-
-import java.util.List;
 
 /**
- * Prevents modification of certain absolute regions as long as the entity that owns it exists.
+ * Prevents interaction from happening when it lies in a protected region, when attached to an entity.
  */
-public class ProtectedRegionsComponent implements Component {
-    @Replicate
-    public List<Region3i> regions;
+public class NoInteractionWhenProtected implements Component {
 
 }
