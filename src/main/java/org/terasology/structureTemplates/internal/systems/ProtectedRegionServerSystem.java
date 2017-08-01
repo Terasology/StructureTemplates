@@ -43,6 +43,7 @@ import org.terasology.structureTemplates.internal.components.NoInteractionWhenPr
 import org.terasology.structureTemplates.util.ProtectedRegionUtility;
 import org.terasology.world.block.BlockComponent;
 import org.terasology.world.block.entity.placement.PlaceBlocks;
+import org.terasology.world.block.regions.BlockRegionComponent;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -60,10 +61,22 @@ public class ProtectedRegionServerSystem extends BaseComponentSystem {
     private EntityManager entityManager;
 
     @ReceiveEvent(priority = EventPriority.PRIORITY_CRITICAL)
-    public void onAttackEntity(AttackEvent event, EntityRef targetEntity, BlockComponent blockComponent) {
+    public void onAttackBlock(AttackEvent event, EntityRef targetEntity, BlockComponent blockComponent) {
         Vector3i pos = blockComponent.getPosition();
 
         if (isInProtectedRegion(Collections.singleton(pos))) {
+            event.consume();
+        }
+    }
+
+    @ReceiveEvent(priority = EventPriority.PRIORITY_CRITICAL)
+    public void onAttackBlockRegion(AttackEvent event, EntityRef targetEntity, BlockRegionComponent blockRegionComponent) {
+        List<Vector3i> positions = Lists.newArrayList();
+        for (Vector3i pos: blockRegionComponent.region) {
+            positions.add(pos);
+        }
+        
+        if (isInProtectedRegion(positions)) {
             event.consume();
         }
     }
