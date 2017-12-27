@@ -451,9 +451,8 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
             if (!firstProperty) {
                 sb.append(",\n");
             }
-            sb.append("        \"spawnChance\": \"");
+            sb.append("        \"spawnChance\": ");
             sb.append(Integer.toString(component.spawnChance));
-            sb.append("\"");
             firstProperty = false;
         }
         if (!firstProperty) {
