@@ -21,19 +21,104 @@ import org.terasology.math.geom.Quat4f;
 import org.terasology.math.geom.Vector3f;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.world.block.Block;
+import org.terasology.world.block.family.AttachedToSurfaceFamily;
+import org.terasology.world.block.family.BlockFamily;
+import org.terasology.world.block.family.SideDefinedBlockFamily;
 
 /**
- * Describes a transformation for a region of blocks like a rotation of 90 degrees.
+ * Describes a transformation for a region of blocks like a rotation of 90 degrees or a movement by an offset.
  */
-public interface BlockRegionTransform {
+public class BlockRegionTransform {
+    /**
+     * How often it will be rotated around the y axis by 90 degree. Must be either 0, 1, 2 or 3.
+     */
+    private int counterClockWiseHorizontal90DegreeRotations = 0;
 
-    Block transformBlock(Block block);
+    private Vector3i offset;
 
-    Side transformSide(Side side);
+    private BlockRegionTransform(Vector3i offset, int counterClockWiseHorizontal90DegreeRotations) {
+        this.offset = offset;
+        this.counterClockWiseHorizontal90DegreeRotations = counterClockWiseHorizontal90DegreeRotations;
+    }
 
-    Vector3i transformVector3i(Vector3i position);
+    public static BlockRegionTransform createMovingThenRotating(Vector3i offset, Side startSide, Side targetSide) {
+        /*
+         * if offset gets added first then it gets transformed by the rotation
+         * So to get the same transformation in the form apply rotation first and then
+         */
+        int rotations = counterClockWiseTurnsFromSideToSide(startSide, targetSide);
+        Vector3i transformedOffset = vectorRotatedClockWiseHorizontallyNTimes(offset, rotations);
+        return new BlockRegionTransform(transformedOffset, rotations);
+    }
 
-    default Quat4f transformRotation(Quat4f rotation) {
+    public static BlockRegionTransform createRotationThenMovement(Side startSide, Side targetSide, Vector3i offset) {
+        return new BlockRegionTransform(offset, counterClockWiseTurnsFromSideToSide(startSide, targetSide));
+    }
+
+    private static int sideToCounterClockwiseTurnsFromRight(Side side) {
+        switch (side) {
+            case RIGHT:
+                return 0;
+            case BACK:
+                return 1;
+            case LEFT:
+                return 2;
+            case FRONT:
+                return 3;
+            default:
+                throw new IllegalArgumentException("not a horizontal side " + side);
+        }
+    }
+
+    private static int counterClockWiseTurnsFromSideToSide(Side startSide, Side endSide) {
+        int turnsFromRightStart = sideToCounterClockwiseTurnsFromRight(startSide);
+        int turnsFromRightEnd = sideToCounterClockwiseTurnsFromRight(endSide);
+        int turns = turnsFromRightEnd - turnsFromRightStart;
+        if (turns < 0) {
+            turns += 4;
+        }
+        return turns;
+    }
+
+    public Region3i transformRegion(Region3i region) {
+        return Region3i.createBounded(transformVector3i(region.min()), transformVector3i(region.max()));
+    }
+
+    public Block transformBlock(Block block) {
+        BlockFamily blockFamily = block.getBlockFamily();
+        if (blockFamily instanceof SideDefinedBlockFamily) {
+            SideDefinedBlockFamily sideDefinedBlockFamily = (SideDefinedBlockFamily) blockFamily;
+            return sideDefinedBlockFamily.getBlockForSide(transformSide(block.getDirection()));
+        } else if (blockFamily instanceof AttachedToSurfaceFamily) {
+            // TODO add some proper method to block famility to not have to do this hack
+            return blockFamily.getBlockForPlacement(null, null, null, transformSide(block.getDirection()), null);
+        }
+        return block;
+    }
+
+    public Side transformSide(Side side) {
+        return side.yawClockwise(4 - counterClockWiseHorizontal90DegreeRotations);
+    }
+
+    public Vector3i transformVector3i(Vector3i vectorToTransform) {
+        Vector3i result = vectorRotatedClockWiseHorizontallyNTimes(vectorToTransform,
+                counterClockWiseHorizontal90DegreeRotations);
+        result.add(offset);
+        return result;
+    }
+
+    private static Vector3i vectorRotatedClockWiseHorizontallyNTimes(Vector3i vectorToTransform, int amount) {
+        Vector3i result = new Vector3i(vectorToTransform);
+        for (int i = 0; i < amount; i++) {
+            int xBackup = result.x();
+            int zBackup = result.z();
+            result.setX(-zBackup);
+            result.setZ(xBackup);
+        }
+        return result;
+    }
+
+    public Quat4f transformRotation(Quat4f rotation) {
         Side side = transformSide(Side.FRONT);
         Quat4f calculatedRotation = new Quat4f(0, 0, 0, 0);
         switch (side) {
@@ -55,7 +140,4 @@ public interface BlockRegionTransform {
     }
 
 
-    default Region3i transformRegion(Region3i region) {
-        return Region3i.createBounded(transformVector3i(region.min()), transformVector3i(region.max()));
-    }
 }

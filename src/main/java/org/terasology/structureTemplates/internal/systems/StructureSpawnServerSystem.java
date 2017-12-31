@@ -43,10 +43,7 @@ import org.terasology.structureTemplates.events.SpawnTemplateEvent;
 import org.terasology.structureTemplates.events.StructureBlocksSpawnedEvent;
 import org.terasology.structureTemplates.events.StructureSpawnStartedEvent;
 import org.terasology.structureTemplates.internal.events.StructureSpawnFailedEvent;
-import org.terasology.structureTemplates.util.transform.BlockRegionMovement;
 import org.terasology.structureTemplates.util.transform.BlockRegionTransform;
-import org.terasology.structureTemplates.util.transform.BlockRegionTransformationList;
-import org.terasology.structureTemplates.util.transform.HorizontalBlockRegionRotation;
 import org.terasology.world.WorldProvider;
 import org.terasology.world.block.Block;
 import org.terasology.world.block.BlockComponent;
@@ -177,11 +174,7 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
 
     public static BlockRegionTransform createBlockRegionTransformForCharacterTargeting(
             Side fromSide, Side toSide, Vector3i target) {
-        BlockRegionTransformationList transformList = new BlockRegionTransformationList();
-        transformList.addTransformation(
-                HorizontalBlockRegionRotation.createRotationFromSideToSide(fromSide, toSide));
-        transformList.addTransformation(new BlockRegionMovement(target));
-        return transformList;
+        return BlockRegionTransform.createRotationThenMovement(fromSide, toSide, target);
     }
 
 }

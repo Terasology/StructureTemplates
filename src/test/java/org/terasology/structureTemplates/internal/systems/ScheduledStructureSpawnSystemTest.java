@@ -18,7 +18,7 @@ package org.terasology.structureTemplates.internal.systems;
 import org.junit.Test;
 import org.terasology.math.Side;
 import org.terasology.math.geom.Vector3i;
-import org.terasology.structureTemplates.util.transform.BlockRegionTransformationList;
+import org.terasology.structureTemplates.util.transform.BlockRegionTransform;
 
 import static org.junit.Assert.assertEquals;
 import static org.terasology.structureTemplates.internal.systems.ScheduledStructureSpawnSystem.createTransformForIncomingConnectionPoint;
@@ -59,7 +59,7 @@ public class ScheduledStructureSpawnSystemTest {
         Vector3i incomingConnectionPointPosition = new Vector3i(0, 0, 4);
         Side incomingConnectionPointDirection = Side.LEFT;
 
-        BlockRegionTransformationList result = createTransformForIncomingConnectionPoint(
+        BlockRegionTransform result = createTransformForIncomingConnectionPoint(
                 direction, spawnPosition, incomingConnectionPointPosition, incomingConnectionPointDirection);
 
         // input point transformed:
@@ -107,7 +107,7 @@ public class ScheduledStructureSpawnSystemTest {
         Vector3i incomingConnectionPointPosition = new Vector3i(0, 0, 4);
         Side incomingConnectionPointDirection = Side.LEFT;
 
-        BlockRegionTransformationList result = createTransformForIncomingConnectionPoint(
+        BlockRegionTransform result = createTransformForIncomingConnectionPoint(
                 direction, spawnPosition, incomingConnectionPointPosition, incomingConnectionPointDirection);
 
         // input point transformed:
@@ -153,7 +153,7 @@ public class ScheduledStructureSpawnSystemTest {
         Vector3i incomingConnectionPointPosition = new Vector3i(2, 0, 0);
         Side incomingConnectionPointDirection = Side.FRONT;
 
-        BlockRegionTransformationList result = createTransformForIncomingConnectionPoint(
+        BlockRegionTransform result = createTransformForIncomingConnectionPoint(
                 direction, spawnPosition, incomingConnectionPointPosition, incomingConnectionPointDirection);
 
         // input point transformed:
@@ -213,7 +213,7 @@ public class ScheduledStructureSpawnSystemTest {
         Vector3i incomingConnectionPointPosition = new Vector3i(2, 0, 0);
         Side incomingConnectionPointDirection = Side.FRONT;
 
-        BlockRegionTransformationList result = createTransformForIncomingConnectionPoint(
+        BlockRegionTransform result = createTransformForIncomingConnectionPoint(
                 direction, spawnPosition, incomingConnectionPointPosition, incomingConnectionPointDirection);
 
         // input point transformed:
