@@ -51,7 +51,7 @@ import org.terasology.structureTemplates.components.SpawnStructureActionComponen
 import org.terasology.structureTemplates.events.CheckSpawnConditionEvent;
 import org.terasology.structureTemplates.internal.events.StructureSpawnFailedEvent;
 import org.terasology.structureTemplates.internal.ui.StructurePlacementFailureScreen;
-import org.terasology.structureTemplates.util.transform.BlockRegionTransform;
+import org.terasology.structureTemplates.util.BlockRegionTransform;
 import org.terasology.world.block.BlockComponent;
 
 import java.util.ArrayList;

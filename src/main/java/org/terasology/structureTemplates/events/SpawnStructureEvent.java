@@ -17,7 +17,7 @@ package org.terasology.structureTemplates.events;
 
 import org.terasology.entitySystem.event.AbstractConsumableEvent;
 import org.terasology.entitySystem.event.EventPriority;
-import org.terasology.structureTemplates.util.transform.BlockRegionTransform;
+import org.terasology.structureTemplates.util.BlockRegionTransform;
 
 /**
  * Send this event to a structure template entity to start the spawning of the structure.

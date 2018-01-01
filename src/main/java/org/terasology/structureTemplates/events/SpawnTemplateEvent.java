@@ -16,7 +16,7 @@
 package org.terasology.structureTemplates.events;
 
 import org.terasology.entitySystem.event.Event;
-import org.terasology.structureTemplates.util.transform.BlockRegionTransform;
+import org.terasology.structureTemplates.util.BlockRegionTransform;
 
 /**
  * Send this event to a structure template entity to make it spawn the template in edit mode.

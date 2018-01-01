@@ -35,7 +35,7 @@ import org.terasology.structureTemplates.events.CheckSpawnConditionEvent;
 import org.terasology.structureTemplates.events.GetBlockPredicateEvent;
 import org.terasology.structureTemplates.interfaces.BlockRegionChecker;
 import org.terasology.structureTemplates.interfaces.BlockPredicateProvider;
-import org.terasology.structureTemplates.util.transform.BlockRegionTransform;
+import org.terasology.structureTemplates.util.BlockRegionTransform;
 import org.terasology.world.WorldProvider;
 import org.terasology.world.block.Block;
 import org.terasology.world.block.BlockManager;

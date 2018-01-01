@@ -16,7 +16,7 @@
 package org.terasology.structureTemplates.events;
 
 import org.terasology.entitySystem.event.Event;
-import org.terasology.structureTemplates.util.transform.BlockRegionTransform;
+import org.terasology.structureTemplates.util.BlockRegionTransform;
 
 /**
  * Gets send when the basic blocks of a structure template got placed. Event handlers
