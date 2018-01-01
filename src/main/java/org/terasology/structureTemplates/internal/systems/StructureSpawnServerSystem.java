@@ -79,21 +79,13 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
     @In
     private AssetManager assetManager;
 
-    @ReceiveEvent(priority = EventPriority.PRIORITY_CRITICAL)
-    public void onSpawnStructureEventWithHighestPriority(SpawnStructureEvent event, EntityRef entity) {
-        entity.send(new StructureSpawnStartedEvent(event.getTransformation()));
-    }
-
-
-    @ReceiveEvent(priority = EventPriority.PRIORITY_NORMAL) // TODO
-    public void onSpawnStructureWithFallingAnimation(SpawnStructureEvent event, EntityRef entity) {
-        entity.send(new SpawnBlocksOfStructureTemplateEvent(event.getTransformation()));
-    }
-
 
     @ReceiveEvent(priority = EventPriority.PRIORITY_TRIVIAL)
-    public void onSpawnStructureEventWithLowestPriority(SpawnStructureEvent event, EntityRef entity) {
+    public void onSpawnStructureWithFallingAnimation(SpawnStructureEvent event, EntityRef entity) {
+        entity.send(new StructureSpawnStartedEvent(event.getTransformation()));
+        entity.send(new SpawnBlocksOfStructureTemplateEvent(event.getTransformation()));
         entity.send(new StructureBlocksSpawnedEvent(event.getTransformation()));
+        event.consume();
     }
 
     @ReceiveEvent

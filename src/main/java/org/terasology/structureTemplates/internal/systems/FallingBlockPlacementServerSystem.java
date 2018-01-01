@@ -22,7 +22,6 @@ import org.terasology.engine.Time;
 import org.terasology.entitySystem.entity.EntityBuilder;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.entitySystem.event.EventPriority;
 import org.terasology.entitySystem.event.ReceiveEvent;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
@@ -42,6 +41,7 @@ import org.terasology.structureTemplates.events.GetStructureTemplateBlocksEvent;
 import org.terasology.structureTemplates.events.SpawnBlocksOfStructureTemplateEvent;
 import org.terasology.structureTemplates.events.SpawnStructureEvent;
 import org.terasology.structureTemplates.events.StructureBlocksSpawnedEvent;
+import org.terasology.structureTemplates.events.StructureSpawnStartedEvent;
 import org.terasology.structureTemplates.util.BlockRegionTransform;
 import org.terasology.world.WorldProvider;
 import org.terasology.world.block.Block;
@@ -82,10 +82,14 @@ public class FallingBlockPlacementServerSystem extends BaseComponentSystem {
     private WorldProvider worldProvider;
 
     /**
-     * This handler interrupts the normal handling in order to place blocks over a longer timeframe
+     * This overrides the normal instant structure template spawning with one where an animation of falling blocks
+     * gets played. The event {@link StructureSpawnStartedEvent} still gets sent at the start and
+     * the event {@link StructureBlocksSpawnedEvent} gets send when the fall down animation has been played for
+     * all blocks. So there might be a few seconds between the events.
      */
-    @ReceiveEvent(priority = EventPriority.PRIORITY_HIGH, components = {FallingBlocksPlacementAlgorithmComponent.class})
+    @ReceiveEvent(components = {FallingBlocksPlacementAlgorithmComponent.class})
     public void onSpawnStructureEventWithBlocksPriority(SpawnStructureEvent event, EntityRef entity) {
+        entity.send(new StructureSpawnStartedEvent(event.getTransformation()));
         GetStructureTemplateBlocksEvent getBlocksEvent =  new GetStructureTemplateBlocksEvent(event.getTransformation());
         entity.send(getBlocksEvent);
         Map<Vector3i, Block> blocksToPlace = getBlocksEvent.getBlocksToPlace();
