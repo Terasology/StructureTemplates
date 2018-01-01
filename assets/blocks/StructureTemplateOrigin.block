@@ -8,7 +8,7 @@
   "attachmentAllowed": true,
   "hardness": 100,
   "displayName": "structure template origin",
-  "rotation": "horizontal",
+  "family": "horizontal",
   "sounds": "none",
   "shape" : "engine:cube",
   "entity": {
