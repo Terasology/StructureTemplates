@@ -20,6 +20,7 @@ import org.terasology.math.Side;
 import org.terasology.math.geom.Quat4f;
 import org.terasology.math.geom.Vector3f;
 import org.terasology.math.geom.Vector3i;
+import org.terasology.structureTemplates.components.BlockRegionTransformComponent;
 import org.terasology.world.block.Block;
 import org.terasology.world.block.family.AttachedToSurfaceFamily;
 import org.terasology.world.block.family.BlockFamily;
@@ -36,9 +37,9 @@ public class BlockRegionTransform {
 
     private Vector3i offset;
 
-    private BlockRegionTransform(Vector3i offset, int counterClockWiseHorizontal90DegreeRotations) {
-        this.offset = offset;
+    private BlockRegionTransform(int counterClockWiseHorizontal90DegreeRotations, Vector3i offset) {
         this.counterClockWiseHorizontal90DegreeRotations = counterClockWiseHorizontal90DegreeRotations;
+        this.offset = new Vector3i(offset);
     }
 
     public static BlockRegionTransform createMovingThenRotating(Vector3i offset, Side startSide, Side targetSide) {
@@ -48,11 +49,11 @@ public class BlockRegionTransform {
          */
         int rotations = counterClockWiseTurnsFromSideToSide(startSide, targetSide);
         Vector3i transformedOffset = vectorRotatedClockWiseHorizontallyNTimes(offset, rotations);
-        return new BlockRegionTransform(transformedOffset, rotations);
+        return new BlockRegionTransform(rotations, transformedOffset);
     }
 
     public static BlockRegionTransform createRotationThenMovement(Side startSide, Side targetSide, Vector3i offset) {
-        return new BlockRegionTransform(offset, counterClockWiseTurnsFromSideToSide(startSide, targetSide));
+        return new BlockRegionTransform(counterClockWiseTurnsFromSideToSide(startSide, targetSide), offset);
     }
 
     private static int sideToCounterClockwiseTurnsFromRight(Side side) {
@@ -139,5 +140,22 @@ public class BlockRegionTransform {
         return calculatedRotation;
     }
 
+    public BlockRegionTransformComponent toComponent() {
+        BlockRegionTransformComponent component = new BlockRegionTransformComponent();
+        component.offset = this.offset;
+        component.counterClockWiseHorizontal90DegreeRotations = this.counterClockWiseHorizontal90DegreeRotations;
+        return component;
+    }
 
+    public static BlockRegionTransform createFromComponent(BlockRegionTransformComponent component) {
+        return new BlockRegionTransform(component.counterClockWiseHorizontal90DegreeRotations, component.offset);
+    }
+
+    /**
+     *
+     * @return a transformation that does nothing
+     */
+    public static BlockRegionTransform getTransformationThatDoesNothing() {
+        return new BlockRegionTransform(0, new Vector3i(0, 0, 0));
+    }
 }

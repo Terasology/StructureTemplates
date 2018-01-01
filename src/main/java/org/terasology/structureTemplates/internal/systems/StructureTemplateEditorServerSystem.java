@@ -41,6 +41,7 @@ import org.terasology.math.geom.Vector3i;
 import org.terasology.network.NetworkComponent;
 import org.terasology.registry.In;
 import org.terasology.structureTemplates.components.BlockPlaceholderComponent;
+import org.terasology.structureTemplates.components.FallingBlocksPlacementAlgorithmComponent;
 import org.terasology.structureTemplates.components.ScheduleStructurePlacementComponent;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent.RegionToFill;
@@ -339,6 +340,8 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
 
         EntityBuilder entityBuilder = entityManager.newBuilder("StructureTemplates:structureSpawnItem");
         addComponentsToTemplate(structureTemplateOriginEntity, structureTemplateOriginComponent, blockComponent, entityBuilder);
+        // TODO make it optional
+        entityBuilder.addOrSaveComponent(new FallingBlocksPlacementAlgorithmComponent());
         EntityRef structureSpawnItem = entityBuilder.build();
 
         // TODO check permission once PermissionManager is public API

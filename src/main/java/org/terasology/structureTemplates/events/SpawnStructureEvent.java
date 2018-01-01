@@ -15,12 +15,15 @@
  */
 package org.terasology.structureTemplates.events;
 
-import org.terasology.entitySystem.event.Event;
+import org.terasology.entitySystem.event.AbstractConsumableEvent;
 import org.terasology.entitySystem.event.EventPriority;
 import org.terasology.structureTemplates.util.transform.BlockRegionTransform;
 
 /**
  * Send this event to a structure template entity to start the spawning of the structure.
+ *
+ * The consuming handler of this event determines how exactly the structure spawning will look like
+ * (e.g. if it is instant or if blocks need time to appear). The standard handling of this event looks like this:
  *
  * On priority {@link EventPriority#PRIORITY_CRITICAL} there is a event handler that sends a
  * {@link StructureSpawnStartedEvent}. Implement a handler of {@link StructureSpawnStartedEvent} when you
@@ -28,18 +31,11 @@ import org.terasology.structureTemplates.util.transform.BlockRegionTransform;
  * particles or playing a placement sound)
  *
  * On priority {@link EventPriority#PRIORITY_TRIVIAL} a handler of this event will send a
- * {@link StructureBlocksSpawnedEvent}.
- *
- * If you want to introduce a component that makes structure templates spawn entities you should
- * subscribe to this event. At least if it is not just a "spawning started" effect.
- *
- * Please note: the usage of this component will be changed, please do not add systtems that subscribe for this event.
- *
- * In future it will made a consumable event, and it will be up to the implementor of the consumable event
- * when it will send the  {@link StructureBlocksSpawnedEvent} event. e.g. a system might place the blocks
- * over a larger time frame and only when it is done the entities will be placed.
+ * {@link StructureBlocksSpawnedEvent}. If you want to introduce a component that makes
+ * structure templates spawn entities you should subscribe to this event. At least
+ * if it is not just a "spawning started" effect.
  */
-public class SpawnStructureEvent implements Event {
+public class SpawnStructureEvent extends AbstractConsumableEvent {
     private BlockRegionTransform transformation;
 
     public SpawnStructureEvent(BlockRegionTransform transform) {

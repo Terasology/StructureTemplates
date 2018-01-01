@@ -17,6 +17,7 @@ package org.terasology.structureTemplates.internal.systems;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.assets.management.AssetManager;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.event.EventPriority;
@@ -38,6 +39,7 @@ import org.terasology.structureTemplates.components.SpawnStructureActionComponen
 import org.terasology.structureTemplates.components.StructureTemplateComponent;
 import org.terasology.structureTemplates.events.CheckSpawnConditionEvent;
 import org.terasology.structureTemplates.events.GetStructureTemplateBlocksEvent;
+import org.terasology.structureTemplates.events.SpawnBlocksOfStructureTemplateEvent;
 import org.terasology.structureTemplates.events.SpawnStructureEvent;
 import org.terasology.structureTemplates.events.SpawnTemplateEvent;
 import org.terasology.structureTemplates.events.StructureBlocksSpawnedEvent;
@@ -74,15 +76,18 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
     @In
     private BlockManager blockManager;
 
+    @In
+    private AssetManager assetManager;
 
     @ReceiveEvent(priority = EventPriority.PRIORITY_CRITICAL)
     public void onSpawnStructureEventWithHighestPriority(SpawnStructureEvent event, EntityRef entity) {
         entity.send(new StructureSpawnStartedEvent(event.getTransformation()));
     }
 
-    @ReceiveEvent(priority = EventPriority.PRIORITY_NORMAL)
-    public void onSpawnStructureEventWithBlocksPriority(SpawnStructureEvent event, EntityRef entity) {
-        spawnBlocks(entity, event.getTransformation());
+
+    @ReceiveEvent(priority = EventPriority.PRIORITY_NORMAL) // TODO
+    public void onSpawnStructureWithFallingAnimation(SpawnStructureEvent event, EntityRef entity) {
+        entity.send(new SpawnBlocksOfStructureTemplateEvent(event.getTransformation()));
     }
 
 
@@ -91,10 +96,10 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
         entity.send(new StructureBlocksSpawnedEvent(event.getTransformation()));
     }
 
-
-    private void spawnBlocks(EntityRef entity, BlockRegionTransform transformation) {
+    @ReceiveEvent
+    public void onSpawnBlocksOfStructureTemplateEvent(SpawnBlocksOfStructureTemplateEvent event, EntityRef entity) {
         long startTime = System.currentTimeMillis();
-        GetStructureTemplateBlocksEvent getBlocksEvent =  new GetStructureTemplateBlocksEvent(transformation);
+        GetStructureTemplateBlocksEvent getBlocksEvent =  new GetStructureTemplateBlocksEvent(event.getTransformation());
         entity.send(getBlocksEvent);
         Map<Vector3i, Block> blocksToPlace = getBlocksEvent.getBlocksToPlace();
         worldProvider.setBlocks(blocksToPlace);
@@ -105,9 +110,10 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
         }
     }
 
+
     @ReceiveEvent(priority = EventPriority.PRIORITY_HIGH)
     public void onSpawnTemplateEventWithBlocksPriority(SpawnTemplateEvent event, EntityRef entity) {
-        spawnBlocks(entity, event.getTransformation());
+        entity.send(new SpawnBlocksOfStructureTemplateEvent(event.getTransformation()));
     }
 
     @ReceiveEvent
