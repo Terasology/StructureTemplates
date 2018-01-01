@@ -79,7 +79,7 @@ public class HorizontalBlockRegionRotation implements BlockRegionTransform {
             return sideDefinedBlockFamily.getBlockForSide(transformSide(block.getDirection()));
         } else if (blockFamily instanceof AttachedToSurfaceFamily) {
             // TODO add some proper method to block famility to not have to do this hack
-            return blockFamily.getBlockForPlacement(null, null, null);
+            return blockFamily.getBlockForPlacement(null,transformSide(block.getDirection()),null);
         }
         return block;
     }
