@@ -15,13 +15,14 @@
  */
 package org.terasology.structureTemplates.internal.systems;
 
+import static org.junit.Assert.assertEquals;
+import static org.terasology.structureTemplates.internal.systems.ScheduledStructureSpawnSystem.createTransformForIncomingConnectionPoint;
+
 import org.junit.Test;
 import org.terasology.math.Side;
 import org.terasology.math.geom.Vector3i;
-import org.terasology.structureTemplates.util.transform.BlockRegionTransformationList;
 
-import static org.junit.Assert.assertEquals;
-import static org.terasology.structureTemplates.internal.systems.ScheduledStructureSpawnSystem.createTransformForIncomingConnectionPoint;
+import org.terasology.structureTemplates.util.transform.BlockRegionTransformationList;
 
 /**
  * Test for {@link ScheduledStructureSpawnSystem}.
