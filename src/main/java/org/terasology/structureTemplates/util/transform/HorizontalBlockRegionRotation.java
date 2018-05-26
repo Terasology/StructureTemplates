@@ -24,7 +24,7 @@ import org.terasology.world.block.family.BlockFamily;
 import org.terasology.world.block.family.SideDefinedBlockFamily;
 
 /**
- * Allows you to roate block regions by 90 degree.
+ * Allows you to rotate block regions by 90 degree.
  */
 public class HorizontalBlockRegionRotation implements BlockRegionTransform {
     /**
@@ -78,8 +78,8 @@ public class HorizontalBlockRegionRotation implements BlockRegionTransform {
             SideDefinedBlockFamily sideDefinedBlockFamily = (SideDefinedBlockFamily) blockFamily;
             return sideDefinedBlockFamily.getBlockForSide(transformSide(block.getDirection()));
         } else if (blockFamily instanceof AttachedToSurfaceFamily) {
-            // TODO add some proper method to block famility to not have to do this hack
-            return blockFamily.getBlockForPlacement(null, null, null, transformSide(block.getDirection()), null);
+            // TODO add some proper method to block familiy to not have to do this hack
+            return blockFamily.getBlockForPlacement(null, transformSide(block.getDirection()), null);
         }
         return block;
     }

@@ -76,7 +76,7 @@ import org.terasology.world.block.BlockComponent;
 import org.terasology.world.block.BlockManager;
 import org.terasology.world.block.entity.placement.PlaceBlocks;
 import org.terasology.world.block.family.BlockFamily;
-import org.terasology.world.block.family.HorizontalBlockFamily;
+import org.terasology.world.block.family.HorizontalFamily;
 import org.terasology.world.block.items.BlockItemComponent;
 import org.terasology.world.block.items.OnBlockItemPlaced;
 import org.terasology.world.block.items.OnBlockToItem;
@@ -732,7 +732,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
             Prefab selectedTemplateType = placementToSchedule.structureTemplateType;
 
             BlockFamily blockFamily = blockManager.getBlockFamily("StructureTemplates:StructurePlaceholder");
-            HorizontalBlockFamily horizontalBlockFamily = (HorizontalBlockFamily) blockFamily;
+            HorizontalFamily horizontalBlockFamily = (HorizontalFamily) blockFamily;
             Block block = horizontalBlockFamily.getBlockForSide(side);
             Vector3i positionAbove = new Vector3i(actualPosition);
             positionAbove.addY(1);
@@ -817,7 +817,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
 
     private boolean placeOriginMarkerBlockWithoutData(ActivateEvent event, Vector3i position, Side frontDirectionOfStructure) {
         BlockFamily blockFamily = blockManager.getBlockFamily("StructureTemplates:StructureTemplateOrigin");
-        HorizontalBlockFamily horizontalBlockFamily = (HorizontalBlockFamily) blockFamily;
+        HorizontalFamily horizontalBlockFamily = (HorizontalFamily) blockFamily;
         Block block = horizontalBlockFamily.getBlockForSide(frontDirectionOfStructure);
 
         PlaceBlocks placeBlocks = new PlaceBlocks(position, block, event.getInstigator());
