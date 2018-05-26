@@ -8,7 +8,7 @@
   "attachmentAllowed": false,
   "hardness": 1,
   "displayName": "structure placeholder",
-  "rotation": "horizontal",
+  "family": "horizontal",
   "sounds": "none",
   "shape" : "StructureTemplates:blockMarkerQuad",
   "entity": {
