@@ -15,6 +15,7 @@
  */
 package org.terasology.structureTemplates.internal.systems;
 
+import org.terasology.engine.Time;
 import org.terasology.entitySystem.entity.EntityBuilder;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
@@ -50,7 +51,7 @@ import org.terasology.structureTemplates.components.SpawnStructureActionComponen
 import org.terasology.structureTemplates.events.CheckSpawnConditionEvent;
 import org.terasology.structureTemplates.internal.events.StructureSpawnFailedEvent;
 import org.terasology.structureTemplates.internal.ui.StructurePlacementFailureScreen;
-import org.terasology.structureTemplates.util.transform.BlockRegionTransform;
+import org.terasology.structureTemplates.util.BlockRegionTransform;
 import org.terasology.world.block.BlockComponent;
 
 import java.util.ArrayList;
@@ -90,9 +91,16 @@ public class StructureSpawnClientSystem extends BaseComponentSystem implements U
 
     private Side directionPlayerLooksAt;
 
+    @In
+    private Time time;
+
 
     @Override
     public void update(float delta) {
+        updateOutlineIfNeeded();
+    }
+
+    private void updateOutlineIfNeeded() {
         LocationComponent locationComponent = locatPlayer.getCharacterEntity().getComponent(LocationComponent.class);
         if (locationComponent == null) {
             directionPlayerLooksAt = null;
@@ -105,7 +113,6 @@ public class StructureSpawnClientSystem extends BaseComponentSystem implements U
             directionPlayerLooksAt = newDirection;
             updateOutlineEntity();
         }
-
     }
 
     @ReceiveEvent
@@ -285,4 +292,5 @@ public class StructureSpawnClientSystem extends BaseComponentSystem implements U
                 STRUCTURE_PLACEMENT_FAILURE_OVERLAY, StructurePlacementFailureScreen.class);
         messagePopup.setMessage(message);
     }
+
 }

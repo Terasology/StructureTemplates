@@ -16,28 +16,30 @@
 package org.terasology.structureTemplates.events;
 
 import org.terasology.entitySystem.event.AbstractConsumableEvent;
-import org.terasology.entitySystem.event.EventPriority;
-import org.terasology.structureTemplates.util.transform.BlockRegionTransform;
+import org.terasology.structureTemplates.util.BlockRegionTransform;
 
 /**
  * Send this event to a structure template entity to start the spawning of the structure.
  *
- * On priority {@link EventPriority#PRIORITY_CRITICAL} there is a event handler that sends a
- * {@link StructureSpawnStartedEvent}. Implement a handler of {@link StructureSpawnStartedEvent} when you
- * want to add a component that does something when the spawning of a structure starts .(e.g. placing some spawn
- * particles or playing a placement sound)
+ * Each handler should do the following:
  *
- * On priority {@link EventPriority#PRIORITY_TRIVIAL} a handler of this event will send a
- * {@link StructureBlocksSpawnedEvent}.
+ * <ul>
+ *     <li>It must send at the start a {@link StructureSpawnStartedEvent}. Other event handlers might use it to trigger
+ *     stuff. E.g. handlers of {@link StructureSpawnStartedEvent} might display soem particles or play a round
+ *     when a certain component is present.</li>
+ *     <li>It may place the blocks instantly or delayed. Possibly triggering a nice animation.
+ *     To get the blocks to place it can send a {@link GetStructureTemplateBlocksEvent}.
+ *     Alternativly it can also send a {@link SpawnBlocksOfStructureTemplateEvent} event to trigger
+ *     the default block spawning</li>
+ *     <li>After all blocks have been spawned it must send a {@link StructureBlocksSpawnedEvent}.
+ *     The {@link StructureBlocksSpawnedEvent} triggers further structure finish up work like the placement of items
+ *     in a chest.</li>
+ *     <li>It must consume the event.</li>
+ * </ul>
  *
- * If you want to introduce a component that makes structure templates spawn entities you should
- * subscribe to this event. At least if it is not just a "spawning started" effect.
- *
- * Please note: the usage of this component will be changed, please do not add systtems that subscribe for this event.
- *
- * In future it will made a consumable event, and it will be up to the implementor of the consumable event
- * when it will send the  {@link StructureBlocksSpawnedEvent} event. e.g. a system might place the blocks
- * over a larger time frame and only when it is done the entities will be placed.
+ * If you don't want to add a new block placement animation then you should not implement a handler for this event.
+ * If you want to create a component that triggers the spawning of for example some entities then you should
+ * create a handler for {@link StructureBlocksSpawnedEvent} instead.
  */
 public class SpawnStructureEvent extends AbstractConsumableEvent {
     private BlockRegionTransform transformation;

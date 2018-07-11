@@ -18,7 +18,7 @@ package org.terasology.structureTemplates.events;
 import org.terasology.entitySystem.event.Event;
 import org.terasology.math.Region3i;
 import org.terasology.math.geom.Vector3i;
-import org.terasology.structureTemplates.util.transform.BlockRegionTransform;
+import org.terasology.structureTemplates.util.BlockRegionTransform;
 import org.terasology.world.block.Block;
 
 import java.util.HashMap;

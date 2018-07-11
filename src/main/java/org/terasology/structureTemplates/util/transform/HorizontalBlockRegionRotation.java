@@ -18,6 +18,7 @@ package org.terasology.structureTemplates.util.transform;
 import org.terasology.math.Region3i;
 import org.terasology.math.Side;
 import org.terasology.math.geom.Vector3i;
+import org.terasology.structureTemplates.util.BlockRegionTransform;
 import org.terasology.world.block.Block;
 import org.terasology.world.block.family.AttachedToSurfaceFamily;
 import org.terasology.world.block.family.BlockFamily;

@@ -40,10 +40,7 @@ import org.terasology.structureTemplates.events.CheckSpawnConditionEvent;
 import org.terasology.structureTemplates.events.SpawnStructureEvent;
 import org.terasology.structureTemplates.events.StructureBlocksSpawnedEvent;
 import org.terasology.structureTemplates.interfaces.StructureTemplateProvider;
-import org.terasology.structureTemplates.util.transform.BlockRegionMovement;
-import org.terasology.structureTemplates.util.transform.BlockRegionTransform;
-import org.terasology.structureTemplates.util.transform.BlockRegionTransformationList;
-import org.terasology.structureTemplates.util.transform.HorizontalBlockRegionRotation;
+import org.terasology.structureTemplates.util.BlockRegionTransform;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -148,10 +145,10 @@ public class ScheduledStructureSpawnSystem extends BaseComponentSystem implement
                 StructureTemplateComponent.class);
 
         // TODO remove last parameter as it is a constant
-        BlockRegionTransformationList transformList = createTransformForIncomingConnectionPoint(activeEntityDirection,
+        BlockRegionTransform blockRegionTransform = createTransformForIncomingConnectionPoint(activeEntityDirection,
                 activeEntityLocation, new Vector3i(0, 0, 0), Side.FRONT);
 
-        CheckSpawnConditionEvent checkSpawnConditionEvent = new CheckSpawnConditionEvent(transformList);
+        CheckSpawnConditionEvent checkSpawnConditionEvent = new CheckSpawnConditionEvent(blockRegionTransform);
         structureToSpawn.send(checkSpawnConditionEvent);
         if (checkSpawnConditionEvent.isPreventSpawn()) {
             if (!activeEntityRemainingTemplates.hasNext()) {
@@ -164,7 +161,7 @@ public class ScheduledStructureSpawnSystem extends BaseComponentSystem implement
             return;
         }
 
-        structureToSpawn.send(new SpawnStructureEvent(transformList));
+        structureToSpawn.send(new SpawnStructureEvent(blockRegionTransform));
         destroyActiveEntityAndItsClearFields();
     }
 
@@ -177,17 +174,15 @@ public class ScheduledStructureSpawnSystem extends BaseComponentSystem implement
 
     }
 
-    static BlockRegionTransformationList createTransformForIncomingConnectionPoint(Side direction, Vector3i spawnPosition, Vector3i incomingConnectionPointPosition, Side incomingConnectionPointDirection) {
-        HorizontalBlockRegionRotation rot = HorizontalBlockRegionRotation.createRotationFromSideToSide(
-                incomingConnectionPointDirection, direction);
+    static BlockRegionTransform createTransformForIncomingConnectionPoint(Side direction, Vector3i spawnPosition, Vector3i incomingConnectionPointPosition, Side incomingConnectionPointDirection) {
+        // TODO Check if simplfiication is possible now that the BlockREgionTransform takes a offset too
+        BlockRegionTransform rot = BlockRegionTransform.createRotationThenMovement(
+                incomingConnectionPointDirection, direction, new Vector3i(0,0,0));
         Vector3i tranformedOffset = rot.transformVector3i(incomingConnectionPointPosition);
         Vector3i actualSpawnPosition = new Vector3i(spawnPosition);
         actualSpawnPosition.sub(tranformedOffset);
 
-        BlockRegionTransformationList transformList = new BlockRegionTransformationList();
-        transformList.addTransformation(
-                HorizontalBlockRegionRotation.createRotationFromSideToSide(incomingConnectionPointDirection, direction));
-        transformList.addTransformation(new BlockRegionMovement(actualSpawnPosition));
-        return transformList;
+        return BlockRegionTransform.createRotationThenMovement(incomingConnectionPointDirection, direction,
+                actualSpawnPosition);
     }
 }

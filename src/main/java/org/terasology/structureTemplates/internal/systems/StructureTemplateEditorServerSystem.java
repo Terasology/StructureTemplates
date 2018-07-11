@@ -41,6 +41,7 @@ import org.terasology.math.geom.Vector3i;
 import org.terasology.network.NetworkComponent;
 import org.terasology.registry.In;
 import org.terasology.structureTemplates.components.BlockPlaceholderComponent;
+import org.terasology.structureTemplates.components.FallingBlocksPlacementAlgorithmComponent;
 import org.terasology.structureTemplates.components.ScheduleStructurePlacementComponent;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent.RegionToFill;
@@ -65,10 +66,7 @@ import org.terasology.structureTemplates.internal.events.StopEditingProcessReque
 import org.terasology.structureTemplates.internal.events.StructureTemplateStringRequest;
 import org.terasology.structureTemplates.util.ListUtil;
 import org.terasology.structureTemplates.util.RegionMergeUtil;
-import org.terasology.structureTemplates.util.transform.BlockRegionMovement;
-import org.terasology.structureTemplates.util.transform.BlockRegionTransform;
-import org.terasology.structureTemplates.util.transform.BlockRegionTransformationList;
-import org.terasology.structureTemplates.util.transform.HorizontalBlockRegionRotation;
+import org.terasology.structureTemplates.util.BlockRegionTransform;
 import org.terasology.world.BlockEntityRegistry;
 import org.terasology.world.WorldProvider;
 import org.terasology.world.block.Block;
@@ -342,6 +340,8 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
 
         EntityBuilder entityBuilder = entityManager.newBuilder("StructureTemplates:structureSpawnItem");
         addComponentsToTemplate(structureTemplateOriginEntity, structureTemplateOriginComponent, blockComponent, entityBuilder);
+        // TODO make it optional
+        entityBuilder.addOrSaveComponent(new FallingBlocksPlacementAlgorithmComponent());
         EntityRef structureSpawnItem = entityBuilder.build();
 
         // TODO check permission once PermissionManager is public API
@@ -648,21 +648,13 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
     // TODO move 2 methods to utility class
     public static BlockRegionTransform createAbsoluteToRelativeTransform(BlockComponent blockComponent) {
         Side front = blockComponent.getBlock().getDirection();
-        BlockRegionTransformationList transformList = new BlockRegionTransformationList();
         Vector3i minusOrigin = new Vector3i(0, 0, 0);
         minusOrigin.sub(blockComponent.getPosition());
-        transformList.addTransformation(new BlockRegionMovement(minusOrigin));
-        transformList.addTransformation(
-                HorizontalBlockRegionRotation.createRotationFromSideToSide(front, Side.FRONT));
-        return transformList;
+        return BlockRegionTransform.createMovingThenRotating(minusOrigin, front, Side.FRONT);
     }
     public static BlockRegionTransform createRelativeToAbsoluteTransform(BlockComponent blockComponent) {
         Side front = blockComponent.getBlock().getDirection();
-        BlockRegionTransformationList transformList = new BlockRegionTransformationList();
-        transformList.addTransformation(
-                HorizontalBlockRegionRotation.createRotationFromSideToSide(Side.FRONT, front));
-        transformList.addTransformation(new BlockRegionMovement(new Vector3i(blockComponent.getPosition())));
-        return transformList;
+        return BlockRegionTransform.createRotationThenMovement(Side.FRONT, front, blockComponent.getPosition());
     }
 
 
@@ -749,13 +741,11 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
     List<Region3i> getAbsolutePlacementRegionsOfTemplate(EntityRef entity, Vector3i position, Side frontDirectionOfStructure) {
         List<Region3i> relativeRegions = getPlacementRegionsOfTemplate(entity);
 
-        // TODO reuse createRelativeToAbsoluteTransform
-        HorizontalBlockRegionRotation rotation = HorizontalBlockRegionRotation.createRotationFromSideToSide(Side.FRONT,
-                frontDirectionOfStructure);
+        BlockRegionTransform rotation = BlockRegionTransform.createRotationThenMovement(Side.FRONT,
+                frontDirectionOfStructure, position);
         List<Region3i> absoluteRegions = new ArrayList<>();
         for (Region3i relativeRegion: relativeRegions) {
             Region3i absoluteRegion = rotation.transformRegion(relativeRegion);
-            absoluteRegion = absoluteRegion.move(position);
             absoluteRegions.add(absoluteRegion);
         }
 

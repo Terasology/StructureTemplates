@@ -40,7 +40,7 @@ import org.terasology.structureTemplates.internal.systems.StructureTemplateEdito
 import org.terasology.structureTemplates.internal.components.StructureTemplateOriginComponent;
 import org.terasology.structureTemplates.util.ListUtil;
 import org.terasology.structureTemplates.util.RegionMergeUtil;
-import org.terasology.structureTemplates.util.transform.BlockRegionTransform;
+import org.terasology.structureTemplates.util.BlockRegionTransform;
 import org.terasology.world.block.BlockComponent;
 
 import java.util.List;

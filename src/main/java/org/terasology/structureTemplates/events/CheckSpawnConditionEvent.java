@@ -19,7 +19,7 @@ import org.terasology.entitySystem.event.AbstractConsumableEvent;
 import org.terasology.entitySystem.prefab.Prefab;
 import org.terasology.math.Region3i;
 import org.terasology.structureTemplates.components.CheckBlockRegionConditionComponent;
-import org.terasology.structureTemplates.util.transform.BlockRegionTransform;
+import org.terasology.structureTemplates.util.BlockRegionTransform;
 
 /**
  * Sent to entities with spawn condition components, in order to check if the spawn conditions are met at a certain

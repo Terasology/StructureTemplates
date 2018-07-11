@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 MovingBlocks
+ * Copyright 2017 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,16 +19,15 @@ import org.terasology.entitySystem.event.Event;
 import org.terasology.structureTemplates.util.BlockRegionTransform;
 
 /**
- * The event gets sent to a structure template entity when a structure template spawning process started.
+ * This class is intended to be used by alternative structure spawning methods.
  *
- * Implement a handler of {@link StructureSpawnStartedEvent} when you
- * want to add a structure template component that does something when the spawning of a structure starts .
- * (e.g. placing some spawn particles or playing a placement sound)
+ * It can be used to trigger the unconditional placement of blocks of a structure template.
+ *
  */
-public class StructureSpawnStartedEvent implements Event {
+public class SpawnBlocksOfStructureTemplateEvent implements Event {
     private BlockRegionTransform transformation;
 
-    public StructureSpawnStartedEvent(BlockRegionTransform transform) {
+    public SpawnBlocksOfStructureTemplateEvent(BlockRegionTransform transform) {
         this.transformation = transform;
     }
 

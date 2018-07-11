@@ -17,7 +17,7 @@ package org.terasology.structureTemplates.interfaces;
 
 import org.terasology.math.Region3i;
 import org.terasology.registry.In;
-import org.terasology.structureTemplates.util.transform.BlockRegionTransform;
+import org.terasology.structureTemplates.util.BlockRegionTransform;
 import org.terasology.world.block.Block;
 
 import java.util.function.Predicate;

@@ -33,6 +33,7 @@ import org.terasology.logic.inventory.events.GiveItemEvent;
 import org.terasology.network.NetworkComponent;
 import org.terasology.registry.In;
 import org.terasology.rendering.assets.texture.TextureRegionAsset;
+import org.terasology.structureTemplates.components.FallingBlocksPlacementAlgorithmComponent;
 import org.terasology.structureTemplates.components.SpawnStructureActionComponent;
 import org.terasology.structureTemplates.components.SpawnTemplateActionComponent;
 import org.terasology.structureTemplates.events.BlockFromToolboxRequest;
@@ -124,6 +125,8 @@ public class ToolboxServerSystem extends BaseComponentSystem {
         displayNameComponent.name =  event.getStructureTemplatePrefab().getName() + " Spawner";
         entityBuilder.addOrSaveComponent(displayNameComponent);
         entityBuilder.addOrSaveComponent(new SpawnStructureActionComponent());
+        // TODO make this optional
+        entityBuilder.addOrSaveComponent(new FallingBlocksPlacementAlgorithmComponent());
         entityBuilder.addOrSaveComponent(new NetworkComponent());
         EntityRef item = entityBuilder.build();
         giveItemToOwnerOrDestroyItem(item, owner);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 MovingBlocks
+ * Copyright 2017 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,23 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.structureTemplates.events;
+package org.terasology.structureTemplates.components;
 
-import org.terasology.entitySystem.event.Event;
+import org.terasology.entitySystem.Component;
+import org.terasology.math.geom.Vector3i;
 import org.terasology.structureTemplates.util.BlockRegionTransform;
 
 /**
- * Gets send when the basic blocks of a structure template got placed. Event handlers
- * typically add then entities that rely on the blocks being present.
+ * Stores the data to construct a {@link BlockRegionTransform}
  */
-public class StructureBlocksSpawnedEvent implements Event {
-    private BlockRegionTransform transformation;
+public class BlockRegionTransformComponent implements Component {
+    public int counterClockWiseHorizontal90DegreeRotations = 0;
 
-    public StructureBlocksSpawnedEvent(BlockRegionTransform transform) {
-        this.transformation = transform;
-    }
+    public Vector3i offset;
 
-    public BlockRegionTransform getTransformation() {
-        return transformation;
-    }
 }

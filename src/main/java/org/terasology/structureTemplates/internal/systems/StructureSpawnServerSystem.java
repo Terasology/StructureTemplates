@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.assets.management.AssetManager;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.event.EventPriority;
@@ -46,6 +47,7 @@ import org.terasology.structureTemplates.components.SpawnStructureActionComponen
 import org.terasology.structureTemplates.components.StructureTemplateComponent;
 import org.terasology.structureTemplates.events.CheckSpawnConditionEvent;
 import org.terasology.structureTemplates.events.GetStructureTemplateBlocksEvent;
+import org.terasology.structureTemplates.events.SpawnBlocksOfStructureTemplateEvent;
 import org.terasology.structureTemplates.events.SpawnStructureEvent;
 import org.terasology.structureTemplates.internal.components.BuildStepwiseStructureComponent;
 import org.terasology.structureTemplates.internal.components.BuildStepwiseStructureComponent.BlockToPlace;
@@ -55,10 +57,7 @@ import org.terasology.structureTemplates.events.SpawnTemplateEvent;
 import org.terasology.structureTemplates.events.StructureBlocksSpawnedEvent;
 import org.terasology.structureTemplates.events.StructureSpawnStartedEvent;
 import org.terasology.structureTemplates.internal.events.StructureSpawnFailedEvent;
-import org.terasology.structureTemplates.util.transform.BlockRegionMovement;
-import org.terasology.structureTemplates.util.transform.BlockRegionTransform;
-import org.terasology.structureTemplates.util.transform.BlockRegionTransformationList;
-import org.terasology.structureTemplates.util.transform.HorizontalBlockRegionRotation;
+import org.terasology.structureTemplates.util.BlockRegionTransform;
 import org.terasology.world.WorldProvider;
 import org.terasology.world.block.Block;
 import org.terasology.world.block.BlockComponent;
@@ -94,27 +93,22 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
     @In
     private BlockManager blockManager;
 
-
-    @ReceiveEvent(priority = EventPriority.PRIORITY_CRITICAL)
-    public void onSpawnStructureEventWithHighestPriority(SpawnStructureEvent event, EntityRef entity) {
-        entity.send(new StructureSpawnStartedEvent(event.getTransformation()));
-    }
-
-    @ReceiveEvent(priority = EventPriority.PRIORITY_NORMAL)
-    public void onSpawnStructureEventWithBlocksPriority(SpawnStructureEvent event, EntityRef entity) {
-        spawnBlocks(entity, event.getTransformation());
-    }
+    @In
+    private AssetManager assetManager;
 
 
     @ReceiveEvent(priority = EventPriority.PRIORITY_TRIVIAL)
-    public void onSpawnStructureEventWithLowestPriority(SpawnStructureEvent event, EntityRef entity) {
+    public void onSpawnStructureWithFallingAnimation(SpawnStructureEvent event, EntityRef entity) {
+        entity.send(new StructureSpawnStartedEvent(event.getTransformation()));
+        entity.send(new SpawnBlocksOfStructureTemplateEvent(event.getTransformation()));
         entity.send(new StructureBlocksSpawnedEvent(event.getTransformation()));
+        event.consume();
     }
 
-
-    private void spawnBlocks(EntityRef entity, BlockRegionTransform transformation) {
+    @ReceiveEvent
+    public void onSpawnBlocksOfStructureTemplateEvent(SpawnBlocksOfStructureTemplateEvent event, EntityRef entity) {
         long startTime = System.currentTimeMillis();
-        GetStructureTemplateBlocksEvent getBlocksEvent =  new GetStructureTemplateBlocksEvent(transformation);
+        GetStructureTemplateBlocksEvent getBlocksEvent =  new GetStructureTemplateBlocksEvent(event.getTransformation());
         entity.send(getBlocksEvent);
         Map<Vector3i, Block> blocksToPlace = getBlocksEvent.getBlocksToPlace();
         worldProvider.setBlocks(blocksToPlace);
@@ -125,8 +119,9 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
         }
     }
 
+    @ReceiveEvent(priority = EventPriority.PRIORITY_HIGH)
     public void onSpawnTemplateEventWithBlocksPriority(SpawnTemplateEvent event, EntityRef entity) {
-        spawnBlocks(entity, event.getTransformation());
+        entity.send(new SpawnBlocksOfStructureTemplateEvent(event.getTransformation()));
     }
 
     @ReceiveEvent
@@ -233,11 +228,7 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
 
     public static BlockRegionTransform createBlockRegionTransformForCharacterTargeting(
             Side fromSide, Side toSide, Vector3i target) {
-        BlockRegionTransformationList transformList = new BlockRegionTransformationList();
-        transformList.addTransformation(
-                HorizontalBlockRegionRotation.createRotationFromSideToSide(fromSide, toSide));
-        transformList.addTransformation(new BlockRegionMovement(target));
-        return transformList;
+        return BlockRegionTransform.createRotationThenMovement(fromSide, toSide, target);
     }
 
     private static BlockToPlace createBlockToPlace(Vector3i pos, Block block) {
