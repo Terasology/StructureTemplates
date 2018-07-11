@@ -48,7 +48,7 @@ public class FallingBlockPlacementClientSystem extends BaseComponentSystem imple
     /**
      * A strongly rounded gravity value
      */
-    public static final float FALLING_BLOCK_ACCELERATION_IN_M_PER_MS = -10f / (1000f * 1000f);
+    public static final float FALLING_BLOCK_ACCELERATION_IN_M_PER_MS = -10f / (1000f * 1000f * 100f);
 
     @In
     private Time time;
