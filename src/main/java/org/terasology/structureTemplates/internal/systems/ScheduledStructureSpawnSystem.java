@@ -38,6 +38,7 @@ import org.terasology.structureTemplates.components.ScheduleStructurePlacementCo
 import org.terasology.structureTemplates.components.StructureTemplateComponent;
 import org.terasology.structureTemplates.events.CheckSpawnConditionEvent;
 import org.terasology.structureTemplates.events.SpawnStructureEvent;
+import org.terasology.structureTemplates.events.StructureBlocksSpawnedEvent;
 import org.terasology.structureTemplates.interfaces.StructureTemplateProvider;
 import org.terasology.structureTemplates.util.transform.BlockRegionMovement;
 import org.terasology.structureTemplates.util.transform.BlockRegionTransform;
@@ -78,8 +79,8 @@ public class ScheduledStructureSpawnSystem extends BaseComponentSystem implement
     private Random random = new Random();
 
     @ReceiveEvent
-    public void onScheduleStructurePlacement(SpawnStructureEvent event, EntityRef entity,
-                                    ScheduleStructurePlacementComponent component) {
+    public void onScheduleStructurePlacement(StructureBlocksSpawnedEvent event, EntityRef entity,
+                                             ScheduleStructurePlacementComponent component) {
 
         BlockRegionTransform transformation = event.getTransformation();
         for (ScheduleStructurePlacementComponent.PlacementToSchedule placement: component.placementsToSchedule) {
@@ -146,11 +147,9 @@ public class ScheduledStructureSpawnSystem extends BaseComponentSystem implement
         StructureTemplateComponent structureTemplateComponent = structureToSpawn.getComponent(
                 StructureTemplateComponent.class);
 
-        Vector3i relSpawnPosition = new Vector3i(structureTemplateComponent.spawnPosition);
-        Side front = structureTemplateComponent.front;
-
+        // TODO remove last parameter as it is a constant
         BlockRegionTransformationList transformList = createTransformForIncomingConnectionPoint(activeEntityDirection,
-                activeEntityLocation, relSpawnPosition, front);
+                activeEntityLocation, new Vector3i(0, 0, 0), Side.FRONT);
 
         CheckSpawnConditionEvent checkSpawnConditionEvent = new CheckSpawnConditionEvent(transformList);
         structureToSpawn.send(checkSpawnConditionEvent);

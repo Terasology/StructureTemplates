@@ -1,0 +1,17 @@
+{
+  "Network" : {},
+  "StructureTemplateOrigin": {
+  },
+  /*
+   * This is not a classical structure template
+   * It just has the StructureTemplate component to store data for a structure template.
+   */
+  "StructureTemplate":{},
+  "BlockPlaceholder": {
+    "block":"engine:air"
+  },
+  "InteractionTarget": {},
+  "InteractionScreen": {
+    "screen": "StructureTemplates:StructureTemplateEditor"
+  }
+}

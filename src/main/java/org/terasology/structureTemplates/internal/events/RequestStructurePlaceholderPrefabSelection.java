@@ -16,13 +16,31 @@
 package org.terasology.structureTemplates.internal.events;
 
 import org.terasology.entitySystem.event.Event;
+import org.terasology.entitySystem.prefab.Prefab;
 import org.terasology.network.ServerEvent;
+import org.terasology.structureTemplates.internal.components.StructurePlaceholderComponent;
 
 /**
- * Requests the server to return a copy of the region specified by the entity to the client via a
- * {@link CopyBlockRegionResultEvent} event. The event gets trigged by a button in the structure template editor.
+ *
+ * The event gets sent to a character entity at the server.
+ *
+ * The server will then check if the character is interacting with a entity that has the {@link StructurePlaceholderComponent}.
+ *
+ * If that is the case that component will be updated with the values of the event.
  *
  */
 @ServerEvent
-public class CopyBlockRegionRequest implements Event {
+public class RequestStructurePlaceholderPrefabSelection implements Event {
+    private Prefab prefab;
+
+    public RequestStructurePlaceholderPrefabSelection(Prefab prefab) {
+        this.prefab = prefab;
+    }
+
+    public RequestStructurePlaceholderPrefabSelection() {
+    }
+
+    public Prefab getPrefab() {
+        return prefab;
+    }
 }

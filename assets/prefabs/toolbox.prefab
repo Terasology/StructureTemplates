@@ -1,0 +1,14 @@
+{
+    "parent": "engine:iconItem",
+    "DisplayName": {
+        "name": "Toolbox"
+    },
+    "Toolbox":{},
+    "Item": {
+        "icon": "StructureTemplates:Toolbox32x32"
+    },
+    "InteractionTarget": {},
+    "InteractionScreen": {
+        "screen": "StructureTemplates:ToolboxScreen"
+    }
+}

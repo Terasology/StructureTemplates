@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.structureTemplates.internal.systems;
+package org.terasology.structureTemplates.util;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -29,9 +29,9 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 
 /**
- * Tests for {@link  StructureTemplateEditorServerSystem}. Tests exemplay the region merging method mergeRegionsByX.
+ * Tests for {@link   RegionMergeUtil}. Tests exemplay the region merging method mergeRegionsByX.
  */
-public class StructureTemplateEditorServerSystemTest {
+public class RegionMergeUtilTest {
 
 
     private Block blockA;
@@ -58,7 +58,7 @@ public class StructureTemplateEditorServerSystemTest {
         regions.add(copyOf(regionC));
         regions.add(copyOf(regionB));
 
-        StructureTemplateEditorServerSystem.mergeRegionsByX(regions);
+        RegionMergeUtil.mergeRegionsToFillByX(regions);
         RegionToFill regionAB = createRegion(blockA, 2, 0, -1, 6, 1, 5);
 
         List<RegionToFill> expectedRegions = new ArrayList<>();
@@ -77,7 +77,7 @@ public class StructureTemplateEditorServerSystemTest {
         regions.add(copyOf(regionA));
         regions.add(copyOf(regionB));
 
-        StructureTemplateEditorServerSystem.mergeRegionsByX(regions);
+        RegionMergeUtil.mergeRegionsToFillByX(regions);
 
         List<RegionToFill> expectedRegions = new ArrayList<>();
         expectedRegions.add(regionA);
@@ -93,7 +93,7 @@ public class StructureTemplateEditorServerSystemTest {
         List<RegionToFill> regions = new ArrayList<>();
         regions.add(copyOf(regionA));
         regions.add(copyOf(regionB));
-        StructureTemplateEditorServerSystem.mergeRegionsByX(regions);
+        RegionMergeUtil.mergeRegionsToFillByX(regions);
 
         List<RegionToFill> expectedRegions = new ArrayList<>();
         expectedRegions.add(regionA);
@@ -110,7 +110,7 @@ public class StructureTemplateEditorServerSystemTest {
         List<RegionToFill> regions = new ArrayList<>();
         regions.add(copyOf(regionA));
         regions.add(copyOf(regionB));
-        StructureTemplateEditorServerSystem.mergeRegionsByX(regions);
+        RegionMergeUtil.mergeRegionsToFillByX(regions);
 
         List<RegionToFill> expectedRegions = new ArrayList<>();
         expectedRegions.add(regionA);
@@ -127,7 +127,7 @@ public class StructureTemplateEditorServerSystemTest {
         List<RegionToFill> regions = new ArrayList<>();
         regions.add(copyOf(regionA));
         regions.add(copyOf(regionB));
-        StructureTemplateEditorServerSystem.mergeRegionsByX(regions);
+        RegionMergeUtil.mergeRegionsToFillByX(regions);
 
         List<RegionToFill> expectedRegions = new ArrayList<>();
         expectedRegions.add(regionA);
@@ -144,7 +144,7 @@ public class StructureTemplateEditorServerSystemTest {
         List<RegionToFill> regions = new ArrayList<>();
         regions.add(copyOf(regionA));
         regions.add(copyOf(regionB));
-        StructureTemplateEditorServerSystem.mergeRegionsByX(regions);
+        RegionMergeUtil.mergeRegionsToFillByX(regions);
 
         List<RegionToFill> expectedRegions = new ArrayList<>();
         expectedRegions.add(regionA);
@@ -161,7 +161,7 @@ public class StructureTemplateEditorServerSystemTest {
         List<RegionToFill> regions = new ArrayList<>();
         regions.add(copyOf(regionA));
         regions.add(copyOf(regionB));
-        StructureTemplateEditorServerSystem.mergeRegionsByX(regions);
+        RegionMergeUtil.mergeRegionsToFillByX(regions);
 
         List<RegionToFill> expectedRegions = new ArrayList<>();
         expectedRegions.add(regionA);
@@ -193,7 +193,7 @@ public class StructureTemplateEditorServerSystemTest {
         regions.add(copyOf(regionB));
 
 
-        StructureTemplateEditorServerSystem.mergeRegionsByX(regions);
+        RegionMergeUtil.mergeRegionsToFillByX(regions);
 
         RegionToFill regionAB = createRegion(blockA, 2, -1, 1, 5, 0, 5);
 

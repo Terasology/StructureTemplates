@@ -26,16 +26,20 @@ import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.logic.clipboard.ClipboardManager;
-import org.terasology.logic.inventory.InventoryComponent;
 import org.terasology.logic.inventory.InventoryManager;
-import org.terasology.logic.inventory.SelectedInventorySlotComponent;
-import org.terasology.logic.inventory.events.InventorySlotChangedEvent;
 import org.terasology.logic.players.LocalPlayer;
 import org.terasology.math.Region3i;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.registry.In;
 import org.terasology.rendering.logic.RegionOutlineComponent;
+import org.terasology.structureTemplates.internal.components.EditTemplateRegionProcessComponent;
+import org.terasology.structureTemplates.internal.components.EditingUserComponent;
+import org.terasology.structureTemplates.internal.components.StructureTemplateOriginComponent;
 import org.terasology.structureTemplates.internal.events.CopyBlockRegionResultEvent;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Handles the result of the activation of the copyBlockRegionTool item.
@@ -55,8 +59,8 @@ public class StructureTemplateEditorClientSystem extends BaseComponentSystem {
     @In
     private InventoryManager inventoryManager;
 
-    private EntityRef regionOutlineEntity = EntityRef.NULL;
-    private Region3i regionWithOutline;
+    private List<EntityRef> regionOutlineEntities = new ArrayList<>();
+    private EntityRef highlightedEditorEntity = EntityRef.NULL;
 
 
     @ReceiveEvent
@@ -66,94 +70,102 @@ public class StructureTemplateEditorClientSystem extends BaseComponentSystem {
 
     @ReceiveEvent
     public void onAddedCopyBlockRegionComponent(OnAddedComponent event, EntityRef entity,
-                                                StructureTemplateEditorComponent component) {
-        updateOutlineEntity();
+                                                StructureTemplateOriginComponent component) {
+        updateHighlightedEditorEntity();
     }
 
     @ReceiveEvent
     public void onChangedCopyBlockRegionComponent(OnChangedComponent event, EntityRef entity,
-                                             StructureTemplateEditorComponent component) {
-        updateOutlineEntity();
+                                             StructureTemplateOriginComponent component) {
+        updateHighlightedEditorEntity();
     }
 
     @ReceiveEvent
     public void onBeforeRemoveCopyBlockRegionComponent(BeforeRemoveComponent event, EntityRef entity,
-                                                  StructureTemplateEditorComponent component) {
-        updateOutlineEntity();
+                                                  StructureTemplateOriginComponent component) {
+        if (entity.equals(highlightedEditorEntity)) {
+            setHighlightedEditorEntity(EntityRef.NULL);
+        }
+        // Calling updateOutlineEntity is not possible as component is still there
+    }
+
+
+    @ReceiveEvent
+    public void onAddedEditsCopyRegionComponent(OnAddedComponent event, EntityRef entity,
+                                                EditingUserComponent component) {
+        updateHighlightedEditorEntity();
     }
 
     @ReceiveEvent
-    public void onInventorySlotChanged(InventorySlotChangedEvent event, EntityRef entity) {
-        updateOutlineEntity();
+    public void onChangedEditsCopyRegionComponent(OnChangedComponent event, EntityRef entity,
+                                                  EditingUserComponent component) {
+        updateHighlightedEditorEntity();
     }
 
     @ReceiveEvent
-    public void onChangedSelectedInventorySlotComponent(OnChangedComponent event, EntityRef entity,
-                                                SelectedInventorySlotComponent component) {
-        updateOutlineEntity();
+    public void onBeforeRemoveEditsCopyRegionComponent(BeforeRemoveComponent event, EntityRef entity,
+                                                       EditingUserComponent component) {
+        if (entity.equals(locatPlayer.getClientEntity())) {
+            setHighlightedEditorEntity(EntityRef.NULL);
+        }
     }
 
-
-    public void updateOutlineEntity() {
-        Region3i region3i = getRegionToDraw();
-        if (region3i == null) {
+    public void destoryOutlineEntities() {
+        for (EntityRef regionOutlineEntity : regionOutlineEntities) {
             if (regionOutlineEntity.exists()) {
                 regionOutlineEntity.destroy();
             }
-        } else {
-            if (regionOutlineEntity.exists()) {
-                RegionOutlineComponent oldComponent = regionOutlineEntity.getComponent(RegionOutlineComponent.class);
-                if (oldComponent != null && oldComponent.corner1 != null && oldComponent.corner2 != null) {
-                    Region3i oldRegion = Region3i.createBounded(oldComponent.corner1, oldComponent.corner2);
-                    if (oldRegion.equals(region3i)) {
-                        return;
-                    }
-                }
-            }
-            if (regionOutlineEntity.exists()) {
-                RegionOutlineComponent regionOutlineComponent = regionOutlineEntity.getComponent(RegionOutlineComponent.class);
-                regionOutlineComponent.corner1 = new Vector3i(region3i.min());
-                regionOutlineComponent.corner2 = new Vector3i(region3i.max());
-                regionOutlineEntity.saveComponent(regionOutlineComponent);
-            } else {
-                EntityBuilder entityBuilder = entityManager.newBuilder();
-                entityBuilder.setPersistent(false);
-                RegionOutlineComponent regionOutlineComponent = new RegionOutlineComponent();
-                regionOutlineComponent.corner1 = new Vector3i(region3i.min());
-                regionOutlineComponent.corner2 = new Vector3i(region3i.max());
-                entityBuilder.addComponent(regionOutlineComponent);
-                regionOutlineEntity = entityBuilder.build();
-            }
+        }
+    }
+
+    public void updateOutlineEntities() {
+            List<Region3i> regionsToDraw = getRegionsToDraw();
+        destoryOutlineEntities();
+
+        for (Region3i regionToDraw: regionsToDraw) {
+            EntityBuilder entityBuilder = entityManager.newBuilder();
+            entityBuilder.setPersistent(false);
+            RegionOutlineComponent regionOutlineComponent = new RegionOutlineComponent();
+            regionOutlineComponent.corner1 = new Vector3i(regionToDraw.min());
+            regionOutlineComponent.corner2 = new Vector3i(regionToDraw.max());
+            entityBuilder.addComponent(regionOutlineComponent);
+            regionOutlineEntities.add(entityBuilder.build());
         }
     }
 
 
+    private void setHighlightedEditorEntity(EntityRef entityRef) {
+        highlightedEditorEntity = entityRef;
+        updateOutlineEntities();
+    }
 
-    private Region3i getRegionToDraw() {
-        EntityRef characterEntity = locatPlayer.getCharacterEntity();
-        SelectedInventorySlotComponent selectedSlotComponent = characterEntity.
-                getComponent(SelectedInventorySlotComponent.class);
-        if (selectedSlotComponent == null) {
-            return null;
-        }
-        InventoryComponent inventoryComponent =  characterEntity.getComponent(InventoryComponent.class);
-        if (inventoryComponent == null) {
-            return null;
-        }
-        inventoryComponent.itemSlots.get(selectedSlotComponent.slot);
+    private void updateHighlightedEditorEntity() {
+        setHighlightedEditorEntity(determineEditorEntityToHighLight());
+    }
 
-        EntityRef item = inventoryManager.getItemInSlot(characterEntity, selectedSlotComponent.slot);
-        StructureTemplateEditorComponent structureTemplateEditorComponent = item.getComponent(StructureTemplateEditorComponent.class);
-        if (structureTemplateEditorComponent == null) {
-            return null;
+    private EntityRef determineEditorEntityToHighLight() {
+        EntityRef clientEntity = locatPlayer.getClientEntity();
+
+        EditingUserComponent editingUserComponent = clientEntity.getComponent(EditingUserComponent.class);
+        if (editingUserComponent == null) {
+            return EntityRef.NULL;
         }
 
-        if (structureTemplateEditorComponent.origin == null) {
-            return null;
+        EntityRef editProcessEntity = editingUserComponent.editProcessEntity;
+        EditTemplateRegionProcessComponent editTemplateRegionProcessComponent = editProcessEntity.getComponent(EditTemplateRegionProcessComponent.class);
+        if (editTemplateRegionProcessComponent == null) {
+            return EntityRef.NULL;
         }
+        return editTemplateRegionProcessComponent.structureTemplateEditor;
+    }
 
-        Region3i region = structureTemplateEditorComponent.editRegion;
-        region = region.move(structureTemplateEditorComponent.origin);
-        return region;
+
+    private List<Region3i> getRegionsToDraw() {
+
+        StructureTemplateOriginComponent structureTemplateOriginComponent = highlightedEditorEntity.getComponent(StructureTemplateOriginComponent.class);
+        if (structureTemplateOriginComponent == null) {
+            return Collections.emptyList();
+        }
+        return new ArrayList<>(structureTemplateOriginComponent.absoluteTemplateRegions);
     }
 }

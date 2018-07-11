@@ -1,101 +1,97 @@
 {
-    "type" : "StructureTemplateEditorScreen",
-    "contents" : {
-        "type": "RelativeLayout",
-        "contents": [
+  "skin": "engine:default",
+  "type": "StructureTemplateEditorScreen",
+  "contents": {
+    "type": "RelativeLayout",
+    "contents": [
+      {
+        "type": "engine:UIBox",
+        "layoutInfo": {
+          "use-content-height": true,
+          "width": 300,
+          "position-vertical-center": {},
+          "position-horizontal-center": {}
+        },
+        "content": {
+          "type": "ColumnLayout",
+          "verticalSpacing": 4,
+          "contents": [
             {
-                "type": "ColumnLayout",
-                "contents" : [
-                    {
-                        "type" : "RowLayout",
-                        "horizontalSpacing" : 4,
-                        "contents" : [
-                            {
-                                "type" : "UILabel",
-                                "text" : "Min",
-                                "id" : "minLabel"
-                            },
-                            {
-                                "type": "UIText",
-                                "readOnly": false,
-                                "multiline": false,
-                                "id": "minXField"
-                            },
-                            {
-                                "type": "UIText",
-                                "readOnly": false,
-                                "multiline": false,
-                                "id": "minYField"
-                            },
-                            {
-                                "type": "UIText",
-                                "readOnly": false,
-                                "multiline": false,
-                                "id": "minZField"
-                            }
-                        ]
-                    },
-                    {
-                        "type" : "RowLayout",
-                        "horizontalSpacing" : 4,
-                        "contents" : [
-                            {
-                                "type" : "UILabel",
-                                "text" : "Max",
-                                "id" : "maxLabel"
-                            },
-                            {
-                                "type": "UIText",
-                                "readOnly": false,
-                                "multiline": false,
-                                "id": "maxXField"
-                            },
-                            {
-                                "type": "UIText",
-                                "readOnly": false,
-                                "multiline": false,
-                                "id": "maxYField"
-                            },
-                            {
-                                "type": "UIText",
-                                "readOnly": false,
-                                "multiline": false,
-                                "id": "maxZField"
-                            }
-                        ]
-                    },
-,
-                    {
-                        "type" : "ColumnLayout",
-                        "verticalSpacing" : 4,
-                        "contents" : [
-                            {
-                                "type" : "UIButton",
-                                "text" : "Selected -> Clipboard",
-                                "id" : "copyToClipboardButton"
-                            },
-                            {
-                                "type" : "UIButton",
-                                "text" : "Create Structure Spawner",
-                                "id" : "createSpawnerButton"
-                            },
-                            {
-                                "type" : "UIButton",
-                                "text" : "Copy region as ground condition",
-                                "id" : "copyGroundConditionButton"
-                            }
-
-
-                        ]
-                    }
-                ],
-                "layoutInfo": {
-                    "use-content-height": true,
-                    "width" : 200,
-                    "position-top": {},
-                    "position-left": {}
+              "type": "UIButton",
+              "text": "Edit Structure Template Properties",
+              "id": "editTemplatePropertiesButton"
+            },
+            {
+              "type": "UIButton",
+              "text": "Make edit region box-shaped",
+              "id": "makeBoxShapedButton"
+            },
+            {
+              "type": "UIButton",
+              "text": "Selected -\u003e Clipboard",
+              "id": "copyToClipboardButton"
+            },
+            {
+              "type": "UIButton",
+              "text": "Copy \"is underground\" condition",
+              "id": "copyInGroundConditionButton"
+            },
+            {
+              "type": "UIButton",
+              "text": "Create Structure Spawner",
+              "id": "createSpawnerButton"
+            },
+            {
+              "type": "UIButton",
+              "text": "Create Structure Template Item",
+              "id": "createTemplateButton"
+            },
+            {
+              "type": "engine:RowLayout",
+              "id": "newWidget",
+              "layoutInfo": {},
+              "contents": [
+                {
+                  "type": "engine:UICheckbox",
+                  "id": "recordBlockAdditionCheckBox",
+                  "layoutInfo": {
+                    "relativeWidth": 0.1
+                  }
+                },
+                {
+                  "type": "engine:UILabel",
+                  "layoutInfo": {
+                    "useContentWidth": true
+                  },
+                  "text": "Record block addition"
                 }
+              ]
+            },
+            {
+              "type": "engine:RowLayout",
+              "id": "newWidget",
+              "layoutInfo": {},
+              "contents": [
+                {
+                  "type": "engine:UICheckbox",
+                  "id": "recordBlockRemovalCheckBox",
+                  "layoutInfo": {
+                    "relativeWidth": 0.1
+                  }
+                },
+                {
+                  "type": "engine:UILabel",
+                  "layoutInfo": {
+                    "useContentWidth": true
+                  },
+                  "text": "Record block removal"
+                }
+              ]
             }
-        ]
-    }
+          ],
+          "layoutInfo": {}
+        }
+      }
+    ]
+  }
 }

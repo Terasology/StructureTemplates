@@ -13,13 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.structureTemplates.internal.systems;
+package org.terasology.structureTemplates.components;
 
 import org.terasology.entitySystem.Component;
+import org.terasology.math.Region3i;
+
+import java.util.List;
 
 /**
- * Used to make the structure template generator item behave like it should
+ * Protects the specified regions of the stucture template against modification by the player for the specified
+ * duration.
+ *
  */
-public class StructureTemplateGeneratorComponent implements Component {
-
+public class ProtectRegionsForAFewHoursComponent implements Component {
+    public List<Region3i> regions;
+    public float hoursToProtect = 2.0f;
 }

@@ -16,12 +16,28 @@
 package org.terasology.structureTemplates.events;
 
 import org.terasology.entitySystem.event.AbstractConsumableEvent;
-import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent;
+import org.terasology.entitySystem.event.EventPriority;
 import org.terasology.structureTemplates.util.transform.BlockRegionTransform;
 
 /**
- * When sent to entities with components like {@link SpawnBlockRegionsComponent} then the structure described by
- * that entity will be generated.
+ * Send this event to a structure template entity to start the spawning of the structure.
+ *
+ * On priority {@link EventPriority#PRIORITY_CRITICAL} there is a event handler that sends a
+ * {@link StructureSpawnStartedEvent}. Implement a handler of {@link StructureSpawnStartedEvent} when you
+ * want to add a component that does something when the spawning of a structure starts .(e.g. placing some spawn
+ * particles or playing a placement sound)
+ *
+ * On priority {@link EventPriority#PRIORITY_TRIVIAL} a handler of this event will send a
+ * {@link StructureBlocksSpawnedEvent}.
+ *
+ * If you want to introduce a component that makes structure templates spawn entities you should
+ * subscribe to this event. At least if it is not just a "spawning started" effect.
+ *
+ * Please note: the usage of this component will be changed, please do not add systtems that subscribe for this event.
+ *
+ * In future it will made a consumable event, and it will be up to the implementor of the consumable event
+ * when it will send the  {@link StructureBlocksSpawnedEvent} event. e.g. a system might place the blocks
+ * over a larger time frame and only when it is done the entities will be placed.
  */
 public class SpawnStructureEvent extends AbstractConsumableEvent {
     private BlockRegionTransform transformation;

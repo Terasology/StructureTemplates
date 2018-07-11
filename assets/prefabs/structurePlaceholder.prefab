@@ -1,0 +1,11 @@
+{
+  "Network" : {},
+  "StructurePlaceholder": {},
+  "BlockPlaceholder": {
+    "block":"engine:air"
+  },
+  "InteractionTarget": {},
+  "InteractionScreen": {
+    "screen": "StructureTemplates:StructurePlaceholderScreen"
+  }
+}

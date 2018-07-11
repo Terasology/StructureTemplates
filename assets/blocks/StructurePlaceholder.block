@@ -1,0 +1,21 @@
+{
+  "translucent": true,
+  "invisible": false,
+  "targetable": true,
+  "penetrable": true,
+  "replacementAllowed": false,
+  "shadowCasting": false,
+  "attachmentAllowed": false,
+  "hardness": 1,
+  "displayName": "structure placeholder",
+  "family": "horizontal",
+  "sounds": "none",
+  "shape" : "StructureTemplates:blockMarkerQuad",
+  "entity": {
+    "prefab": "StructureTemplates:structurePlaceholder"
+  },
+  "inventory": {
+    "stackable": true,
+    "directPickup": true
+  }
+}

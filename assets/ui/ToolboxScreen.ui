@@ -1,0 +1,111 @@
+{
+  "type": "ToolboxScreen",
+  "contents": {
+    "type": "RelativeLayout",
+    "contents": [
+      {
+        "type": "engine:UIBox",
+        "layoutInfo": {
+          "width": 700,
+          "height": 600,
+          "position-vertical-center": {},
+          "position-horizontal-center": {}
+        },
+        "content": {
+          "type": "RelativeLayout",
+          "layoutInfo": {},
+          "text": "",
+          "contents": [
+            {
+              "id": "topRow",
+              "type": "RowLayout",
+              "contents": [
+                {
+                  "type": "UILabel",
+                  "text": "Toolbox",
+                  "layoutInfo": {
+                    "useContentWidth": true
+                  }
+                },
+                {
+                  "type": "engine:UISpace",
+                  "layoutInfo": {}
+                }
+              ],
+              "layoutInfo": {
+                "position-top": {},
+                "use-content-height": true,
+                "position-left": {},
+                "position-right": {}
+              }
+            },
+            {
+              "type": "RowLayout",
+              "contents": [
+                {
+                  "type": "engine:UISpace",
+                  "layoutInfo": {}
+                }
+              ],
+              "layoutInfo": {}
+            },
+            {
+              "type": "engine:RelativeLayout",
+              "id": "bottomRow",
+              "layoutInfo": {
+                "position-bottom": {},
+                "position-right": {},
+                "position-left": {},
+                "height": 30
+              },
+              "contents": [
+                {
+                  "type": "UIButton",
+                  "text": "Get Item",
+                  "id": "getItemButton",
+                  "layoutInfo": {
+                    "position-right": {
+                      "target": "LEFT",
+                      "offset": 5,
+                      "widget": "closeButton"
+                    },
+                    "use-content-width": true
+                  }
+                },
+                {
+                  "type": "UIButton",
+                  "text": "Close",
+                  "id": "closeButton",
+                  "layoutInfo": {
+                    "position-right": {},
+                    "use-content-width": true
+                  }
+                }
+              ]
+            },
+            {
+              "type": "engine:ScrollableArea",
+              "layoutInfo": {
+                "position-top": {
+                  "widget": "topRow",
+                  "target": "BOTTOM"
+                },
+                "position-bottom": {
+                  "widget": "bottomRow",
+                  "target": "TOP"
+                }
+              },
+              "contents": [
+                {
+                  "type": "StructureTemplates:ToolboxTreeView",
+                  "id": "treeView",
+                  "layoutInfo": {}
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

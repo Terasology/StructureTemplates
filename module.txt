@@ -1,12 +1,11 @@
 {
     "id" : "StructureTemplates",
-    "version" : "0.1.0-SNAPSHOT",
+    "version" : "0.2.1-SNAPSHOT",
     "author" : "Florian",
     "displayName" : "Structure Templates",
-    "description" : "Use the command 'giveItem structureTemplateGenerator' to get a item that can be used to create structure templates. Structure templates can be either used ingame for faster building or by modules for spawning structures programatically via prefabs",
-    "dependencies" : [{
-            "id" : "Core",
-            "minVersion" : "1.0.0"
-        }],
+    "description" : "A module that adds 'structure templates' which can be used to spawn whole structures for faster building.",
+    "dependencies" : [
+        {"id" : "Core", "minVersion" : "2.0.0"}
+    ],
     "serverSideOnly" : false
 }

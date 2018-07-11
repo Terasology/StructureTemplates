@@ -1,0 +1,79 @@
+{
+  "type": "StructurePlaceholderScreen",
+  "contents": {
+    "type": "RelativeLayout",
+    "contents": [
+      {
+        "type": "engine:UIBox",
+        "layoutInfo": {
+          "width": 400,
+          "height": 250,
+          "position-vertical-center": {},
+          "position-horizontal-center": {}
+        },
+        "content": {
+          "type": "RelativeLayout",
+          "layoutInfo": {},
+          "contents": [
+            {
+              "type": "RowLayout",
+              "contents": [
+                {
+                  "type": "UILabel",
+                  "text": "Spawn: ",
+                  "layoutInfo": {
+                    "useContentWidth": true
+                  }
+                },
+                {
+                  "type": "UIDropdown",
+                  "multiline": false,
+                  "id": "comboBox"
+                },
+                {
+                  "type": "UIButton",
+                  "text": "x",
+                  "id": "closeButton",
+                  "layoutInfo": {
+                    "relativeWidth": 0.1
+                  }
+                }
+              ],
+              "layoutInfo": {
+                "position-top": {},
+                "position-left": {
+                  "offset": 5
+                },
+                "position-right": {
+                  "offset": 5
+                },
+                "height": 30
+              },
+              "id": "header"
+            },
+            {
+              "type": "ScrollableArea",
+              "id": "scrollArea",
+              "content": {
+                "type": "UIText",
+                "readOnly": true,
+                "multiline": true,
+                "id": "fullDescriptionLabel"
+              },
+              "layoutInfo": {
+                "position-bottom": {},
+                "position-left": {},
+                "position-right": {},
+                "position-top": {
+                  "widget": "header",
+                  "target": "BOTTOM"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "skin": "engine:default"
+}

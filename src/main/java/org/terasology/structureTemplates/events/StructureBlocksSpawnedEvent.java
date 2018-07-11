@@ -13,14 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.structureTemplates.internal.components;
+package org.terasology.structureTemplates.events;
 
 import org.terasology.entitySystem.event.Event;
-import org.terasology.network.ServerEvent;
+import org.terasology.structureTemplates.util.transform.BlockRegionTransform;
 
 /**
- *
+ * Gets send when the basic blocks of a structure template got placed. Event handlers
+ * typically add then entities that rely on the blocks being present.
  */
-@ServerEvent
-public class CreateStructureSpawnItemRequest implements Event {
+public class StructureBlocksSpawnedEvent implements Event {
+    private BlockRegionTransform transformation;
+
+    public StructureBlocksSpawnedEvent(BlockRegionTransform transform) {
+        this.transformation = transform;
+    }
+
+    public BlockRegionTransform getTransformation() {
+        return transformation;
+    }
 }

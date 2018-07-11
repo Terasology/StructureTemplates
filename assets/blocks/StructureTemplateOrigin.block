@@ -1,0 +1,25 @@
+{
+  "translucent": false,
+  "invisible": false,
+  "targetable": true,
+  "penetrable": false,
+  "replacementAllowed": false,
+  "shadowCasting": true,
+  "attachmentAllowed": true,
+  "hardness": 100,
+  "displayName": "structure template origin",
+  "family": "horizontal",
+  "sounds": "none",
+  "shape" : "engine:cube",
+  "entity": {
+    "prefab": "StructureTemplates:structureTemplateOrigin"
+  },
+  "tiles": {
+      "topBottom": "StructureTemplates:StructureTemplateOriginTopBottom",
+      "sides": "StructureTemplates:StructureTemplateOriginSides"
+  },
+  "inventory": {
+    "stackable": false,
+    "directPickup": true
+  }
+}

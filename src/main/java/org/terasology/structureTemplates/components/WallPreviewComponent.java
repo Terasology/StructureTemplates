@@ -13,27 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.structureTemplates.internal.systems;
+package org.terasology.structureTemplates.components;
 
 import org.terasology.entitySystem.Component;
 import org.terasology.math.Region3i;
-import org.terasology.math.geom.Vector3i;
 import org.terasology.network.FieldReplicateType;
 import org.terasology.network.Replicate;
+import org.terasology.structureTemplates.internal.components.ReplaceWallItemComponent;
+
+import java.util.List;
 
 /**
- * Used to describe an block region location
+ * This component shows a preview of the the wall taht will be placed by items with the {@link ReplaceWallItemComponent}.
+ *
+ * It is a separte component so that it is possibly to listen for actual modifications of the
+ * {@link ReplaceWallItemComponent}.
  */
-public class StructureTemplateEditorComponent implements Component {
-    /**
-     * Edit region relative to origin.
-     */
+public class WallPreviewComponent implements Component {
+    // TODO it would be saver to let the server calculate the regions
     @Replicate(FieldReplicateType.OWNER_TO_SERVER)
-    public Region3i editRegion = Region3i.createBounded(new Vector3i(0,0,0), new Vector3i(0,0,0));
+    public List<Region3i> wallRegions;
 
-    /**
-     * Origin for editRegion values. To get the avsolute edit region add this value to it.
-     */
-    @Replicate(FieldReplicateType.OWNER_TO_SERVER)
-    public Vector3i origin = new Vector3i();
 }

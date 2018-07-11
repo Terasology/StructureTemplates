@@ -1,0 +1,15 @@
+{
+  "parent" : "engine:iconItem",
+  "DisplayName" : {
+    "name" : "Structure Template Item",
+    "description": "Spawns a structure template for editing"
+  },
+  "Item" : {
+    "icon" : "StructureTemplates:StructureTemplateOrigin",
+    "stackCount": 1,
+    "stackId": "stack",
+    "maxStackSize": 1,
+    "consumedOnUse": true
+  },
+  "SpawnTemplateAction": {}
+}
