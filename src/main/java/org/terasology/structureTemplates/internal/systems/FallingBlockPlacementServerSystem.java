@@ -41,9 +41,7 @@ import org.terasology.world.WorldProvider;
 import org.terasology.world.block.Block;
 import org.terasology.world.block.BlockManager;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -78,7 +76,6 @@ public class FallingBlockPlacementServerSystem extends BaseComponentSystem {
     @In
     private WorldProvider worldProvider;
 
-    //List<EntityRef> fallingBlockEntities;
     long maxStopGameTimeInMs = 0;
     BlockRegionTransform transformation;
 
@@ -101,12 +98,6 @@ public class FallingBlockPlacementServerSystem extends BaseComponentSystem {
         transformation = event.getTransformation();
         event.consume();
     }
-
-    /**void scheduleCleanupOfFallingBlockEntities(List<EntityRef> fallingBlockEntities, long maxStopGameTimeInMs) {
-        for (EntityRef fallingBlockEntity: fallingBlockEntities) {
-            delayManager.addDelayedAction(fallingBlockEntity, DESTROY_ENTITY_ACTION_ID, maxStopGameTimeInMs - time.getGameTimeInMs());
-        }
-    }**/
 
     void createFallingBlockEntities(Map<Vector3i, Block> blocksToPlace, EntityRef entityRef) {
         Vector3i minPos = getSmallestPlacementPosition(blocksToPlace);
@@ -142,15 +133,6 @@ public class FallingBlockPlacementServerSystem extends BaseComponentSystem {
         return minPos;
     }
 
-    long determineMaxStopTimeInMs(List<EntityRef> fallingBlockEntities) {
-        //maxStopGameTimeInMs = time.getGameTimeInMs();
-        for (EntityRef fallingBlockEntity: fallingBlockEntities) {
-            FallingBlockComponent component = fallingBlockEntity.getComponent(FallingBlockComponent.class);
-            maxStopGameTimeInMs = Math.max(maxStopGameTimeInMs, component.stopGameTimeInMs);
-        }
-        return maxStopGameTimeInMs;
-    }
-
     private EntityRef createEntityThatTriggersTheCompletionEvent(EntityRef structureTemplate, BlockRegionTransform transform) {
         EntityBuilder entityBuilder = entityManager.newBuilder();
         entityBuilder.setPersistent(true);
@@ -170,7 +152,7 @@ public class FallingBlockPlacementServerSystem extends BaseComponentSystem {
 
         EntityRef entityRef = entityBuilder.build();
         long durationTillLastBlockPlacement = maxStopGameTimeInMs - time.getGameTimeInMs();
-        // Add 1ms to ensure it is indeed after the last block placement.
+        // Add 5ms to ensure it is indeed after the last block placement.
         long directlyAfterLastBlockPlacement = durationTillLastBlockPlacement + 5;
         delayManager.addDelayedAction(entityRef, COMPLETE_STRUCTURE_ACTION_ID, directlyAfterLastBlockPlacement);
         return entityRef;
@@ -185,8 +167,10 @@ public class FallingBlockPlacementServerSystem extends BaseComponentSystem {
         }
         EntityRef structureTemplate = completionComponent.structureTemplate;
         BlockRegionTransform transform = BlockRegionTransform.createFromComponent(transformComponent);
+
         //structureTemplate.send(new SpawnBlocksOfStructureTemplateEvent(transform));
-        //structureTemplate.send(new StructureBlocksSpawnedEvent(transform));
+
+        structureTemplate.send(new StructureBlocksSpawnedEvent(transform));
 
         entityRef.destroy();
     }
@@ -234,7 +218,6 @@ public class FallingBlockPlacementServerSystem extends BaseComponentSystem {
     public void onEntityCreationComplete(DelayedActionTriggeredEvent event, EntityRef entityRef) {
         if (!event.getActionId().equals(COMPLETE_CREATE_ENTITY_ACTION_ID)) {
             createEntityThatTriggersTheCompletionEvent(entityRef, transformation);
-           // scheduleCleanupOfFallingBlockEntities(maxStopGameTimeInMs);
         }
     }
 
@@ -242,7 +225,7 @@ public class FallingBlockPlacementServerSystem extends BaseComponentSystem {
     public void onFallingBlockDelayElapsed(DelayedActionTriggeredEvent event, EntityRef entityRef,
                         FallingBlockComponent component, LocationComponent locationComponent) {
         if (event.getActionId().equals(PLACE_BLOCK_ACTION_ID)) {
-
+            delayManager.addDelayedAction(entityRef, DESTROY_ENTITY_ACTION_ID, 1);
             Vector3f pos = locationComponent.getWorldPosition();
             Block block = blockManager.getBlock(component.blockUri);
             if (block == null) {
@@ -251,7 +234,6 @@ public class FallingBlockPlacementServerSystem extends BaseComponentSystem {
             Vector3i roundedPos = new Vector3i(Math.round(pos.getX()), Math.round(pos.getY()), Math.round(pos.getZ()));
             logger.info("Placing block at " + roundedPos);
             worldProvider.setBlock(roundedPos, block);
-            delayManager.addDelayedAction(entityRef, DESTROY_ENTITY_ACTION_ID, 10);
         }
         if (event.getActionId().equals(DESTROY_ENTITY_ACTION_ID)) {
             entityRef.destroy();

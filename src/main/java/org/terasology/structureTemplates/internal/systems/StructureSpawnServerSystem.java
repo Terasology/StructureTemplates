@@ -16,10 +16,14 @@
 package org.terasology.structureTemplates.internal.systems;
 
 import com.google.common.collect.Lists;
+
 import java.util.Map;
+
 import com.google.common.collect.Maps;
+
 import java.util.List;
 import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.assets.management.AssetManager;
@@ -40,7 +44,6 @@ import org.terasology.math.Side;
 import org.terasology.math.geom.Vector3f;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.registry.In;
-import org.terasology.structureTemplates.components.GrowStructureComponent;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent.RegionToFill;
 import org.terasology.structureTemplates.components.SpawnStructureActionComponent;
@@ -102,7 +105,7 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
     @ReceiveEvent
     public void onSpawnBlocksOfStructureTemplateEvent(SpawnBlocksOfStructureTemplateEvent event, EntityRef entity) {
         long startTime = System.currentTimeMillis();
-        GetStructureTemplateBlocksEvent getBlocksEvent =  new GetStructureTemplateBlocksEvent(event.getTransformation());
+        GetStructureTemplateBlocksEvent getBlocksEvent = new GetStructureTemplateBlocksEvent(event.getTransformation());
         entity.send(getBlocksEvent);
         Map<Vector3i, Block> blocksToPlace = getBlocksEvent.getBlocksToPlace();
         worldProvider.setBlocks(blocksToPlace);
@@ -123,19 +126,8 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
                                              SpawnBlockRegionsComponent spawnBlockRegionComponent) {
 
         BlockRegionTransform transformation = event.getTransformation();
-        /**for (RegionToFill regionToFill : spawnBlockRegionComponent.regionsToFill) {
-            Block block = regionToFill.blockType;
 
-
-            Region3i region = regionToFill.region;
-            region = transformation.transformRegion(region);
-            block = transformation.transformBlock(block);
-
-
-            event.fillRegion(region, block);
-        }**/
-
-            Map<Integer, List<BlockToPlace>> blocksPerLayer = Maps.newTreeMap();
+        Map<Integer, List<BlockToPlace>> blocksPerLayer = Maps.newTreeMap();
         for (RegionToFill regionToFill : spawnBlockRegionComponent.regionsToFill) {
             Block block = regionToFill.blockType;
 
@@ -159,7 +151,6 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
         EntityRef growingStructureEntity = entityManager.create(buildStepwiseStructureComponent, growStructureCounter);
 
         delayManager.addDelayedAction(growingStructureEntity, GROW_STRUCTURE_ACTION_ID, 0);
-        //event.consume();    // structure should not be build by any other event handler.
     }
 
     @ReceiveEvent
@@ -168,16 +159,16 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
 
         BlockRegionTransform transformation = event.getTransformation();
         for (RegionToFill regionToFill : spawnBlockRegionComponent.regionsToFill) {
-         Block block = regionToFill.blockType;
+            Block block = regionToFill.blockType;
 
 
-         Region3i region = regionToFill.region;
-         region = transformation.transformRegion(region);
-         block = transformation.transformBlock(block);
+            Region3i region = regionToFill.region;
+            region = transformation.transformRegion(region);
+            block = transformation.transformBlock(block);
 
 
-         event.fillRegion(region, block);
-         }
+            event.fillRegion(region, block);
+        }
     }
 
 
