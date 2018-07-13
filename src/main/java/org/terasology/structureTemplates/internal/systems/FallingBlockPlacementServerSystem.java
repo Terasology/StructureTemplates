@@ -63,7 +63,7 @@ public class FallingBlockPlacementServerSystem extends BaseComponentSystem {
     private static final String PLACE_BLOCK_ACTION_ID = "StructureTemplates:FallingBlockPlacementServerSystem:placeBlock";
     private static final String DESTROY_ENTITY_ACTION_ID = "StructureTemplates:FallingBlockPlacementServerSystem:destroyEntity";
     private static final String CREATE_ENTITY_ACTION_ID = "StructureTemplates:FallingBlockPlacementServerSystem:createEntity";
-    private static final String COMPLETE_CREATE_ENTITY_ACTION_ID = "StructureTemplates:FallingBlockPlacementServerSystem:createEntity";
+    private static final String COMPLETE_CREATE_ENTITY_ACTION_ID = "StructureTemplates:FallingBlockPlacementServerSystem:completeCreateEntity";
 
     @In
     private Time time;
