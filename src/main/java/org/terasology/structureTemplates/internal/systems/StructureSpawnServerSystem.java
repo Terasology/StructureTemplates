@@ -81,6 +81,7 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
     private static final Logger logger = LoggerFactory.getLogger(StructureSpawnServerSystem.class);
 
     private static final String GROW_STRUCTURE_ACTION_ID = "structureTemplates:growStructureEvent";
+    private static final String CONSTRUCTION_COMPLETE_ACTION_ID = "structureTemplates:structureCompleteEvent";
 
     @In
     private WorldProvider worldProvider;
@@ -100,12 +101,15 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
     @In
     private AssetManager assetManager;
 
+    private BlockRegionTransform regionTransform;
+    private EntityRef structureEntity;
 
-    @ReceiveEvent(priority = EventPriority.PRIORITY_TRIVIAL)
-    public void onSpawnStructureWithFallingAnimation(SpawnStructureEvent event, EntityRef entity) {
+    @ReceiveEvent
+    public void onSpawnStructureWithoutFallingAnimation(SpawnStructureEvent event, EntityRef entity) {
+        regionTransform = event.getTransformation();
+        structureEntity = entity;
         entity.send(new StructureSpawnStartedEvent(event.getTransformation()));
         entity.send(new SpawnBlocksOfStructureTemplateEvent(event.getTransformation()));
-        entity.send(new StructureBlocksSpawnedEvent(event.getTransformation()));
         event.consume();
     }
 
@@ -114,8 +118,6 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
         long startTime = System.currentTimeMillis();
         GetStructureTemplateBlocksEvent getBlocksEvent = new GetStructureTemplateBlocksEvent(event.getTransformation());
         entity.send(getBlocksEvent);
-        Map<Vector3i, Block> blocksToPlace = getBlocksEvent.getBlocksToPlace();
-        worldProvider.setBlocks(blocksToPlace);
         long endTime = System.currentTimeMillis();
         long delta = endTime - startTime;
         if (delta > 20) {
@@ -183,6 +185,9 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
     public void onDelayedTriggeredEvent(DelayedActionTriggeredEvent event, EntityRef entity,
                                         BuildStepwiseStructureComponent buildStepwiseStructureComponent, BuildStructureCounterComponent counterComponent) {
 
+        if (!event.getActionId().equals(GROW_STRUCTURE_ACTION_ID)) {
+            return;
+        }
         int currentStepCount = counterComponent.iter;
         List<BuildStep> buildSteps = buildStepwiseStructureComponent.getBuildSteps();
         BuildStep step = buildSteps.get(currentStepCount);
@@ -200,6 +205,18 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
             entity.saveComponent(counterComponent);
             delayManager.addDelayedAction(entity, GROW_STRUCTURE_ACTION_ID, 1000);
         }
+        else {
+            delayManager.addDelayedAction(entity, CONSTRUCTION_COMPLETE_ACTION_ID, 100);
+        }
+    }
+
+    @ReceiveEvent
+    public void setConstructionComplete(DelayedActionTriggeredEvent event, EntityRef entity) {
+        if (!event.getActionId().equals(CONSTRUCTION_COMPLETE_ACTION_ID)) {
+            return;
+        }
+
+        structureEntity.send(new StructureBlocksSpawnedEvent(regionTransform));
     }
 
     @ReceiveEvent

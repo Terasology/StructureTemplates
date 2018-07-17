@@ -22,7 +22,6 @@ import org.terasology.engine.Time;
 import org.terasology.entitySystem.entity.EntityBuilder;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.entitySystem.event.EventPriority;
 import org.terasology.entitySystem.event.ReceiveEvent;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
@@ -34,11 +33,9 @@ import org.terasology.math.geom.Vector3f;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.network.NetworkComponent;
 import org.terasology.registry.In;
-import org.terasology.structureTemplates.components.BlockRegionTransformComponent;
 import org.terasology.structureTemplates.components.PrepareFallingBlockEntityComponent;
 import org.terasology.structureTemplates.components.FallingBlockComponent;
 import org.terasology.structureTemplates.components.FallingBlocksPlacementAlgorithmComponent;
-import org.terasology.structureTemplates.components.TimedStructureCompletionComponent;
 import org.terasology.structureTemplates.events.SpawnStructureEvent;
 import org.terasology.structureTemplates.events.GetStructureTemplateBlocksForMidAirEvent;
 import org.terasology.structureTemplates.events.StructureSpawnStartedEvent;
@@ -92,8 +89,9 @@ public class FallingBlockPlacementServerSystem extends BaseComponentSystem {
      * the event {@link StructureBlocksSpawnedEvent} gets send when the fall down animation has been played for
      * all blocks. So there might be a few seconds between the events.
      */
-    @ReceiveEvent(components = {FallingBlocksPlacementAlgorithmComponent.class}, priority = EventPriority.PRIORITY_CRITICAL)
+    @ReceiveEvent(components = {FallingBlocksPlacementAlgorithmComponent.class})
     public void onSpawnStructureEventWithBlocksPriority(SpawnStructureEvent event, EntityRef entity) {
+        transformation = event.getTransformation();
         entity.send(new StructureSpawnStartedEvent(event.getTransformation()));
         GetStructureTemplateBlocksForMidAirEvent getBlocksEvent =  new GetStructureTemplateBlocksForMidAirEvent(event.getTransformation());
         entity.send(getBlocksEvent);
@@ -102,7 +100,6 @@ public class FallingBlockPlacementServerSystem extends BaseComponentSystem {
         replacePlacementLocationWithAir(blocksToPlace.keySet());
 
         createFallingBlockEntities(blocksToPlace, entity);
-        transformation = event.getTransformation();
         event.consume();
     }
 
@@ -140,8 +137,8 @@ public class FallingBlockPlacementServerSystem extends BaseComponentSystem {
         return minPos;
     }
 
-    private EntityRef createEntityThatTriggersTheCompletionEvent(EntityRef structureTemplate, BlockRegionTransform transform) {
-        EntityBuilder entityBuilder = entityManager.newBuilder();
+    private void createEntityThatTriggersTheCompletionEvent(EntityRef structureTemplate, BlockRegionTransform transform) {
+        /**EntityBuilder entityBuilder = entityManager.newBuilder();
         entityBuilder.setPersistent(true);
         entityBuilder.addComponent(new NetworkComponent());
 
@@ -157,29 +154,18 @@ public class FallingBlockPlacementServerSystem extends BaseComponentSystem {
 
         entityBuilder.addComponent(transform.toComponent());
 
-        EntityRef entityRef = entityBuilder.build();
-        long durationTillLastBlockPlacement = maxStopGameTimeInMs - time.getGameTimeInMs();
-        // Add 5ms to ensure it is indeed after the last block placement.
-        long directlyAfterLastBlockPlacement = durationTillLastBlockPlacement + 5;
-        delayManager.addDelayedAction(entityRef, COMPLETE_STRUCTURE_ACTION_ID, directlyAfterLastBlockPlacement);
-        return entityRef;
+        EntityRef entityRef = entityBuilder.build();**/
+        delayManager.addDelayedAction(structureTemplate, COMPLETE_STRUCTURE_ACTION_ID, 0);
     }
 
     @ReceiveEvent
-    public void onDelayedStructureCompletionTrigger(DelayedActionTriggeredEvent event, EntityRef entityRef,
-                                   TimedStructureCompletionComponent completionComponent,
-                                   BlockRegionTransformComponent transformComponent) {
+    public void onDelayedStructureCompletionTrigger(DelayedActionTriggeredEvent event, EntityRef structureTemplate) {
         if (!event.getActionId().equals(COMPLETE_STRUCTURE_ACTION_ID)) {
             return;
         }
-        EntityRef structureTemplate = completionComponent.structureTemplate;
-        BlockRegionTransform transform = BlockRegionTransform.createFromComponent(transformComponent);
-
         //structureTemplate.send(new SpawnBlocksOfStructureTemplateEvent(transform));
 
-        structureTemplate.send(new StructureBlocksSpawnedEvent(transform));
-
-        entityRef.destroy();
+        structureTemplate.send(new StructureBlocksSpawnedEvent(transformation));
     }
 
 
@@ -224,8 +210,9 @@ public class FallingBlockPlacementServerSystem extends BaseComponentSystem {
     @ReceiveEvent
     public void onEntityCreationComplete(DelayedActionTriggeredEvent event, EntityRef entityRef) {
         if (!event.getActionId().equals(COMPLETE_CREATE_ENTITY_ACTION_ID)) {
-            createEntityThatTriggersTheCompletionEvent(entityRef, transformation);
+            return;
         }
+        createEntityThatTriggersTheCompletionEvent(entityRef, transformation);
     }
 
     @ReceiveEvent
