@@ -44,6 +44,7 @@ import org.terasology.math.Side;
 import org.terasology.math.geom.Vector3f;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.registry.In;
+import org.terasology.structureTemplates.components.CompletionTimeComponent;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent.RegionToFill;
 import org.terasology.structureTemplates.components.SpawnStructureActionComponent;
@@ -104,7 +105,7 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
     private BlockRegionTransform regionTransform;
     private EntityRef structureEntity;
 
-    @ReceiveEvent
+    @ReceiveEvent(priority = EventPriority.PRIORITY_TRIVIAL)
     public void onSpawnStructureWithoutFallingAnimation(SpawnStructureEvent event, EntityRef entity) {
         regionTransform = event.getTransformation();
         structureEntity = entity;
@@ -159,6 +160,9 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
 
         EntityRef growingStructureEntity = entityManager.create(buildStepwiseStructureComponent, growStructureCounter);
 
+        CompletionTimeComponent completionTimeComponent = new CompletionTimeComponent();
+        completionTimeComponent.completionDelay = buildStepwiseStructureComponent.getBuildSteps().size() * 1000 + 100;
+        structureEntity.addComponent(completionTimeComponent);
         delayManager.addDelayedAction(growingStructureEntity, GROW_STRUCTURE_ACTION_ID, 0);
     }
 

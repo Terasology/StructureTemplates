@@ -33,6 +33,7 @@ import org.terasology.math.geom.Vector3f;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.network.NetworkComponent;
 import org.terasology.registry.In;
+import org.terasology.structureTemplates.components.CompletionTimeComponent;
 import org.terasology.structureTemplates.components.PrepareFallingBlockEntityComponent;
 import org.terasology.structureTemplates.components.FallingBlockComponent;
 import org.terasology.structureTemplates.components.FallingBlocksPlacementAlgorithmComponent;
@@ -125,6 +126,9 @@ public class FallingBlockPlacementServerSystem extends BaseComponentSystem {
                 delayManager.addDelayedAction(entity, CREATE_ENTITY_ACTION_ID, delay);
             }
         }
+        CompletionTimeComponent completionTimeComponent = new CompletionTimeComponent();
+        completionTimeComponent.completionDelay = delay + 100;
+        entityRef.addComponent(completionTimeComponent);
 
         delayManager.addDelayedAction(entityRef, COMPLETE_CREATE_ENTITY_ACTION_ID, delay + 100);
     }
