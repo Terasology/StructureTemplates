@@ -33,10 +33,12 @@ import org.terasology.structureTemplates.internal.components.StructureTemplateOr
 public class RequestStructureTemplatePropertiesChange implements Event {
     private Prefab prefab;
     private Integer spawnChance;
+    private String animationType;
 
-    public RequestStructureTemplatePropertiesChange(Prefab prefab, Integer spawnChance) {
+    public RequestStructureTemplatePropertiesChange(Prefab prefab, Integer spawnChance, String animationType) {
         this.prefab = prefab;
         this.spawnChance = spawnChance;
+        this.animationType = animationType;
     }
 
     public RequestStructureTemplatePropertiesChange() {
@@ -49,4 +51,6 @@ public class RequestStructureTemplatePropertiesChange implements Event {
     public Integer getSpawnChance() {
         return spawnChance;
     }
+
+    public String getAnimationType() { return animationType; }
 }

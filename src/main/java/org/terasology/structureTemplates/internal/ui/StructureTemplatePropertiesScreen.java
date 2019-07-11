@@ -42,11 +42,13 @@ import java.util.List;
 public class StructureTemplatePropertiesScreen extends CoreScreenLayer {
 
     private UIDropdown<Prefab> comboBox;
+    private UIDropdown<String> comboBoxAnimation;
     private UIText spawnChanceTextBox;
     private UIButton closeButton;
 
     private String spawnChanceString;
     private Prefab selectedPrefab;
+    private String animationType;
 
     private EntityRef editorEntity;
 
@@ -66,6 +68,7 @@ public class StructureTemplatePropertiesScreen extends CoreScreenLayer {
         StructureTemplateComponent comp = editorEntity.getComponent(StructureTemplateComponent.class);
         selectedPrefab = comp.type;
         spawnChanceString = Integer.toString(comp.spawnChance);
+        animationType = comp.animationType;
     }
 
 
@@ -119,6 +122,28 @@ public class StructureTemplatePropertiesScreen extends CoreScreenLayer {
             });
         }
 
+        comboBoxAnimation = find("comboBoxAnimation", UIDropdown.class);
+        if (comboBoxAnimation != null) {
+            List<String> animations = new ArrayList<>();
+            animations.add("Layer-by-Layer");
+            animations.add("Falling Block");
+            animations.add("No animation");
+            comboBoxAnimation.setOptions(animations);
+
+            comboBoxAnimation.bindSelection(new Binding<String>() {
+                @Override
+                public String get() {
+                    return animationType;
+                }
+
+                @Override
+                public void set(String value) {
+                    animationType = value;
+                    requestServerToTakeOverCurrentValues();
+                }
+            });
+        }
+
         closeButton = find("closeButton", UIButton.class);
         if (closeButton != null) {
             closeButton.subscribe(this::onCloseButton);
@@ -141,7 +166,7 @@ public class StructureTemplatePropertiesScreen extends CoreScreenLayer {
         } catch (NumberFormatException e) {
             spawnChance = 0;
         }
-        localPlayer.getCharacterEntity().send(new RequestStructureTemplatePropertiesChange(selectedPrefab, spawnChance));
+        localPlayer.getCharacterEntity().send(new RequestStructureTemplatePropertiesChange(selectedPrefab, spawnChance, animationType));
 
     }
 }

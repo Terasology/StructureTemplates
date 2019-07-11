@@ -33,4 +33,6 @@ public class StructureTemplateComponent implements Component {
      */
     public int spawnChance = 100;
 
+    public String animationType = "Layer-by-Layer";
+
 }

@@ -65,6 +65,48 @@
               },
               "id": "typeRow"
             },
+                        {
+                          "type": "engine:UILabel",
+                          "id": "titleLabel",
+                          "layoutInfo": {
+                            "position-top": {},
+                            "position-horizontal-center": {},
+                            "use-content-height": true
+                          },
+                          "text": "Structure Template Properties"
+                        },
+                        {
+                          "type": "RowLayout",
+                          "contents": [
+                            {
+                              "type": "UILabel",
+                              "text": "Select Animation: ",
+                              "layoutInfo": {
+                                "useContentWidth": true
+                              }
+                            },
+                            {
+                              "type": "UIDropdown",
+                              "multiline": false,
+                              "id": "comboBoxAnimation"
+                            }
+                          ],
+                          "layoutInfo": {
+                            "position-top": {
+                              "widget": "titleLabel",
+                              "target": "BOTTOM",
+                              "offset": 15
+                            },
+                            "position-left": {
+                              "offset": 5
+                            },
+                            "position-right": {
+                              "offset": 5
+                            },
+                            "height": 30
+                          },
+                          "id": "animationRow"
+                        },
             {
               "type": "RowLayout",
               "contents": [

@@ -263,6 +263,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
 
         structureTemplateComponent.type = event.getPrefab();
         structureTemplateComponent.spawnChance = event.getSpawnChance();
+        structureTemplateComponent.animationType = event.getAnimationType();
         interactionTarget.saveComponent(structureTemplateComponent);
     }
 
@@ -332,7 +333,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         EntityBuilder entityBuilder = entityManager.newBuilder("StructureTemplates:structureSpawnItem");
         addComponentsToTemplate(structureTemplateOriginEntity, structureTemplateOriginComponent, blockComponent, entityBuilder);
         // TODO make it optional
-        entityBuilder.addOrSaveComponent(new NoConstructionAnimationComponent());
+        //entityBuilder.addOrSaveComponent(new NoConstructionAnimationComponent());
         EntityRef structureSpawnItem = entityBuilder.build();
 
         // TODO check permission once PermissionManager is public API
@@ -384,6 +385,12 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
                                                 StructureTemplateComponent componentOfEditor) {
         MutableComponentContainer templateEntity = event.getTemplateEntity();
         templateEntity.addOrSaveComponent(componentLibrary.copy(componentOfEditor));
+        if (componentOfEditor.animationType == "Falling Block") {
+            templateEntity.addOrSaveComponent(new FallingBlocksPlacementAlgorithmComponent());
+        }
+        else if (componentOfEditor.animationType == "No animation") {
+            templateEntity.addOrSaveComponent(new NoConstructionAnimationComponent());
+        }
     }
 
     @ReceiveEvent
@@ -463,6 +470,24 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         sb.append("        ]\n");
         sb.append("    }");
         event.addJsonForComponent(sb.toString(), SpawnBlockRegionsComponent.class);
+    }
+
+    @ReceiveEvent(priority = EventPriority.PRIORITY_HIGH)
+    public void onBuildTemplateStringWithBlockRegions(BuildStructureTemplateStringEvent event, EntityRef template,
+                                                      FallingBlocksPlacementAlgorithmComponent component) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("    \"FallingBlockPlacementAlgorithm\": {\n");
+        sb.append("    }");
+        event.addJsonForComponent(sb.toString(), FallingBlocksPlacementAlgorithmComponent.class);
+    }
+
+    @ReceiveEvent(priority = EventPriority.PRIORITY_HIGH)
+    public void onBuildTemplateStringWithBlockRegions(BuildStructureTemplateStringEvent event, EntityRef template,
+                                                      NoConstructionAnimationComponent component) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("    \"NoConstructionAnimation\": {\n");
+        sb.append("    }");
+        event.addJsonForComponent(sb.toString(), NoConstructionAnimationComponent.class);
     }
 
     @ReceiveEvent
