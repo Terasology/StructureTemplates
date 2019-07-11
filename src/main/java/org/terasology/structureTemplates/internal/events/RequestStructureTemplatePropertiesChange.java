@@ -20,6 +20,7 @@ import org.terasology.entitySystem.prefab.Prefab;
 import org.terasology.network.ServerEvent;
 import org.terasology.structureTemplates.components.StructureTemplateComponent;
 import org.terasology.structureTemplates.internal.components.StructureTemplateOriginComponent;
+import org.terasology.structureTemplates.util.AnimationType;
 
 /**
  * The event gets sent to a character entity at the server.
@@ -33,9 +34,9 @@ import org.terasology.structureTemplates.internal.components.StructureTemplateOr
 public class RequestStructureTemplatePropertiesChange implements Event {
     private Prefab prefab;
     private Integer spawnChance;
-    private String animationType;
+    private AnimationType animationType;
 
-    public RequestStructureTemplatePropertiesChange(Prefab prefab, Integer spawnChance, String animationType) {
+    public RequestStructureTemplatePropertiesChange(Prefab prefab, Integer spawnChance, AnimationType animationType) {
         this.prefab = prefab;
         this.spawnChance = spawnChance;
         this.animationType = animationType;
@@ -52,5 +53,5 @@ public class RequestStructureTemplatePropertiesChange implements Event {
         return spawnChance;
     }
 
-    public String getAnimationType() { return animationType; }
+    public AnimationType getAnimationType() { return animationType; }
 }

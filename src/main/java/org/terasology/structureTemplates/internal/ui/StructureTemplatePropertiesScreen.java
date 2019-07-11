@@ -31,6 +31,7 @@ import org.terasology.rendering.nui.widgets.UIText;
 import org.terasology.structureTemplates.components.StructureTemplateComponent;
 import org.terasology.structureTemplates.components.StructureTemplateTypeComponent;
 import org.terasology.structureTemplates.internal.events.RequestStructureTemplatePropertiesChange;
+import org.terasology.structureTemplates.util.AnimationType;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -42,13 +43,13 @@ import java.util.List;
 public class StructureTemplatePropertiesScreen extends CoreScreenLayer {
 
     private UIDropdown<Prefab> comboBox;
-    private UIDropdown<String> comboBoxAnimation;
+    private UIDropdown<AnimationType> comboBoxAnimation;
     private UIText spawnChanceTextBox;
     private UIButton closeButton;
 
     private String spawnChanceString;
     private Prefab selectedPrefab;
-    private String animationType;
+    private AnimationType animationType;
 
     private EntityRef editorEntity;
 
@@ -124,20 +125,34 @@ public class StructureTemplatePropertiesScreen extends CoreScreenLayer {
 
         comboBoxAnimation = find("comboBoxAnimation", UIDropdown.class);
         if (comboBoxAnimation != null) {
-            List<String> animations = new ArrayList<>();
-            animations.add("Layer-by-Layer");
-            animations.add("Falling Block");
-            animations.add("No animation");
+            List<AnimationType> animations = new ArrayList<>();
+            animations.add(AnimationType.LayerByLayer);
+            animations.add(AnimationType.FallingBlock);
+            animations.add(AnimationType.NoAnimation);
             comboBoxAnimation.setOptions(animations);
-
-            comboBoxAnimation.bindSelection(new Binding<String>() {
+            comboBoxAnimation.setOptionRenderer(new StringTextRenderer<AnimationType>() {
                 @Override
-                public String get() {
+                public String getString(AnimationType value) {
+                    switch (value) {
+                        case NoAnimation:
+                            return "No animation";
+
+                        case FallingBlock:
+                            return "Falling Block";
+
+                        default:
+                            return "Layer-by-Layer";
+                    }
+                }
+            });
+            comboBoxAnimation.bindSelection(new Binding<AnimationType>() {
+                @Override
+                public AnimationType get() {
                     return animationType;
                 }
 
                 @Override
-                public void set(String value) {
+                public void set(AnimationType value) {
                     animationType = value;
                     requestServerToTakeOverCurrentValues();
                 }

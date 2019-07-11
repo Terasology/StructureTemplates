@@ -40,11 +40,21 @@ import org.terasology.math.geom.Vector3f;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.network.NetworkComponent;
 import org.terasology.registry.In;
-import org.terasology.structureTemplates.components.*;
+import org.terasology.structureTemplates.components.BlockPlaceholderComponent;
+import org.terasology.structureTemplates.components.FallingBlocksPlacementAlgorithmComponent;
+import org.terasology.structureTemplates.components.ScheduleStructurePlacementComponent;
+import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent;
+import org.terasology.structureTemplates.components.NoConstructionAnimationComponent;
+import org.terasology.structureTemplates.components.StructureTemplateComponent;
+import org.terasology.structureTemplates.components.SpawnTemplateActionComponent;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent.RegionToFill;
 import org.terasology.structureTemplates.events.BuildStructureTemplateEntityEvent;
 import org.terasology.structureTemplates.events.SpawnTemplateEvent;
-import org.terasology.structureTemplates.internal.components.*;
+import org.terasology.structureTemplates.internal.components.EditTemplateRegionProcessComponent;
+import org.terasology.structureTemplates.internal.components.EditingUserComponent;
+import org.terasology.structureTemplates.internal.components.StructurePlaceholderComponent;
+import org.terasology.structureTemplates.internal.components.StructureTemplateGeneratorComponent;
+import org.terasology.structureTemplates.internal.components.StructureTemplateOriginComponent;
 import org.terasology.structureTemplates.internal.events.BuildStructureTemplateStringEvent;
 import org.terasology.structureTemplates.internal.events.CopyBlockRegionResultEvent;
 import org.terasology.structureTemplates.internal.events.CreateEditTemplateRegionProcessRequest;
@@ -55,6 +65,7 @@ import org.terasology.structureTemplates.internal.events.RequestStructurePlaceho
 import org.terasology.structureTemplates.internal.events.RequestStructureTemplatePropertiesChange;
 import org.terasology.structureTemplates.internal.events.StopEditingProcessRequest;
 import org.terasology.structureTemplates.internal.events.StructureTemplateStringRequest;
+import org.terasology.structureTemplates.util.AnimationType;
 import org.terasology.structureTemplates.util.ListUtil;
 import org.terasology.structureTemplates.util.RegionMergeUtil;
 import org.terasology.structureTemplates.util.BlockRegionTransform;
@@ -385,10 +396,10 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
                                                 StructureTemplateComponent componentOfEditor) {
         MutableComponentContainer templateEntity = event.getTemplateEntity();
         templateEntity.addOrSaveComponent(componentLibrary.copy(componentOfEditor));
-        if (componentOfEditor.animationType == "Falling Block") {
+        if (componentOfEditor.animationType == AnimationType.FallingBlock) {
             templateEntity.addOrSaveComponent(new FallingBlocksPlacementAlgorithmComponent());
         }
-        else if (componentOfEditor.animationType == "No animation") {
+        else if (componentOfEditor.animationType == AnimationType.NoAnimation) {
             templateEntity.addOrSaveComponent(new NoConstructionAnimationComponent());
         }
     }

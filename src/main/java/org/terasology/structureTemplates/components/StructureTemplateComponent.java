@@ -17,6 +17,7 @@ package org.terasology.structureTemplates.components;
 
 import org.terasology.entitySystem.Component;
 import org.terasology.entitySystem.prefab.Prefab;
+import org.terasology.structureTemplates.util.AnimationType;
 
 /**
  * All structure spawning entities should have this component.
@@ -33,6 +34,6 @@ public class StructureTemplateComponent implements Component {
      */
     public int spawnChance = 100;
 
-    public String animationType = "Layer-by-Layer";
+    public AnimationType animationType = AnimationType.LayerByLayer;
 
 }
