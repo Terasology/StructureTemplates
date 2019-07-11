@@ -40,20 +40,11 @@ import org.terasology.math.geom.Vector3f;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.network.NetworkComponent;
 import org.terasology.registry.In;
-import org.terasology.structureTemplates.components.BlockPlaceholderComponent;
-import org.terasology.structureTemplates.components.FallingBlocksPlacementAlgorithmComponent;
-import org.terasology.structureTemplates.components.ScheduleStructurePlacementComponent;
-import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent;
+import org.terasology.structureTemplates.components.*;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent.RegionToFill;
-import org.terasology.structureTemplates.components.SpawnTemplateActionComponent;
-import org.terasology.structureTemplates.components.StructureTemplateComponent;
 import org.terasology.structureTemplates.events.BuildStructureTemplateEntityEvent;
 import org.terasology.structureTemplates.events.SpawnTemplateEvent;
-import org.terasology.structureTemplates.internal.components.EditTemplateRegionProcessComponent;
-import org.terasology.structureTemplates.internal.components.EditingUserComponent;
-import org.terasology.structureTemplates.internal.components.StructurePlaceholderComponent;
-import org.terasology.structureTemplates.internal.components.StructureTemplateGeneratorComponent;
-import org.terasology.structureTemplates.internal.components.StructureTemplateOriginComponent;
+import org.terasology.structureTemplates.internal.components.*;
 import org.terasology.structureTemplates.internal.events.BuildStructureTemplateStringEvent;
 import org.terasology.structureTemplates.internal.events.CopyBlockRegionResultEvent;
 import org.terasology.structureTemplates.internal.events.CreateEditTemplateRegionProcessRequest;
@@ -341,7 +332,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         EntityBuilder entityBuilder = entityManager.newBuilder("StructureTemplates:structureSpawnItem");
         addComponentsToTemplate(structureTemplateOriginEntity, structureTemplateOriginComponent, blockComponent, entityBuilder);
         // TODO make it optional
-        entityBuilder.addOrSaveComponent(new FallingBlocksPlacementAlgorithmComponent());
+        entityBuilder.addOrSaveComponent(new NoConstructionAnimationComponent());
         EntityRef structureSpawnItem = entityBuilder.build();
 
         // TODO check permission once PermissionManager is public API

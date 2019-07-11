@@ -61,6 +61,7 @@ import org.terasology.structureTemplates.internal.components.BuildStepwiseStruct
 import org.terasology.structureTemplates.internal.components.BuildStepwiseStructureComponent.BlockToPlace;
 import org.terasology.structureTemplates.internal.components.BuildStepwiseStructureComponent.BuildStep;
 import org.terasology.structureTemplates.internal.components.BuildStructureCounterComponent;
+import org.terasology.structureTemplates.components.NoConstructionAnimationComponent;
 import org.terasology.structureTemplates.internal.events.StructureSpawnFailedEvent;
 import org.terasology.structureTemplates.util.BlockRegionTransform;
 import org.terasology.world.WorldProvider;
@@ -111,6 +112,32 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
         structureEntity = entity;
         entity.send(new StructureSpawnStartedEvent(event.getTransformation()));
         entity.send(new SpawnBlocksOfStructureTemplateEvent(event.getTransformation()));
+        event.consume();
+    }
+
+    @ReceiveEvent(priority = EventPriority.PRIORITY_HIGH)
+    public void onSpawnStructureWithNoAnimation(SpawnStructureEvent event,
+                                                EntityRef entity,
+                                                SpawnBlockRegionsComponent spawnBlockRegionsComponent,
+                                                NoConstructionAnimationComponent noConstructionAnimationComponent) {
+        BlockRegionTransform transformation = event.getTransformation();
+
+        Map<Vector3i, Block> blocksToPlace = Maps.newHashMap();
+
+        for (RegionToFill regionToFill : spawnBlockRegionsComponent.regionsToFill) {
+            Block block = regionToFill.blockType;
+
+            Region3i region = regionToFill.region;
+            region = transformation.transformRegion(region);
+            block = transformation.transformBlock(block);
+
+            for (Vector3i pos : region) {
+                blocksToPlace.put(pos, block);
+            }
+        }
+
+        worldProvider.setBlocks(blocksToPlace);
+
         event.consume();
     }
 
