@@ -18,9 +18,8 @@ package org.terasology.structureTemplates.components;
 import org.terasology.entitySystem.Component;
 
 /**
- * Add this component to a ST when neither the FallingBlock or Layer-by-Layer animation is required
+ * Add this component to a StructureTemplate when neither the FallingBlock nor Layer-by-Layer animation is desired.
  */
-
 public class NoConstructionAnimationComponent implements Component {
-    public NoConstructionAnimationComponent() {}
+
 }
