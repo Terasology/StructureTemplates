@@ -30,7 +30,7 @@ public class BlockRegionUtilities {
      */
     public static Vector3i determineBottomCenter(SpawnBlockRegionsComponent spawnBlockRegionsComponent) {
         Vector3f bbCenter = getBoundingBox(spawnBlockRegionsComponent).center();
-        Vector3i center = new Vector3i(-bbCenter.x, (float) getBoundingBox(spawnBlockRegionsComponent).minY(), -bbCenter.z);
+        Vector3i center = new Vector3i(bbCenter.x, (float) getBoundingBox(spawnBlockRegionsComponent).minY(), bbCenter.z);
 
         return center;
     }
