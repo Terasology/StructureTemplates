@@ -69,8 +69,8 @@ public class ReplaceWallScreen extends BaseInteractionScreen {
         blockComboBox = find("blockComboBox", UIDropdownScrollable.class);
         BlockExplorer blockExplorer = new BlockExplorer(assetManager);
         Set<BlockUri> blocks = blockExplorer.getFreeformBlockFamilies();
-        blocks.add(new BlockUri("Core:water"));
-        blocks.add(new BlockUri("Core:lava"));
+        blocks.add(new BlockUri("CoreBlocks:Water"));
+        blocks.add(new BlockUri("CoreBlocks:Lava"));
         blocks.add(BlockManager.AIR_ID);
         List<BlockUri> blockList = Lists.newArrayList(blocks);
         blockList.sort((BlockUri o1, BlockUri o2) -> o1.toString().compareTo(o2.toString()));
