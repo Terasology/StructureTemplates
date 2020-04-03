@@ -67,8 +67,9 @@ import org.terasology.structureTemplates.util.BlockRegionTransform;
 import org.terasology.world.WorldProvider;
 import org.terasology.world.block.Block;
 import org.terasology.world.block.BlockComponent;
-
+import org.terasology.structureTemplates.components.IgnoreAirBlocksComponent;
 import org.terasology.world.block.BlockManager;
+import org.terasology.world.block.family.BlockFamily;
 
 
 /**
@@ -126,8 +127,11 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
 
         for (RegionToFill regionToFill : spawnBlockRegionsComponent.regionsToFill) {
             Block block = regionToFill.blockType;
-
-            Region3i region = regionToFill.region;
+            if(entity.hasComponent(IgnoreAirBlocksComponent.class)&&block.getURI().getBlockFamilyDefinitionUrn().equals(BlockManager.AIR_ID.getBlockFamilyDefinitionUrn()))
+            {
+                continue;
+            }
+                Region3i region = regionToFill.region;
             region = transformation.transformRegion(region);
             block = transformation.transformBlock(block);
 
@@ -167,8 +171,11 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
         Map<Integer, List<BlockToPlace>> blocksPerLayer = Maps.newTreeMap();
         for (RegionToFill regionToFill : spawnBlockRegionComponent.regionsToFill) {
             Block block = regionToFill.blockType;
-
-            Region3i region = regionToFill.region;
+            if(entity.hasComponent(IgnoreAirBlocksComponent.class)&&block.getURI().getBlockFamilyDefinitionUrn().equals(BlockManager.AIR_ID.getBlockFamilyDefinitionUrn()))
+            {
+                continue;
+            }
+                Region3i region = regionToFill.region;
             region = transformation.transformRegion(region);
             block = transformation.transformBlock(block);
 
@@ -200,7 +207,10 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
         BlockRegionTransform transformation = event.getTransformation();
         for (RegionToFill regionToFill : spawnBlockRegionComponent.regionsToFill) {
             Block block = regionToFill.blockType;
-
+            if(entity.hasComponent(IgnoreAirBlocksComponent.class)&&block.getURI().getBlockFamilyDefinitionUrn().equals(BlockManager.AIR_ID.getBlockFamilyDefinitionUrn()))
+            {
+                continue;
+            }
 
             Region3i region = regionToFill.region;
             region = transformation.transformRegion(region);
