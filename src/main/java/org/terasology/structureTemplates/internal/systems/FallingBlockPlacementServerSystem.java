@@ -230,7 +230,7 @@ public class FallingBlockPlacementServerSystem extends BaseComponentSystem {
                 logger.error("Block with url not found, block placement of fallen block skipped: " + Objects.toString(component.blockUri));
             }
             Vector3i roundedPos = new Vector3i(Math.round(pos.getX()), Math.round(pos.getY()), Math.round(pos.getZ()));
-            logger.info("Placing block at " + roundedPos);
+            logger.debug("Placing block at " + roundedPos);
             worldProvider.setBlock(roundedPos, block);
         }
         if (event.getActionId().equals(DESTROY_ENTITY_ACTION_ID)) {
