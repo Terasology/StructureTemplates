@@ -15,6 +15,7 @@
  */
 package org.terasology.structureTemplates.internal.ui;
 
+import org.terasology.math.JomlUtil;
 import org.terasology.math.geom.Rect2i;
 import org.terasology.math.geom.Vector2i;
 import org.terasology.rendering.assets.font.Font;
@@ -89,11 +90,11 @@ public class ToolboxItemRenderer extends AbstractItemRenderer<ToolboxTreeValue> 
         TextureRegion texture = getTexture(value);
         if (texture == null) {
             List<String> lines = TextLineBuilder.getLines(font, text, canvas.size().x);
-            return font.getSize(lines);
+            return JomlUtil.from(font.getSize(lines));
         } else {
             int iconWidth = marginLeft + texture.getWidth() + marginRight;
             List<String> lines = TextLineBuilder.getLines(font, text, canvas.size().x - iconWidth);
-            return font.getSize(lines).addX(iconWidth);
+            return JomlUtil.from(font.getSize(lines)).addX(iconWidth);
         }
     }
 
