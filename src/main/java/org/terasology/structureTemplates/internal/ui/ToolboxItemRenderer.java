@@ -94,7 +94,7 @@ public class ToolboxItemRenderer extends AbstractItemRenderer<ToolboxTreeValue> 
         } else {
             int iconWidth = marginLeft + texture.getWidth() + marginRight;
             List<String> lines = TextLineBuilder.getLines(font, text, canvas.size().x - iconWidth);
-            return JomlUtil.from(font.getSize(lines)).addX(iconWidth);
+            return JomlUtil.from(font.getSize(lines).add(iconWidth, 0));
         }
     }
 
