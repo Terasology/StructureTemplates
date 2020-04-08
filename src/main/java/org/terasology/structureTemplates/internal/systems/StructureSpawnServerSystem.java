@@ -127,7 +127,7 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
 
         for (RegionToFill regionToFill : spawnBlockRegionsComponent.regionsToFill) {
             Block block = regionToFill.blockType;
-            if(entity.hasComponent(IgnoreAirBlocksComponent.class) && isAir(block)) {
+            if (entity.hasComponent(IgnoreAirBlocksComponent.class) && isAir(block)) {
                 continue;
             }
 
@@ -171,7 +171,7 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
         Map<Integer, List<BlockToPlace>> blocksPerLayer = Maps.newTreeMap();
         for (RegionToFill regionToFill : spawnBlockRegionComponent.regionsToFill) {
             Block block = regionToFill.blockType;
-            if(entity.hasComponent(IgnoreAirBlocksComponent.class) && isAir(block)) {
+            if (entity.hasComponent(IgnoreAirBlocksComponent.class) && isAir(block)) {
                 continue;
             }
             
@@ -207,7 +207,7 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
         BlockRegionTransform transformation = event.getTransformation();
         for (RegionToFill regionToFill : spawnBlockRegionComponent.regionsToFill) {
             Block block = regionToFill.blockType;
-            if(entity.hasComponent(IgnoreAirBlocksComponent.class) && isAir(block)) {
+            if (entity.hasComponent(IgnoreAirBlocksComponent.class) && isAir(block)) {
                 continue;
             }
 
@@ -290,6 +290,10 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
 
         entity.send(new SpawnStructureEvent(blockRegionTransform));
 
+    }
+    
+    private boolean isAir(final Block block) {
+        return block.getURI().getBlockFamilyDefinitionUrn().equals(BlockManager.AIR_ID.getBlockFamilyDefinitionUrn());
     }
 
     // TODO move method into utility class:
