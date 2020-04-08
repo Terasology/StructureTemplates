@@ -127,11 +127,11 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
 
         for (RegionToFill regionToFill : spawnBlockRegionsComponent.regionsToFill) {
             Block block = regionToFill.blockType;
-            if(entity.hasComponent(IgnoreAirBlocksComponent.class)&&block.getURI().getBlockFamilyDefinitionUrn().equals(BlockManager.AIR_ID.getBlockFamilyDefinitionUrn()))
-            {
+            if(entity.hasComponent(IgnoreAirBlocksComponent.class) && isAir(block)) {
                 continue;
             }
-                Region3i region = regionToFill.region;
+
+            Region3i region = regionToFill.region;
             region = transformation.transformRegion(region);
             block = transformation.transformBlock(block);
 
@@ -171,11 +171,11 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
         Map<Integer, List<BlockToPlace>> blocksPerLayer = Maps.newTreeMap();
         for (RegionToFill regionToFill : spawnBlockRegionComponent.regionsToFill) {
             Block block = regionToFill.blockType;
-            if(entity.hasComponent(IgnoreAirBlocksComponent.class)&&block.getURI().getBlockFamilyDefinitionUrn().equals(BlockManager.AIR_ID.getBlockFamilyDefinitionUrn()))
-            {
+            if(entity.hasComponent(IgnoreAirBlocksComponent.class) && isAir(block)) {
                 continue;
             }
-                Region3i region = regionToFill.region;
+            
+            Region3i region = regionToFill.region;
             region = transformation.transformRegion(region);
             block = transformation.transformBlock(block);
 
@@ -207,8 +207,7 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
         BlockRegionTransform transformation = event.getTransformation();
         for (RegionToFill regionToFill : spawnBlockRegionComponent.regionsToFill) {
             Block block = regionToFill.blockType;
-            if(entity.hasComponent(IgnoreAirBlocksComponent.class)&&block.getURI().getBlockFamilyDefinitionUrn().equals(BlockManager.AIR_ID.getBlockFamilyDefinitionUrn()))
-            {
+            if(entity.hasComponent(IgnoreAirBlocksComponent.class) && isAir(block)) {
                 continue;
             }
 
