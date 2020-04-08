@@ -127,7 +127,7 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
 
         for (RegionToFill regionToFill : spawnBlockRegionsComponent.regionsToFill) {
             Block block = regionToFill.blockType;
-            if (entity.hasComponent(IgnoreAirBlocksComponent.class) && isAir(block)) {
+            if (entity.hasComponent(IgnoreAirBlocksComponent.class) && isAir(block)) {
                 continue;
             }
 
