@@ -159,6 +159,7 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
 
     @ReceiveEvent(priority = EventPriority.PRIORITY_HIGH)
     public void onSpawnTemplateEventWithBlocksPriority(SpawnTemplateEvent event, EntityRef entity) {
+        structureEntity = entity;
         entity.send(new SpawnBlocksOfStructureTemplateEvent(event.getTransformation()));
     }
 
