@@ -42,6 +42,7 @@ import org.terasology.structureTemplates.events.BlockFromToolboxRequest;
 import org.terasology.structureTemplates.events.ItemFromToolboxRequest;
 import org.terasology.structureTemplates.events.StructureSpawnerFromToolboxRequest;
 import org.terasology.structureTemplates.events.StructureTemplateFromToolboxRequest;
+import org.terasology.structureTemplates.util.ItemType;
 import org.terasology.world.block.BlockExplorer;
 import org.terasology.world.block.BlockManager;
 import org.terasology.world.block.BlockUri;
@@ -100,8 +101,8 @@ public class ToolboxScreen extends BaseInteractionScreen {
             ToolboxTree tree = new ToolboxTree(new ToolboxTreeValue("Toolbox", toolboxTexture, null));
             tree.addChild(createBlockSubTree());
             tree.addChild(createStructureTemplatesTools());
-            tree.addChild(createStructureSpawnersSubTree());
-            tree.addChild(createStructureTemplatesSubTree());
+            tree.addChild(createSubTree(ItemType.SPAWNER, StructureSpawnerFromToolboxRequest::new));
+            tree.addChild(createSubTree(ItemType.TEMPLATE, StructureTemplateFromToolboxRequest::new));
 
             tree.setExpanded(true);
 
@@ -154,7 +155,7 @@ public class ToolboxScreen extends BaseInteractionScreen {
                 // String displayName = blockFamily.getDisplayName();
                 ToolboxTree blockFamiliyTree = createBlockNode(block);
                 if (freeFormBlocks.contains(block)) {
-                    for (ResourceUrn shareUrn: blockShapes) {
+                    for (ResourceUrn shareUrn : blockShapes) {
 
                         blockFamiliyTree.addChild(new ToolboxTreeValue(shareUrn.toString(),
                                 genericBlockTexture,
@@ -175,14 +176,16 @@ public class ToolboxScreen extends BaseInteractionScreen {
 
     private Prefab getPrefab(String prefab) {
         return assetManager.getAsset(prefab, Prefab.class)
-                .orElseThrow(() ->new RuntimeException("Can't find prefab:" + prefab));
+                .orElseThrow(() -> new RuntimeException("Can't find prefab:" + prefab));
     }
 
     private ToolboxTree createStructureTemplatesTools() {
-        Optional<TextureRegionAsset> optionalTextureRegion = assetManager.getAsset("StructureTemplates:StructureTemplateGenerator", TextureRegionAsset.class);
-        TextureRegion texture = optionalTextureRegion.get();
+        Optional<TextureRegionAsset> optionalTextureRegion =
+                assetManager.getAsset("StructureTemplates:StructureTemplateGenerator", TextureRegionAsset.class);
+        TextureRegion texture = optionalTextureRegion.orElse(null);
 
-        ToolboxTree tree = new ToolboxTree(new ToolboxTreeValue("Structure Template Tools", texture, null));
+        ToolboxTree tree =
+                new ToolboxTree(new ToolboxTreeValue("Structure Template Tools", texture, null));
 
         tree.addChild(createBlockNode(new BlockUri("StructureTemplates:StructureTemplateOrigin")));
         tree.addChild(createItemNode(getPrefab("StructureTemplates:StructureTemplateGenerator")));
@@ -207,29 +210,20 @@ public class ToolboxScreen extends BaseInteractionScreen {
                 () -> new ItemFromToolboxRequest(itemPrefab)));
     }
 
-    private ToolboxTree createStructureSpawnersSubTree() {
-        return createSubTree("Structure Spawner", "engine:items#whiteRecipe", StructureSpawnerFromToolboxRequest::new);
-    }
+    private ToolboxTree createSubTree(final ItemType itemType, final Function<Prefab, Event> itemRequest) {
 
-    private ToolboxTree createStructureTemplatesSubTree() {
-        return createSubTree("Structure Templates", "StructureTemplates:StructureTemplateOrigin", StructureTemplateFromToolboxRequest::new);
-    }
-
-    private ToolboxTree createSubTree(final String title, final String iconUrn, final Function<Prefab, Event> itemRequest) {
-
-        Optional<TextureRegionAsset> optionalTextureRegion = assetManager.getAsset(iconUrn, TextureRegionAsset.class);
+        Optional<TextureRegionAsset> optionalTextureRegion = assetManager.getAsset(itemType.thumbnailUrn, TextureRegionAsset.class);
         TextureRegion texture = optionalTextureRegion.orElse(null);
 
-        ToolboxTree subTree = new ToolboxTree(new ToolboxTreeValue(title, texture, null));
+        ToolboxTree subTree = new ToolboxTree(new ToolboxTreeValue("Structure" + itemType.suffix, texture, null));
 
         Prefab structureTemplateOriginPrefab = assetManager.getAsset("StructureTemplates:StructureTemplateOrigin", Prefab.class).get();
-
         List<Prefab> prefabs = prefabManager.listPrefabs(StructureTemplateComponent.class).stream()
                 .filter(prefab -> prefab != structureTemplateOriginPrefab)
                 .sorted(Comparator.comparing(o -> o.getUrn().toString()))
                 .collect(Collectors.toList());
 
-        for (Prefab prefab: prefabs) {
+        for (Prefab prefab : prefabs) {
             ToolboxTree item = new ToolboxTree(new ToolboxTreeValue(prefab.getUrn().toString(), texture,
                     () -> itemRequest.apply(prefab)));
             subTree.addChild(item);

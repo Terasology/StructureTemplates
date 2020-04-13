@@ -40,6 +40,7 @@ import org.terasology.structureTemplates.events.ItemFromToolboxRequest;
 import org.terasology.structureTemplates.events.StructureSpawnerFromToolboxRequest;
 import org.terasology.structureTemplates.events.StructureTemplateFromToolboxRequest;
 import org.terasology.structureTemplates.internal.components.ToolboxComponent;
+import org.terasology.structureTemplates.util.ItemType;
 import org.terasology.world.block.BlockManager;
 import org.terasology.world.block.family.BlockFamily;
 import org.terasology.world.block.items.BlockItemFactory;
@@ -199,22 +200,4 @@ public class ToolboxServerSystem extends BaseComponentSystem {
         return displayNameComponent;
     }
 
-    /**
-     * Describes the type of item to create, either a structure template or a structure spawner.
-     * <p>
-     * Holds information about the associated icon and (display name) suffix.
-     */
-    //TODO: to be shared with other classes, e.g., ToolboxScreen
-    private enum ItemType {
-        TEMPLATE(" Template", "StructureTemplates:StructureTemplateOrigin"),
-        SPAWNER(" Spawner", "engine:items#whiteRecipe");
-
-        public final String suffix;
-        public final String iconUrn;
-
-        ItemType(final String suffix, String iconUrn) {
-            this.suffix = suffix;
-            this.iconUrn = iconUrn;
-        }
-    }
 }

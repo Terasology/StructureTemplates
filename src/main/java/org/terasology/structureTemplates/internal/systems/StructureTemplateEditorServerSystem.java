@@ -343,8 +343,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
 
         EntityBuilder entityBuilder = entityManager.newBuilder("StructureTemplates:structureSpawnItem");
         addComponentsToTemplate(structureTemplateOriginEntity, structureTemplateOriginComponent, blockComponent, entityBuilder);
-        // TODO make it optional
-        //entityBuilder.addOrSaveComponent(new NoConstructionAnimationComponent());
+        // TODO allow the player to select construction animation
         EntityRef structureSpawnItem = entityBuilder.build();
 
         // TODO check permission once PermissionManager is public API
