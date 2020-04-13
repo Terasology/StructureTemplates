@@ -193,7 +193,6 @@ public class ToolboxScreen extends BaseInteractionScreen {
     }
 
     private ToolboxTree createItemNodeWithIcon(Prefab itemPrefab, String iconUrn) {
-        ItemComponent itemComponent = itemPrefab.getComponent(ItemComponent.class);
         TextureRegionAsset<?> icon = assetManager.getAsset(iconUrn, Texture.class).get();
         String text = itemPrefab.getUrn().toString();
         return new ToolboxTree(new ToolboxTreeValue(text, icon,
