@@ -139,6 +139,7 @@ public class ToolboxServerSystem extends BaseComponentSystem {
      */
     private EntityRef createItem(final Prefab prefab, final ItemType itemType) {
         EntityBuilder entityBuilder = entityManager.newBuilder(prefab);
+        entityBuilder.addPrefab("engine:iconItem");
 
         ItemComponent itemComponent = getItemComponent(entityBuilder, itemType.iconUrn);
         if (itemType == ItemType.TEMPLATE) {
