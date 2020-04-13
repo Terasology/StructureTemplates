@@ -93,14 +93,6 @@ public class ToolboxServerSystem extends BaseComponentSystem {
 
     }
 
-    void giveItemToOwnerOrDestroyItem(EntityRef item, EntityRef owner) {
-        GiveItemEvent giveItemEvent = new GiveItemEvent(owner);
-        item.send(giveItemEvent);
-        if (!giveItemEvent.isHandled()) {
-            item.destroy();
-        }
-    }
-
     @ReceiveEvent(components = ToolboxComponent.class)
     public void onItemFromToolboxRequest(ItemFromToolboxRequest event, EntityRef toolboxEntity) {
         EntityRef owner = toolboxEntity.getOwner();
@@ -130,6 +122,21 @@ public class ToolboxServerSystem extends BaseComponentSystem {
         giveItemToOwnerOrDestroyItem(item, owner);
     }
 
+    private void giveItemToOwnerOrDestroyItem(EntityRef item, EntityRef owner) {
+        GiveItemEvent giveItemEvent = new GiveItemEvent(owner);
+        item.send(giveItemEvent);
+        if (!giveItemEvent.isHandled()) {
+            item.destroy();
+        }
+    }
+
+    /**
+     * Create an item to for either a structure template or structure spawner based on the given prefab.
+     *
+     * @param prefab   the structure prefab to create an item for
+     * @param itemType what kind of item to create
+     * @return the created item entity
+     */
     private EntityRef createItem(final Prefab prefab, final ItemType itemType) {
         EntityBuilder entityBuilder = entityManager.newBuilder(prefab);
 
@@ -191,6 +198,12 @@ public class ToolboxServerSystem extends BaseComponentSystem {
         return displayNameComponent;
     }
 
+    /**
+     * Describes the type of item to create, either a structure template or a structure spawner.
+     * <p>
+     * Holds information about the associated icon and (display name) suffix.
+     */
+    //TODO: to be shared with other classes, e.g., ToolboxScreen
     private enum ItemType {
         TEMPLATE(" Template", "StructureTemplates:StructureTemplateOrigin"),
         SPAWNER(" Spawner", "engine:items#whiteRecipe");
