@@ -33,7 +33,6 @@ import org.terasology.logic.inventory.events.GiveItemEvent;
 import org.terasology.network.NetworkComponent;
 import org.terasology.registry.In;
 import org.terasology.rendering.assets.texture.TextureRegionAsset;
-import org.terasology.structureTemplates.components.FallingBlocksPlacementAlgorithmComponent;
 import org.terasology.structureTemplates.components.SpawnStructureActionComponent;
 import org.terasology.structureTemplates.components.SpawnTemplateActionComponent;
 import org.terasology.structureTemplates.events.BlockFromToolboxRequest;
@@ -41,6 +40,7 @@ import org.terasology.structureTemplates.events.ItemFromToolboxRequest;
 import org.terasology.structureTemplates.events.StructureSpawnerFromToolboxRequest;
 import org.terasology.structureTemplates.events.StructureTemplateFromToolboxRequest;
 import org.terasology.structureTemplates.internal.components.ToolboxComponent;
+import org.terasology.structureTemplates.util.ItemType;
 import org.terasology.world.block.BlockManager;
 import org.terasology.world.block.family.BlockFamily;
 import org.terasology.world.block.items.BlockItemFactory;
@@ -53,7 +53,6 @@ import java.util.Optional;
 @RegisterSystem(RegisterMode.AUTHORITY)
 public class ToolboxServerSystem extends BaseComponentSystem {
     private static final Logger logger = LoggerFactory.getLogger(ScheduledStructureSpawnSystem.class);
-
 
     @In
     private EntityManager entityManager;
@@ -75,7 +74,7 @@ public class ToolboxServerSystem extends BaseComponentSystem {
     }
 
     @ReceiveEvent
-    public void onRBlockFromToolboxRequest(BlockFromToolboxRequest event, EntityRef toolboxEntity) {
+    public void onBlockFromToolboxRequest(BlockFromToolboxRequest event, EntityRef toolboxEntity) {
         EntityRef owner = toolboxEntity.getOwner();
 
         BlockFamily blockFamily = blockManager.getBlockFamily(event.getBlockUri());
@@ -95,45 +94,6 @@ public class ToolboxServerSystem extends BaseComponentSystem {
 
     }
 
-    void giveItemToOwnerOrDestroyItem(EntityRef item, EntityRef owner) {
-        GiveItemEvent giveItemEvent = new GiveItemEvent(owner);
-        item.send(giveItemEvent);
-        if (!giveItemEvent.isHandled()) {
-            item.destroy();
-        }
-    }
-
-    @ReceiveEvent(components = ToolboxComponent.class)
-    public void onStructureSpawnerFromToolboxRequest(StructureSpawnerFromToolboxRequest event, EntityRef toolboxEntity) {
-        EntityRef owner = toolboxEntity.getOwner();
-
-        EntityBuilder entityBuilder = entityManager.newBuilder(event.getStructureTemplatePrefab());
-        ItemComponent itemComponent = entityBuilder.getComponent(ItemComponent.class);
-        if (itemComponent == null) {
-            itemComponent = new ItemComponent();
-        }
-        Optional<TextureRegionAsset> optionalIcon = assetManager.getAsset("engine:items#whiteRecipe", TextureRegionAsset.class);
-        itemComponent.icon = optionalIcon.get();
-        itemComponent.damageType = assetManager.getAsset("engine:physicalDamage", Prefab.class).get();
-        itemComponent.pickupPrefab = assetManager.getAsset("engine:itemPickup", Prefab.class).get();
-        entityBuilder.addOrSaveComponent(itemComponent);
-        DisplayNameComponent displayNameComponent = entityBuilder.getComponent(DisplayNameComponent.class);
-        if (displayNameComponent == null) {
-            displayNameComponent = new DisplayNameComponent();
-        }
-
-        displayNameComponent.name =  event.getStructureTemplatePrefab().getName() + " Spawner";
-        entityBuilder.addOrSaveComponent(displayNameComponent);
-        entityBuilder.addOrSaveComponent(new SpawnStructureActionComponent());
-        // TODO make this optional
-        entityBuilder.addOrSaveComponent(new FallingBlocksPlacementAlgorithmComponent());
-        entityBuilder.addOrSaveComponent(new NetworkComponent());
-        EntityRef item = entityBuilder.build();
-        giveItemToOwnerOrDestroyItem(item, owner);
-
-    }
-
-
     @ReceiveEvent(components = ToolboxComponent.class)
     public void onItemFromToolboxRequest(ItemFromToolboxRequest event, EntityRef toolboxEntity) {
         EntityRef owner = toolboxEntity.getOwner();
@@ -150,36 +110,94 @@ public class ToolboxServerSystem extends BaseComponentSystem {
     }
 
     @ReceiveEvent(components = ToolboxComponent.class)
+    public void onStructureSpawnerFromToolboxRequest(StructureSpawnerFromToolboxRequest event, EntityRef toolboxEntity) {
+        EntityRef owner = toolboxEntity.getOwner();
+        EntityRef item = createItem(event.getStructureTemplatePrefab(), ItemType.SPAWNER);
+        giveItemToOwnerOrDestroyItem(item, owner);
+    }
+
+    @ReceiveEvent(components = ToolboxComponent.class)
     public void onStructureTemplateFromToolboxRequest(StructureTemplateFromToolboxRequest event, EntityRef toolboxEntity) {
         EntityRef owner = toolboxEntity.getOwner();
-
-        EntityBuilder entityBuilder = entityManager.newBuilder(event.getStructureTemplatePrefab());
-        ItemComponent itemComponent = entityBuilder.getComponent(ItemComponent.class);
-        if (itemComponent == null) {
-            itemComponent = new ItemComponent();
-        }
-        Optional<TextureRegionAsset> optionalIcon = assetManager.getAsset("StructureTemplates:StructureTemplateOrigin", TextureRegionAsset.class);
-        itemComponent.icon = optionalIcon.get();
-        itemComponent.damageType = assetManager.getAsset("engine:physicalDamage", Prefab.class).get();
-        itemComponent.pickupPrefab = assetManager.getAsset("engine:itemPickup", Prefab.class).get();
-        itemComponent.stackCount = 1;
-        itemComponent.stackId = "stack";
-        itemComponent.maxStackSize =1;
-        itemComponent.consumedOnUse = true;
-        entityBuilder.addOrSaveComponent(itemComponent);
-        DisplayNameComponent displayNameComponent = entityBuilder.getComponent(DisplayNameComponent.class);
-        if (displayNameComponent == null) {
-            displayNameComponent = new DisplayNameComponent();
-        }
-
-        displayNameComponent.name =  event.getStructureTemplatePrefab().getName() + " Template";
-        entityBuilder.addOrSaveComponent(displayNameComponent);
-        entityBuilder.addOrSaveComponent(new SpawnTemplateActionComponent());
-        entityBuilder.removeComponent(SpawnStructureActionComponent.class);
-        entityBuilder.addOrSaveComponent(new NetworkComponent());
-        EntityRef item = entityBuilder.build();
+        EntityRef item = createItem(event.getStructureTemplatePrefab(), ItemType.TEMPLATE);
         giveItemToOwnerOrDestroyItem(item, owner);
+    }
 
+    private void giveItemToOwnerOrDestroyItem(EntityRef item, EntityRef owner) {
+        GiveItemEvent giveItemEvent = new GiveItemEvent(owner);
+        item.send(giveItemEvent);
+        if (!giveItemEvent.isHandled()) {
+            item.destroy();
+        }
+    }
+
+    /**
+     * Create an item to for either a structure template or structure spawner based on the given prefab.
+     *
+     * @param prefab   the structure prefab to create an item for
+     * @param itemType what kind of item to create
+     * @return the created item entity
+     */
+    private EntityRef createItem(final Prefab prefab, final ItemType itemType) {
+        EntityBuilder entityBuilder = entityManager.newBuilder(prefab);
+        entityBuilder.addPrefab("engine:iconItem");
+
+        ItemComponent itemComponent = getItemComponent(entityBuilder, itemType.iconUrn);
+        if (itemType == ItemType.TEMPLATE) {
+            itemComponent.consumedOnUse = true;
+        }
+        entityBuilder.addOrSaveComponent(itemComponent);
+
+        DisplayNameComponent displayNameComponent =
+                getDisplayNameComponent(entityBuilder, prefab, itemType.suffix);
+        entityBuilder.addOrSaveComponent(displayNameComponent);
+
+        switch (itemType) {
+            case TEMPLATE:
+                entityBuilder.addOrSaveComponent(new SpawnTemplateActionComponent());
+                entityBuilder.removeComponent(SpawnStructureActionComponent.class);
+                break;
+            case SPAWNER:
+                entityBuilder.addOrSaveComponent(new SpawnStructureActionComponent());
+                break;
+        }
+        entityBuilder.addOrSaveComponent(new NetworkComponent());
+
+        return entityBuilder.build();
+    }
+
+    /**
+     * Create or modify a common item component for structure templates and structure spawners.
+     *
+     * @param entityBuilder entity builder to take an existing item component from, if present
+     * @param iconUrn       the icon URN to be used for rendering the item
+     * @return a modified item component if the entity builders has an item component, or a new component otherwise
+     */
+    private ItemComponent getItemComponent(final EntityBuilder entityBuilder, final String iconUrn) {
+        final ItemComponent itemComponent =
+                Optional.ofNullable(entityBuilder.getComponent(ItemComponent.class)).orElse(new ItemComponent());
+        Optional<TextureRegionAsset> maybeTexture = assetManager.getAsset(iconUrn, TextureRegionAsset.class);
+        itemComponent.icon = maybeTexture.orElse(null);
+        itemComponent.damageType = assetManager.getAsset("engine:physicalDamage", Prefab.class).orElse(null);
+        itemComponent.pickupPrefab = assetManager.getAsset("engine:itemPickup", Prefab.class).orElse(null);
+        return itemComponent;
+    }
+
+    /**
+     * Create or modify the display name component for structure templates and structure spawners.
+     *
+     * @param entityBuilder entity builder to take an existing display name component from, if present
+     * @param prefab        the prefab to derive the display name from
+     * @param suffix        the display name suffix to be displayed after the prefab name
+     * @return a modified display name component if the entity builder has a display name component, or a new component otherwise
+     */
+    private DisplayNameComponent getDisplayNameComponent(final EntityBuilder entityBuilder, final Prefab prefab, final String suffix) {
+        final DisplayNameComponent displayNameComponent =
+                Optional.ofNullable(entityBuilder.getComponent(DisplayNameComponent.class))
+                        .orElse(new DisplayNameComponent());
+        displayNameComponent.name = prefab.getName() + suffix;
+
+        return displayNameComponent;
     }
 
 }

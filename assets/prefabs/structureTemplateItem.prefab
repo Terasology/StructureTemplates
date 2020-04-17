@@ -6,9 +6,6 @@
   },
   "Item" : {
     "icon" : "StructureTemplates:StructureTemplateOrigin",
-    "stackCount": 1,
-    "stackId": "stack",
-    "maxStackSize": 1,
     "consumedOnUse": true
   },
   "SpawnTemplateAction": {}
