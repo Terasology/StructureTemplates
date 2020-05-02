@@ -8,5 +8,6 @@
         {"id" : "CoreBlocks", "minVersion" : "1.0.0"},
         {"id" : "Inventory", "minVersion" : "1.1.0"}
     ],
-    "serverSideOnly" : false
+    "serverSideOnly" : false,
+    "isLibrary": true
 }
