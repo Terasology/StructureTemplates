@@ -1,12 +1,14 @@
 {
-    "id" : "StructureTemplates",
-    "version" : "0.3.1-SNAPSHOT",
-    "author" : "Florian",
-    "displayName" : "Structure Templates",
-    "description" : "A module that adds 'structure templates' which can be used to spawn whole structures for faster building.",
-    "dependencies" : [
-        {"id" : "Core", "minVersion" : "3.0.0"},
-        {"id" : "CoreBlocks", "minVersion" : "1.0.0"}
+    "id": "StructureTemplates",
+    "version": "1.0.0",
+    "author": "Florian",
+    "displayName": "Structure Templates",
+    "description": "A module that adds 'structure templates' which can be used to spawn whole structures for faster building.",
+    "dependencies": [
+        { "id": "CoreAdvancedAssets", "minVersion": "1.1.0" },
+        { "id": "CoreAssets", "minVersion": "2.0.1" },
+        { "id": "Inventory", "minVersion": "1.1.0" }
     ],
-    "serverSideOnly" : false
+    "serverSideOnly": false,
+    "isAsset": true
 }
