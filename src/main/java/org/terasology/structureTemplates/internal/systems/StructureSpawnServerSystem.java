@@ -16,17 +16,9 @@
 package org.terasology.structureTemplates.internal.systems;
 
 import com.google.common.collect.Lists;
-
-import java.util.Map;
-
 import com.google.common.collect.Maps;
-
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.assets.management.AssetManager;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.event.EventPriority;
@@ -34,6 +26,7 @@ import org.terasology.entitySystem.event.ReceiveEvent;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
+import org.terasology.gestalt.assets.management.AssetManager;
 import org.terasology.logic.common.ActivateEvent;
 import org.terasology.logic.delay.DelayManager;
 import org.terasology.logic.delay.DelayedActionTriggeredEvent;
@@ -45,31 +38,34 @@ import org.terasology.math.geom.Vector3f;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.registry.In;
 import org.terasology.structureTemplates.components.CompletionTimeComponent;
+import org.terasology.structureTemplates.components.IgnoreAirBlocksComponent;
+import org.terasology.structureTemplates.components.NoConstructionAnimationComponent;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent.RegionToFill;
 import org.terasology.structureTemplates.components.SpawnStructureActionComponent;
 import org.terasology.structureTemplates.components.StructureTemplateComponent;
 import org.terasology.structureTemplates.events.CheckSpawnConditionEvent;
-import org.terasology.structureTemplates.events.SpawnStructureEvent;
-import org.terasology.structureTemplates.events.SpawnBlocksOfStructureTemplateEvent;
-import org.terasology.structureTemplates.events.SpawnTemplateEvent;
 import org.terasology.structureTemplates.events.GetStructureTemplateBlocksEvent;
 import org.terasology.structureTemplates.events.GetStructureTemplateBlocksForMidAirEvent;
-import org.terasology.structureTemplates.events.StructureSpawnStartedEvent;
+import org.terasology.structureTemplates.events.SpawnBlocksOfStructureTemplateEvent;
+import org.terasology.structureTemplates.events.SpawnStructureEvent;
+import org.terasology.structureTemplates.events.SpawnTemplateEvent;
 import org.terasology.structureTemplates.events.StructureBlocksSpawnedEvent;
+import org.terasology.structureTemplates.events.StructureSpawnStartedEvent;
 import org.terasology.structureTemplates.internal.components.BuildStepwiseStructureComponent;
 import org.terasology.structureTemplates.internal.components.BuildStepwiseStructureComponent.BlockToPlace;
 import org.terasology.structureTemplates.internal.components.BuildStepwiseStructureComponent.BuildStep;
 import org.terasology.structureTemplates.internal.components.BuildStructureCounterComponent;
-import org.terasology.structureTemplates.components.NoConstructionAnimationComponent;
 import org.terasology.structureTemplates.internal.events.StructureSpawnFailedEvent;
 import org.terasology.structureTemplates.util.BlockRegionTransform;
 import org.terasology.world.WorldProvider;
 import org.terasology.world.block.Block;
 import org.terasology.world.block.BlockComponent;
-import org.terasology.structureTemplates.components.IgnoreAirBlocksComponent;
 import org.terasology.world.block.BlockManager;
-import org.terasology.world.block.family.BlockFamily;
+
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 
 /**

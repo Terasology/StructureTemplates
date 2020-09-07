@@ -15,7 +15,6 @@
  */
 package org.terasology.structureTemplates.internal.systems;
 
-import org.terasology.assets.ResourceUrn;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.event.ReceiveEvent;
@@ -24,6 +23,7 @@ import org.terasology.entitySystem.prefab.PrefabManager;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
+import org.terasology.gestalt.assets.ResourceUrn;
 import org.terasology.math.Region3i;
 import org.terasology.registry.In;
 import org.terasology.registry.Share;
@@ -33,8 +33,8 @@ import org.terasology.structureTemplates.components.CheckBlockRegionConditionCom
 import org.terasology.structureTemplates.components.RequiredBlockPropertiesComponent;
 import org.terasology.structureTemplates.events.CheckSpawnConditionEvent;
 import org.terasology.structureTemplates.events.GetBlockPredicateEvent;
-import org.terasology.structureTemplates.interfaces.BlockRegionChecker;
 import org.terasology.structureTemplates.interfaces.BlockPredicateProvider;
+import org.terasology.structureTemplates.interfaces.BlockRegionChecker;
 import org.terasology.structureTemplates.util.BlockRegionTransform;
 import org.terasology.world.WorldProvider;
 import org.terasology.world.block.Block;

@@ -3,18 +3,18 @@
 package org.terasology.structureTemplates.internal.ui;
 
 import com.google.common.collect.Lists;
-import org.terasology.assets.management.AssetManager;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.prefab.Prefab;
 import org.terasology.entitySystem.prefab.PrefabManager;
+import org.terasology.gestalt.assets.management.AssetManager;
 import org.terasology.logic.players.LocalPlayer;
-import org.terasology.registry.In;
-import org.terasology.rendering.nui.BaseInteractionScreen;
 import org.terasology.nui.UIWidget;
 import org.terasology.nui.databinding.Binding;
 import org.terasology.nui.widgets.UIButton;
 import org.terasology.nui.widgets.UIDropdown;
 import org.terasology.nui.widgets.UIDropdownScrollable;
+import org.terasology.registry.In;
+import org.terasology.rendering.nui.BaseInteractionScreen;
 import org.terasology.structureTemplates.internal.components.ReplaceWallItemComponent;
 import org.terasology.structureTemplates.internal.events.ReplaceBlocksRequest;
 import org.terasology.world.block.BlockExplorer;
