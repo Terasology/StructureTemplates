@@ -1,46 +1,33 @@
-/*
- * Copyright 2016 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2020 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.structureTemplates.internal.systems;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.entitySystem.entity.EntityManager;
-import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.entitySystem.event.ReceiveEvent;
-import org.terasology.entitySystem.prefab.Prefab;
-import org.terasology.entitySystem.systems.BaseComponentSystem;
-import org.terasology.entitySystem.systems.RegisterMode;
-import org.terasology.entitySystem.systems.RegisterSystem;
-import org.terasology.logic.inventory.InventoryManager;
-import org.terasology.logic.inventory.ItemComponent;
+import org.terasology.engine.entitySystem.entity.EntityManager;
+import org.terasology.engine.entitySystem.entity.EntityRef;
+import org.terasology.engine.entitySystem.event.ReceiveEvent;
+import org.terasology.engine.entitySystem.prefab.Prefab;
+import org.terasology.engine.entitySystem.systems.BaseComponentSystem;
+import org.terasology.engine.entitySystem.systems.RegisterMode;
+import org.terasology.engine.entitySystem.systems.RegisterSystem;
+import org.terasology.engine.logic.inventory.ItemComponent;
+import org.terasology.engine.registry.In;
+import org.terasology.engine.world.BlockEntityRegistry;
+import org.terasology.engine.world.block.BlockComponent;
+import org.terasology.engine.world.block.BlockManager;
+import org.terasology.engine.world.block.family.BlockFamily;
+import org.terasology.engine.world.block.items.BlockItemComponent;
+import org.terasology.engine.world.block.items.BlockItemFactory;
+import org.terasology.inventory.logic.InventoryManager;
 import org.terasology.math.geom.Vector3i;
-import org.terasology.registry.In;
 import org.terasology.structureTemplates.components.AddItemsToChestComponent;
 import org.terasology.structureTemplates.events.BuildStructureTemplateEntityEvent;
 import org.terasology.structureTemplates.events.SpawnTemplateEvent;
 import org.terasology.structureTemplates.events.StructureBlocksSpawnedEvent;
 import org.terasology.structureTemplates.internal.events.BuildStructureTemplateStringEvent;
-import org.terasology.structureTemplates.util.ListUtil;
 import org.terasology.structureTemplates.util.BlockRegionTransform;
-import org.terasology.world.BlockEntityRegistry;
-import org.terasology.world.block.BlockComponent;
-import org.terasology.world.block.BlockManager;
-import org.terasology.world.block.family.BlockFamily;
-import org.terasology.world.block.items.BlockItemComponent;
-import org.terasology.world.block.items.BlockItemFactory;
+import org.terasology.structureTemplates.util.ListUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -83,10 +70,10 @@ public class AddItemsToChestSystem extends BaseComponentSystem {
     private void addItemsToChest(AddItemsToChestComponent component, BlockRegionTransform transformation) {
         BlockItemFactory blockFactory = new BlockItemFactory(entityManager);
 
-        for (AddItemsToChestComponent.ChestToFill chestToFill: component.chestsToFill) {
+        for (AddItemsToChestComponent.ChestToFill chestToFill : component.chestsToFill) {
             Vector3i absolutePosition = transformation.transformVector3i(chestToFill.position);
             EntityRef chest = blockEntityRegistry.getBlockEntityAt(absolutePosition);
-            for (AddItemsToChestComponent.Item item: chestToFill.items) {
+            for (AddItemsToChestComponent.Item item : chestToFill.items) {
                 addItemToChest(chest, item, blockFactory);
             }
         }
@@ -111,7 +98,8 @@ public class AddItemsToChestSystem extends BaseComponentSystem {
 
 
     @ReceiveEvent
-    public void onBuildTemplateWithScheduledStructurePlacment(BuildStructureTemplateEntityEvent event, EntityRef entity) {
+    public void onBuildTemplateWithScheduledStructurePlacment(BuildStructureTemplateEntityEvent event,
+                                                              EntityRef entity) {
         BlockRegionTransform transformToRelative = event.getTransformToRelative();
         BlockFamily blockFamily = blockManager.getBlockFamily("CoreAdvancedAssets:Chest");
 
@@ -123,9 +111,10 @@ public class AddItemsToChestSystem extends BaseComponentSystem {
         }
     }
 
-    private List<AddItemsToChestComponent.ChestToFill> describeChestContent(BuildStructureTemplateEntityEvent event, BlockFamily blockFamily) {
+    private List<AddItemsToChestComponent.ChestToFill> describeChestContent(BuildStructureTemplateEntityEvent event,
+                                                                            BlockFamily blockFamily) {
         List<AddItemsToChestComponent.ChestToFill> chestsToFill = new ArrayList<>();
-        for (Vector3i position: event.findAbsolutePositionsOf(blockFamily)) {
+        for (Vector3i position : event.findAbsolutePositionsOf(blockFamily)) {
             EntityRef blockEntity = blockEntityRegistry.getBlockEntityAt(position);
             BlockComponent blockComponent = blockEntity.getComponent(BlockComponent.class);
             List<AddItemsToChestComponent.Item> itemsToAdd = describeItemsOfEntity(blockEntity);
@@ -144,7 +133,7 @@ public class AddItemsToChestSystem extends BaseComponentSystem {
     private List<AddItemsToChestComponent.Item> describeItemsOfEntity(EntityRef blockEntity) {
         List<AddItemsToChestComponent.Item> itemsToAdd = new ArrayList<>();
         int numberOfSlots = inventoryManager.getNumSlots(blockEntity);
-        for (int slot = 0;slot < numberOfSlots; slot++) {
+        for (int slot = 0; slot < numberOfSlots; slot++) {
             Optional<AddItemsToChestComponent.Item> optionalItem = describeItemInSlot(blockEntity, slot);
             if (optionalItem.isPresent()) {
                 itemsToAdd.add(optionalItem.get());
@@ -183,7 +172,8 @@ public class AddItemsToChestSystem extends BaseComponentSystem {
         StringBuilder sb = new StringBuilder();
         sb.append("    \"AddItemsToChest\": {\n");
         sb.append("        \"chestsToFill\": [\n");
-        ListUtil.visitList(component.chestsToFill, (AddItemsToChestComponent.ChestToFill chestToFill, boolean lastChest) -> {
+        ListUtil.visitList(component.chestsToFill, (AddItemsToChestComponent.ChestToFill chestToFill,
+                                                    boolean lastChest) -> {
             sb.append("            {\n");
             sb.append("                \"position\": [");
             sb.append(chestToFill.position.x);
@@ -193,7 +183,7 @@ public class AddItemsToChestSystem extends BaseComponentSystem {
             sb.append(chestToFill.position.z);
             sb.append("],\n");
             sb.append("                \"items\": [\n");
-            ListUtil.visitList(chestToFill.items, (AddItemsToChestComponent.Item item, boolean lastItem) ->  {
+            ListUtil.visitList(chestToFill.items, (AddItemsToChestComponent.Item item, boolean lastItem) -> {
                 sb.append("                        ");
                 appendItemJson(sb, item);
                 if (lastItem) {
@@ -249,7 +239,6 @@ public class AddItemsToChestSystem extends BaseComponentSystem {
         }
         sb.append("}");
     }
-
 
 
 }

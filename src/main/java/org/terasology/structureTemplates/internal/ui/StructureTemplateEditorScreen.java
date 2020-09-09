@@ -3,20 +3,22 @@
 package org.terasology.structureTemplates.internal.ui;
 
 import com.google.common.collect.Lists;
-import org.terasology.entitySystem.entity.EntityManager;
-import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.logic.clipboard.ClipboardManager;
-import org.terasology.logic.players.LocalPlayer;
-import org.terasology.math.Region3i;
+import org.terasology.engine.entitySystem.entity.EntityManager;
+import org.terasology.engine.entitySystem.entity.EntityRef;
+import org.terasology.engine.logic.clipboard.ClipboardManager;
+import org.terasology.engine.logic.players.LocalPlayer;
+import org.terasology.engine.math.Region3i;
+import org.terasology.engine.registry.In;
+import org.terasology.engine.rendering.nui.BaseInteractionScreen;
+import org.terasology.engine.world.block.BlockComponent;
 import org.terasology.math.geom.Vector3i;
-import org.terasology.registry.In;
-import org.terasology.rendering.nui.BaseInteractionScreen;
 import org.terasology.nui.UIWidget;
 import org.terasology.nui.databinding.Binding;
 import org.terasology.nui.widgets.UIButton;
 import org.terasology.nui.widgets.UICheckbox;
 import org.terasology.structureTemplates.internal.components.EditTemplateRegionProcessComponent;
 import org.terasology.structureTemplates.internal.components.EditingUserComponent;
+import org.terasology.structureTemplates.internal.components.StructureTemplateOriginComponent;
 import org.terasology.structureTemplates.internal.events.CreateEditTemplateRegionProcessRequest;
 import org.terasology.structureTemplates.internal.events.CreateStructureSpawnItemRequest;
 import org.terasology.structureTemplates.internal.events.CreateStructureTemplateItemRequest;
@@ -24,11 +26,9 @@ import org.terasology.structureTemplates.internal.events.MakeBoxShapedRequest;
 import org.terasology.structureTemplates.internal.events.StopEditingProcessRequest;
 import org.terasology.structureTemplates.internal.events.StructureTemplateStringRequest;
 import org.terasology.structureTemplates.internal.systems.StructureTemplateEditorServerSystem;
-import org.terasology.structureTemplates.internal.components.StructureTemplateOriginComponent;
+import org.terasology.structureTemplates.util.BlockRegionTransform;
 import org.terasology.structureTemplates.util.ListUtil;
 import org.terasology.structureTemplates.util.RegionMergeUtil;
-import org.terasology.structureTemplates.util.BlockRegionTransform;
-import org.terasology.world.block.BlockComponent;
 
 import java.util.List;
 import java.util.Set;
@@ -64,8 +64,8 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
     protected void initializeWithInteractionTarget(EntityRef interactionTarget) {
         EditTemplateRegionProcessComponent editProcessComponent = findEditProcessForInteractionTarget();
         if (editProcessComponent != null) {
-            recordBlockAddition =  editProcessComponent.recordBlockAddition;
-            recordBlockRemoval =  editProcessComponent.recordBlockRemoval;
+            recordBlockAddition = editProcessComponent.recordBlockAddition;
+            recordBlockRemoval = editProcessComponent.recordBlockRemoval;
         } else {
             recordBlockAddition = false;
             recordBlockRemoval = false;
@@ -89,7 +89,7 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
             createSpawnerButton.subscribe(this::onCreateSpawnerButton);
         }
 
-        createTemplateButton= find("createTemplateButton", UIButton.class);
+        createTemplateButton = find("createTemplateButton", UIButton.class);
         if (createTemplateButton != null) {
             createTemplateButton.subscribe(this::onCreateTemplateItemButton);
         }
@@ -148,8 +148,9 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
         if (editingUserComponent == null) {
             return null;
         }
-        EditTemplateRegionProcessComponent editProcessComponent = editingUserComponent.editProcessEntity.getComponent(EditTemplateRegionProcessComponent.class);
-        if  (!editProcessComponent.structureTemplateEditor.equals(getInteractionTarget())) {
+        EditTemplateRegionProcessComponent editProcessComponent =
+                editingUserComponent.editProcessEntity.getComponent(EditTemplateRegionProcessComponent.class);
+        if (!editProcessComponent.structureTemplateEditor.equals(getInteractionTarget())) {
             return null;
         }
         return editProcessComponent;
@@ -165,7 +166,8 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
     }
 
     private void onEditTemplatePropertiesButton(UIWidget button) {
-        StructureTemplatePropertiesScreen screen = getManager().pushScreen("StructureTemplates:StructureTemplatePropertiesScreen", StructureTemplatePropertiesScreen.class);
+        StructureTemplatePropertiesScreen screen = getManager().pushScreen("StructureTemplates" +
+                ":StructureTemplatePropertiesScreen", StructureTemplatePropertiesScreen.class);
         screen.setEditorEntity(getInteractionTarget());
     }
 
@@ -178,8 +180,10 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
                 "StructureTemplates:StructureTemplateRegionScreen", StructureTemplateRegionScreen.class);
 
         BlockComponent blockComponent = entity.getComponent(BlockComponent.class);
-        BlockRegionTransform transformToRelative = StructureTemplateEditorServerSystem.createAbsoluteToRelativeTransform(blockComponent);
-        BlockRegionTransform transformToAbsolute = StructureTemplateEditorServerSystem.createRelativeToAbsoluteTransform(blockComponent);
+        BlockRegionTransform transformToRelative =
+                StructureTemplateEditorServerSystem.createAbsoluteToRelativeTransform(blockComponent);
+        BlockRegionTransform transformToAbsolute =
+                StructureTemplateEditorServerSystem.createRelativeToAbsoluteTransform(blockComponent);
 
         Region3i relativeRegion = transformToRelative.transformRegion(absoluteRegion);
         regionScreen.setRegion(relativeRegion);
@@ -195,7 +199,7 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
         }
         Vector3i min = new Vector3i(regions.get(0).min());
         Vector3i max = new Vector3i(regions.get(0).max());
-        for (Region3i region: regions) {
+        for (Region3i region : regions) {
             min.min(region.min());
             max.max(region.max());
         }
@@ -209,10 +213,11 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
         List<Region3i> regionsOneHigher = Lists.newArrayList();
 
         BlockComponent blockComponent = entity.getComponent(BlockComponent.class);
-        BlockRegionTransform transformToRelative = StructureTemplateEditorServerSystem.createAbsoluteToRelativeTransform(blockComponent);
+        BlockRegionTransform transformToRelative =
+                StructureTemplateEditorServerSystem.createAbsoluteToRelativeTransform(blockComponent);
 
 
-        for (Region3i absoluteRegion: component.absoluteTemplateRegions) {
+        for (Region3i absoluteRegion : component.absoluteTemplateRegions) {
             Region3i relativeRegion = transformToRelative.transformRegion(absoluteRegion);
             Vector3i max = new Vector3i(relativeRegion.max());
             max.addY(1);
@@ -232,8 +237,9 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
         stringBuilder.append("        \"checksToPerform\": [\n");
         ListUtil.visitList(regions, (Region3i region, boolean last) -> {
             stringBuilder.append(String.format(
-                    "            {\"condition\": \"StructureTemplates:IsGroundLike\", \"region\" :{\"min\": [%d, %d, %d], \"size\": [%d, %d, %d]}}",
-                    region.minX(),region.minY(), region.minZ(),region.sizeX(), region.sizeY(), region.sizeZ()));
+                    "            {\"condition\": \"StructureTemplates:IsGroundLike\", \"region\" :{\"min\": [%d, %d, " +
+                            "%d], \"size\": [%d, %d, %d]}}",
+                    region.minX(), region.minY(), region.minZ(), region.sizeX(), region.sizeY(), region.sizeZ()));
             if (last) {
                 stringBuilder.append("\n");
             } else {

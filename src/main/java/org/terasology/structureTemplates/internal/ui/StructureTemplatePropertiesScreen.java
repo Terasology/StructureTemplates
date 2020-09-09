@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.structureTemplates.internal.ui;
 
-import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.entitySystem.prefab.Prefab;
-import org.terasology.entitySystem.prefab.PrefabManager;
-import org.terasology.logic.common.DisplayNameComponent;
-import org.terasology.logic.players.LocalPlayer;
-import org.terasology.registry.In;
-import org.terasology.rendering.nui.CoreScreenLayer;
+import org.terasology.engine.entitySystem.entity.EntityRef;
+import org.terasology.engine.entitySystem.prefab.Prefab;
+import org.terasology.engine.entitySystem.prefab.PrefabManager;
+import org.terasology.engine.logic.common.DisplayNameComponent;
+import org.terasology.engine.logic.players.LocalPlayer;
+import org.terasology.engine.registry.In;
+import org.terasology.engine.rendering.nui.CoreScreenLayer;
 import org.terasology.nui.UIWidget;
 import org.terasology.nui.databinding.Binding;
 import org.terasology.nui.itemRendering.StringTextRenderer;
@@ -168,7 +168,8 @@ public class StructureTemplatePropertiesScreen extends CoreScreenLayer {
         } catch (NumberFormatException e) {
             spawnChance = 0;
         }
-        localPlayer.getCharacterEntity().send(new RequestStructureTemplatePropertiesChange(selectedPrefab, spawnChance, animationType));
+        localPlayer.getCharacterEntity().send(new RequestStructureTemplatePropertiesChange(selectedPrefab,
+                spawnChance, animationType));
 
     }
 }

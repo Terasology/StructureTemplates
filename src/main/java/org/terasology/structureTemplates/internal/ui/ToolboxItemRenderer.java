@@ -3,12 +3,12 @@
 package org.terasology.structureTemplates.internal.ui;
 
 import org.joml.Rectanglei;
-import org.terasology.math.JomlUtil;
 import org.joml.Vector2i;
-import org.terasology.nui.asset.font.Font;
-import org.terasology.rendering.assets.texture.TextureRegion;
+import org.terasology.engine.math.JomlUtil;
+import org.terasology.engine.rendering.assets.texture.TextureRegion;
 import org.terasology.nui.Canvas;
 import org.terasology.nui.TextLineBuilder;
+import org.terasology.nui.asset.font.Font;
 import org.terasology.nui.itemRendering.AbstractItemRenderer;
 import org.terasology.nui.itemRendering.StringTextIconRenderer;
 
@@ -16,7 +16,7 @@ import java.util.List;
 
 /**
  * Renders NUI editor nodes along with an icon depending on their types.
- *
+ * <p>
  * Does not extend {@link StringTextIconRenderer} as it does not allow for TextureRegions yet.
  */
 public class ToolboxItemRenderer extends AbstractItemRenderer<ToolboxTreeValue> {
@@ -46,11 +46,13 @@ public class ToolboxItemRenderer extends AbstractItemRenderer<ToolboxTreeValue> 
             if (marginTop + texture.getHeight() + marginBottom > canvas.size().y) {
                 // Icon does not fit within the canvas - vertically shrinking it
                 int iconHeight = canvas.size().y - marginTop - marginBottom;
-                canvas.drawTexture(texture, JomlUtil.rectangleiFromMinAndSize(marginLeft, marginTop, texture.getWidth(), iconHeight));
+                canvas.drawTexture(texture, JomlUtil.rectangleiFromMinAndSize(marginLeft, marginTop,
+                        texture.getWidth(), iconHeight));
             } else {
                 // Icon fits within the canvas - vertically centering it
                 int iconVerticalPosition = (canvas.size().y - texture.getHeight()) / 2;
-                canvas.drawTexture(texture, JomlUtil.rectangleiFromMinAndSize(marginLeft, iconVerticalPosition, texture.getWidth(), texture.getHeight()));
+                canvas.drawTexture(texture, JomlUtil.rectangleiFromMinAndSize(marginLeft, iconVerticalPosition,
+                        texture.getWidth(), texture.getHeight()));
             }
         }
 
@@ -64,7 +66,8 @@ public class ToolboxItemRenderer extends AbstractItemRenderer<ToolboxTreeValue> 
             iconWidth = 0;
         }
 
-        Rectanglei textRegion = JomlUtil.rectangleiFromMinAndSize(iconWidth, 0, canvas.getRegion().lengthX() - iconWidth, canvas.getRegion().lengthY());
+        Rectanglei textRegion = JomlUtil.rectangleiFromMinAndSize(iconWidth, 0,
+                canvas.getRegion().lengthX() - iconWidth, canvas.getRegion().lengthY());
         canvas.drawText(text, textRegion);
     }
 

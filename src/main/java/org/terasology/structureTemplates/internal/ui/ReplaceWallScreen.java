@@ -3,23 +3,23 @@
 package org.terasology.structureTemplates.internal.ui;
 
 import com.google.common.collect.Lists;
-import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.entitySystem.prefab.Prefab;
-import org.terasology.entitySystem.prefab.PrefabManager;
+import org.terasology.engine.entitySystem.entity.EntityRef;
+import org.terasology.engine.entitySystem.prefab.Prefab;
+import org.terasology.engine.entitySystem.prefab.PrefabManager;
+import org.terasology.engine.logic.players.LocalPlayer;
+import org.terasology.engine.registry.In;
+import org.terasology.engine.rendering.nui.BaseInteractionScreen;
+import org.terasology.engine.world.block.BlockExplorer;
+import org.terasology.engine.world.block.BlockManager;
+import org.terasology.engine.world.block.BlockUri;
 import org.terasology.gestalt.assets.management.AssetManager;
-import org.terasology.logic.players.LocalPlayer;
 import org.terasology.nui.UIWidget;
 import org.terasology.nui.databinding.Binding;
 import org.terasology.nui.widgets.UIButton;
 import org.terasology.nui.widgets.UIDropdown;
 import org.terasology.nui.widgets.UIDropdownScrollable;
-import org.terasology.registry.In;
-import org.terasology.rendering.nui.BaseInteractionScreen;
 import org.terasology.structureTemplates.internal.components.ReplaceWallItemComponent;
 import org.terasology.structureTemplates.internal.events.ReplaceBlocksRequest;
-import org.terasology.world.block.BlockExplorer;
-import org.terasology.world.block.BlockManager;
-import org.terasology.world.block.BlockUri;
 
 import java.util.Arrays;
 import java.util.List;
@@ -86,7 +86,6 @@ public class ReplaceWallScreen extends BaseInteractionScreen {
         if (placeWallButton != null) {
             placeWallButton.subscribe(this::onPlaceWallButton);
         }
-
 
 
         replacementTypeComboBox = find("replacementTypeComboBox", UIDropdown.class);

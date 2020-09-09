@@ -1,22 +1,9 @@
-/*
- * Copyright 2016 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2020 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.structureTemplates.internal.systems;
 
 import org.junit.Test;
-import org.terasology.math.Side;
+import org.terasology.engine.math.Side;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.structureTemplates.util.BlockRegionTransform;
 
@@ -70,10 +57,9 @@ public class ScheduledStructureSpawnSystemTest {
 
         // output point transformed:
         assertEquals(Side.RIGHT, result.transformSide(Side.FRONT));
-        assertEquals(new Vector3i(104, 200, 303),  result.transformVector3i(new Vector3i(3, 0, 0)));
+        assertEquals(new Vector3i(104, 200, 303), result.transformVector3i(new Vector3i(3, 0, 0)));
 
     }
-
 
 
     @Test
@@ -118,7 +104,7 @@ public class ScheduledStructureSpawnSystemTest {
 
         // output point transformed:
         assertEquals(Side.LEFT, result.transformSide(Side.FRONT));
-        assertEquals(new Vector3i(100 - 4, 200, 300 - 3),  result.transformVector3i(new Vector3i(3, 0, 0)));
+        assertEquals(new Vector3i(100 - 4, 200, 300 - 3), result.transformVector3i(new Vector3i(3, 0, 0)));
 
     }
 
@@ -162,7 +148,7 @@ public class ScheduledStructureSpawnSystemTest {
 
         // output point transformed:
         assertEquals(Side.LEFT, result.transformSide(Side.BACK));
-        assertEquals(new Vector3i(100 - 5, 200, 300),  result.transformVector3i(new Vector3i(2, 0, 5)));
+        assertEquals(new Vector3i(100 - 5, 200, 300), result.transformVector3i(new Vector3i(2, 0, 5)));
 
     }
 
@@ -207,7 +193,6 @@ public class ScheduledStructureSpawnSystemTest {
          */
 
 
-
         Side direction = Side.RIGHT;
         Vector3i spawnPosition = new Vector3i(100, 200, 300);
         Vector3i incomingConnectionPointPosition = new Vector3i(2, 0, 0);
@@ -222,7 +207,7 @@ public class ScheduledStructureSpawnSystemTest {
 
         // output point transformed:
         assertEquals(Side.LEFT, result.transformSide(Side.BACK));
-        assertEquals(new Vector3i(100 - 5, 200, 300),  result.transformVector3i(new Vector3i(2, 0, 5)));
+        assertEquals(new Vector3i(100 - 5, 200, 300), result.transformVector3i(new Vector3i(2, 0, 5)));
 
     }
 }

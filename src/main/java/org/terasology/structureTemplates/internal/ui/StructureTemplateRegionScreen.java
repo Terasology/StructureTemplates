@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.structureTemplates.internal.ui;
 
-import org.terasology.logic.clipboard.ClipboardManager;
-import org.terasology.logic.players.LocalPlayer;
-import org.terasology.math.Region3i;
+import org.terasology.engine.logic.clipboard.ClipboardManager;
+import org.terasology.engine.logic.players.LocalPlayer;
+import org.terasology.engine.math.Region3i;
+import org.terasology.engine.registry.In;
+import org.terasology.engine.rendering.nui.CoreScreenLayer;
 import org.terasology.math.geom.Vector3i;
-import org.terasology.registry.In;
-import org.terasology.rendering.nui.CoreScreenLayer;
 import org.terasology.nui.UIWidget;
 import org.terasology.nui.widgets.UIButton;
 import org.terasology.nui.widgets.UIText;
@@ -44,14 +44,6 @@ public class StructureTemplateRegionScreen extends CoreScreenLayer {
         );
     }
 
-    private Integer integerFromField(UIText field) {
-        try {
-            return Integer.parseInt(field.getText());
-        } catch (NumberFormatException e) {
-            return 0;
-        }
-    }
-
     public void setRegion(Region3i region) {
         minXField.setText(Integer.toString(region.minX()));
         minYField.setText(Integer.toString(region.minY()));
@@ -59,6 +51,14 @@ public class StructureTemplateRegionScreen extends CoreScreenLayer {
         sizeXField.setText(Integer.toString(region.sizeX()));
         sizeYField.setText(Integer.toString(region.sizeY()));
         sizeZField.setText(Integer.toString(region.sizeZ()));
+    }
+
+    private Integer integerFromField(UIText field) {
+        try {
+            return Integer.parseInt(field.getText());
+        } catch (NumberFormatException e) {
+            return 0;
+        }
     }
 
     @Override

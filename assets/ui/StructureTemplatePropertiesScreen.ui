@@ -1,174 +1,174 @@
 {
-    "type": "StructureTemplatePropertiesScreen",
-    "contents": {
-        "type": "RelativeLayout",
-        "contents": [
+  "type": "StructureTemplatePropertiesScreen",
+  "contents": {
+    "type": "RelativeLayout",
+    "contents": [
+      {
+        "type": "engine:UIBox",
+        "layoutInfo": {
+          "width": 400,
+          "height": 170,
+          "position-vertical-center": {},
+          "position-horizontal-center": {}
+        },
+        "content": {
+          "type": "RelativeLayout",
+          "layoutInfo": {},
+          "contents": [
             {
-                "type": "engine:UIBox",
-                "layoutInfo": {
-                    "width": 400,
-                    "height": 170,
-                    "position-vertical-center": {},
-                    "position-horizontal-center": {}
+              "type": "engine:UILabel",
+              "id": "titleLabel",
+              "layoutInfo": {
+                "position-top": {},
+                "position-horizontal-center": {},
+                "use-content-height": true
+              },
+              "text": "Structure Template Properties"
+            },
+            {
+              "type": "RowLayout",
+              "contents": [
+                {
+                  "type": "UILabel",
+                  "text": "Type: ",
+                  "layoutInfo": {
+                    "useContentWidth": true
+                  }
                 },
-                "content": {
-                    "type": "RelativeLayout",
-                    "layoutInfo": {},
-                    "contents": [
-                        {
-                            "type": "engine:UILabel",
-                            "id": "titleLabel",
-                            "layoutInfo": {
-                                "position-top": {},
-                                "position-horizontal-center": {},
-                                "use-content-height": true
-                            },
-                            "text": "Structure Template Properties"
-                        },
-                        {
-                            "type": "RowLayout",
-                            "contents": [
-                                {
-                                    "type": "UILabel",
-                                    "text": "Type: ",
-                                    "layoutInfo": {
-                                        "useContentWidth": true
-                                    }
-                                },
-                                {
-                                    "type": "UIDropdown",
-                                    "multiline": false,
-                                    "id": "comboBox"
-                                },
-                                {
-                                    "type": "UIButton",
-                                    "text": "?",
-                                    "id": "typeHelpButton",
-                                    "layoutInfo": {
-                                        "relativeWidth": 0.1
-                                    }
-                                }
-                            ],
-                            "layoutInfo": {
-                                "position-top": {
-                                    "widget": "titleLabel",
-                                    "target": "BOTTOM",
-                                    "offset": 15
-                                },
-                                "position-left": {
-                                    "offset": 5
-                                },
-                                "position-right": {
-                                    "offset": 5
-                                },
-                                "height": 30
-                            },
-                            "id": "typeRow"
-                        },
-                        {
-                            "type": "engine:UILabel",
-                            "id": "titleLabel",
-                            "layoutInfo": {
-                                "position-top": {},
-                                "position-horizontal-center": {},
-                                "use-content-height": true
-                            },
-                            "text": "Structure Template Properties"
-                        },
-                        {
-                            "type": "RowLayout",
-                            "contents": [
-                                {
-                                    "type": "UILabel",
-                                    "text": "Select Animation: ",
-                                    "layoutInfo": {
-                                        "useContentWidth": true
-                                    }
-                                },
-                                {
-                                    "type": "UIDropdown",
-                                    "multiline": false,
-                                    "id": "comboBoxAnimation"
-                                }
-                            ],
-                            "layoutInfo": {
-                                "position-top": {
-                                    "widget": "titleLabel",
-                                    "target": "BOTTOM",
-                                    "offset": 15
-                                },
-                                "position-left": {
-                                    "offset": 5
-                                },
-                                "position-right": {
-                                    "offset": 5
-                                },
-                                "height": 30
-                            },
-                            "id": "animationRow"
-                        },
-                        {
-                            "type": "RowLayout",
-                            "contents": [
-                                {
-                                    "type": "UILabel",
-                                    "text": "Spawn Chance: ",
-                                    "layoutInfo": {
-                                        "useContentWidth": true
-                                    }
-                                },
-                                {
-                                    "type": "UIText",
-                                    "multiline": false,
-                                    "id": "spawnChanceTextBox"
-                                },
-                                {
-                                    "type": "UIButton",
-                                    "text": "?",
-                                    "id": "spawnChanceHelpButton",
-                                    "layoutInfo": {
-                                        "relativeWidth": 0.1
-                                    }
-                                }
-                            ],
-                            "layoutInfo": {
-                                "position-top": {
-                                    "widget": "typeRow",
-                                    "target": "BOTTOM",
-                                    "offset": 5
-                                },
-                                "position-left": {
-                                    "offset": 5
-                                },
-                                "position-right": {
-                                    "offset": 5
-                                },
-                                "height": 30
-                            }
-                        },
-                        {
-                            "type": "engine:RelativeLayout",
-                            "layoutInfo": {
-                                "height": 30,
-                                "position-bottom": {},
-                                "position-right": {},
-                                "width": 100
-                            },
-                            "contents": [
-                                {
-                                    "type": "UIButton",
-                                    "text": "Close",
-                                    "id": "closeButton",
-                                    "layoutInfo": {
-                                        "relativeWidth": 0.1
-                                    }
-                                }
-                            ]
-                        }
-                    ]
+                {
+                  "type": "UIDropdown",
+                  "multiline": false,
+                  "id": "comboBox"
+                },
+                {
+                  "type": "UIButton",
+                  "text": "?",
+                  "id": "typeHelpButton",
+                  "layoutInfo": {
+                    "relativeWidth": 0.1
+                  }
                 }
+              ],
+              "layoutInfo": {
+                "position-top": {
+                  "widget": "titleLabel",
+                  "target": "BOTTOM",
+                  "offset": 15
+                },
+                "position-left": {
+                  "offset": 5
+                },
+                "position-right": {
+                  "offset": 5
+                },
+                "height": 30
+              },
+              "id": "typeRow"
+            },
+            {
+              "type": "engine:UILabel",
+              "id": "titleLabel",
+              "layoutInfo": {
+                "position-top": {},
+                "position-horizontal-center": {},
+                "use-content-height": true
+              },
+              "text": "Structure Template Properties"
+            },
+            {
+              "type": "RowLayout",
+              "contents": [
+                {
+                  "type": "UILabel",
+                  "text": "Select Animation: ",
+                  "layoutInfo": {
+                    "useContentWidth": true
+                  }
+                },
+                {
+                  "type": "UIDropdown",
+                  "multiline": false,
+                  "id": "comboBoxAnimation"
+                }
+              ],
+              "layoutInfo": {
+                "position-top": {
+                  "widget": "titleLabel",
+                  "target": "BOTTOM",
+                  "offset": 15
+                },
+                "position-left": {
+                  "offset": 5
+                },
+                "position-right": {
+                  "offset": 5
+                },
+                "height": 30
+              },
+              "id": "animationRow"
+            },
+            {
+              "type": "RowLayout",
+              "contents": [
+                {
+                  "type": "UILabel",
+                  "text": "Spawn Chance: ",
+                  "layoutInfo": {
+                    "useContentWidth": true
+                  }
+                },
+                {
+                  "type": "UIText",
+                  "multiline": false,
+                  "id": "spawnChanceTextBox"
+                },
+                {
+                  "type": "UIButton",
+                  "text": "?",
+                  "id": "spawnChanceHelpButton",
+                  "layoutInfo": {
+                    "relativeWidth": 0.1
+                  }
+                }
+              ],
+              "layoutInfo": {
+                "position-top": {
+                  "widget": "typeRow",
+                  "target": "BOTTOM",
+                  "offset": 5
+                },
+                "position-left": {
+                  "offset": 5
+                },
+                "position-right": {
+                  "offset": 5
+                },
+                "height": 30
+              }
+            },
+            {
+              "type": "engine:RelativeLayout",
+              "layoutInfo": {
+                "height": 30,
+                "position-bottom": {},
+                "position-right": {},
+                "width": 100
+              },
+              "contents": [
+                {
+                  "type": "UIButton",
+                  "text": "Close",
+                  "id": "closeButton",
+                  "layoutInfo": {
+                    "relativeWidth": 0.1
+                  }
+                }
+              ]
             }
-        ]
-    },
-    "skin": "engine:default"
+          ]
+        }
+      }
+    ]
+  },
+  "skin": "engine:default"
 }

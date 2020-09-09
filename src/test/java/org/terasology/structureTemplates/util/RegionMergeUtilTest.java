@@ -1,27 +1,14 @@
-/*
- * Copyright 2016 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2020 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.structureTemplates.util;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.terasology.math.Region3i;
+import org.terasology.engine.math.Region3i;
+import org.terasology.engine.world.block.Block;
+import org.terasology.engine.world.block.BlockUri;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent.RegionToFill;
-import org.terasology.world.block.Block;
-import org.terasology.world.block.BlockUri;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +23,24 @@ public class RegionMergeUtilTest {
 
     private Block blockA;
     private Block blockB;
+
+    private static String regionToString(RegionToFill r) {
+        return String.format("block: \"%s\", min: [%d, %d, %d], max: [%d, %d, %d]", r.blockType, r.region.minX(),
+                r.region.minY(), r.region.minZ(), r.region.maxX(), r.region.maxY(), r.region.maxZ());
+    }
+
+    private static String regionsToString(List<RegionToFill> regions) {
+        StringBuilder sb = new StringBuilder();
+        for (RegionToFill r : regions) {
+            sb.append(regionToString(r));
+            sb.append("\n");
+        }
+        return sb.toString();
+    }
+
+    private static void assertRegionListsEqual(List<RegionToFill> expected, List<RegionToFill> actual) {
+        assertEquals(regionsToString(expected), regionsToString(actual));
+    }
 
     @Before
     public void prepare() {
@@ -65,7 +70,6 @@ public class RegionMergeUtilTest {
         expectedRegions.add(regionAB);
         assertRegionListsEqual(expectedRegions, regions);
     }
-
 
     @Test
     public void testMergeRegionsByXWithTooFarAwayCase() {
@@ -170,7 +174,6 @@ public class RegionMergeUtilTest {
         assertRegionListsEqual(expectedRegions, regions);
     }
 
-
     @Test
     public void testMergeRegionsByXWithBasicSuccessCase() {
         List<RegionToFill> regions = new ArrayList<>();
@@ -213,28 +216,10 @@ public class RegionMergeUtilTest {
     }
 
     private RegionToFill createRegion(Block blockType, int minX, int minY, int minZ,
-                                                                 int maxX, int maxY, int maxZ) {
+                                      int maxX, int maxY, int maxZ) {
         RegionToFill r = new RegionToFill();
         r.region = Region3i.createBounded(new Vector3i(minX, minY, minZ), new Vector3i(maxX, maxY, maxZ));
         r.blockType = blockType;
         return r;
-    }
-
-    private static String regionToString(RegionToFill r) {
-        return String.format("block: \"%s\", min: [%d, %d, %d], max: [%d, %d, %d]", r.blockType, r.region.minX(),
-                r. region.minY(), r. region.minZ(), r. region.maxX(), r. region.maxY(), r. region.maxZ());
-    }
-
-    private static String regionsToString(List<RegionToFill> regions) {
-        StringBuilder sb = new StringBuilder();
-        for (RegionToFill r: regions) {
-            sb.append(regionToString(r));
-            sb.append("\n");
-        }
-        return sb.toString();
-    }
-
-    private static void assertRegionListsEqual(List<RegionToFill> expected, List<RegionToFill> actual) {
-        assertEquals(regionsToString(expected), regionsToString(actual));
     }
 }

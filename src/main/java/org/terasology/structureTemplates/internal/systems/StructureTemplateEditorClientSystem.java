@@ -1,37 +1,24 @@
-/*
- * Copyright 2016 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2020 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.structureTemplates.internal.systems;
 
-import org.terasology.entitySystem.entity.EntityBuilder;
-import org.terasology.entitySystem.entity.EntityManager;
-import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.entitySystem.entity.lifecycleEvents.BeforeRemoveComponent;
-import org.terasology.entitySystem.entity.lifecycleEvents.OnAddedComponent;
-import org.terasology.entitySystem.entity.lifecycleEvents.OnChangedComponent;
-import org.terasology.entitySystem.event.ReceiveEvent;
-import org.terasology.entitySystem.systems.BaseComponentSystem;
-import org.terasology.entitySystem.systems.RegisterMode;
-import org.terasology.entitySystem.systems.RegisterSystem;
-import org.terasology.logic.clipboard.ClipboardManager;
-import org.terasology.logic.inventory.InventoryManager;
-import org.terasology.logic.players.LocalPlayer;
-import org.terasology.math.Region3i;
+import org.terasology.engine.entitySystem.entity.EntityBuilder;
+import org.terasology.engine.entitySystem.entity.EntityManager;
+import org.terasology.engine.entitySystem.entity.EntityRef;
+import org.terasology.engine.entitySystem.entity.lifecycleEvents.BeforeRemoveComponent;
+import org.terasology.engine.entitySystem.entity.lifecycleEvents.OnAddedComponent;
+import org.terasology.engine.entitySystem.entity.lifecycleEvents.OnChangedComponent;
+import org.terasology.engine.entitySystem.event.ReceiveEvent;
+import org.terasology.engine.entitySystem.systems.BaseComponentSystem;
+import org.terasology.engine.entitySystem.systems.RegisterMode;
+import org.terasology.engine.entitySystem.systems.RegisterSystem;
+import org.terasology.engine.logic.clipboard.ClipboardManager;
+import org.terasology.engine.logic.players.LocalPlayer;
+import org.terasology.engine.math.Region3i;
+import org.terasology.engine.registry.In;
+import org.terasology.engine.rendering.logic.RegionOutlineComponent;
+import org.terasology.inventory.logic.InventoryManager;
 import org.terasology.math.geom.Vector3i;
-import org.terasology.registry.In;
-import org.terasology.rendering.logic.RegionOutlineComponent;
 import org.terasology.structureTemplates.internal.components.EditTemplateRegionProcessComponent;
 import org.terasology.structureTemplates.internal.components.EditingUserComponent;
 import org.terasology.structureTemplates.internal.components.StructureTemplateOriginComponent;
@@ -47,19 +34,15 @@ import java.util.List;
 @RegisterSystem(RegisterMode.CLIENT)
 public class StructureTemplateEditorClientSystem extends BaseComponentSystem {
 
+    private final List<EntityRef> regionOutlineEntities = new ArrayList<>();
     @In
     private ClipboardManager clipboardManager;
-
     @In
     private LocalPlayer locatPlayer;
-
     @In
     private EntityManager entityManager;
-
     @In
     private InventoryManager inventoryManager;
-
-    private List<EntityRef> regionOutlineEntities = new ArrayList<>();
     private EntityRef highlightedEditorEntity = EntityRef.NULL;
 
 
@@ -76,13 +59,13 @@ public class StructureTemplateEditorClientSystem extends BaseComponentSystem {
 
     @ReceiveEvent
     public void onChangedCopyBlockRegionComponent(OnChangedComponent event, EntityRef entity,
-                                             StructureTemplateOriginComponent component) {
+                                                  StructureTemplateOriginComponent component) {
         updateHighlightedEditorEntity();
     }
 
     @ReceiveEvent
     public void onBeforeRemoveCopyBlockRegionComponent(BeforeRemoveComponent event, EntityRef entity,
-                                                  StructureTemplateOriginComponent component) {
+                                                       StructureTemplateOriginComponent component) {
         if (entity.equals(highlightedEditorEntity)) {
             setHighlightedEditorEntity(EntityRef.NULL);
         }
@@ -119,10 +102,10 @@ public class StructureTemplateEditorClientSystem extends BaseComponentSystem {
     }
 
     public void updateOutlineEntities() {
-            List<Region3i> regionsToDraw = getRegionsToDraw();
+        List<Region3i> regionsToDraw = getRegionsToDraw();
         destoryOutlineEntities();
 
-        for (Region3i regionToDraw: regionsToDraw) {
+        for (Region3i regionToDraw : regionsToDraw) {
             EntityBuilder entityBuilder = entityManager.newBuilder();
             entityBuilder.setPersistent(false);
             RegionOutlineComponent regionOutlineComponent = new RegionOutlineComponent();
@@ -152,7 +135,8 @@ public class StructureTemplateEditorClientSystem extends BaseComponentSystem {
         }
 
         EntityRef editProcessEntity = editingUserComponent.editProcessEntity;
-        EditTemplateRegionProcessComponent editTemplateRegionProcessComponent = editProcessEntity.getComponent(EditTemplateRegionProcessComponent.class);
+        EditTemplateRegionProcessComponent editTemplateRegionProcessComponent =
+                editProcessEntity.getComponent(EditTemplateRegionProcessComponent.class);
         if (editTemplateRegionProcessComponent == null) {
             return EntityRef.NULL;
         }
@@ -162,7 +146,8 @@ public class StructureTemplateEditorClientSystem extends BaseComponentSystem {
 
     private List<Region3i> getRegionsToDraw() {
 
-        StructureTemplateOriginComponent structureTemplateOriginComponent = highlightedEditorEntity.getComponent(StructureTemplateOriginComponent.class);
+        StructureTemplateOriginComponent structureTemplateOriginComponent =
+                highlightedEditorEntity.getComponent(StructureTemplateOriginComponent.class);
         if (structureTemplateOriginComponent == null) {
             return Collections.emptyList();
         }

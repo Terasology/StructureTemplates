@@ -1,40 +1,27 @@
-/*
- * Copyright 2017 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2020 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.structureTemplates.internal.systems;
 
-import org.terasology.engine.Time;
-import org.terasology.entitySystem.entity.EntityBuilder;
-import org.terasology.entitySystem.entity.EntityManager;
-import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.entitySystem.entity.lifecycleEvents.BeforeDeactivateComponent;
-import org.terasology.entitySystem.entity.lifecycleEvents.OnActivatedComponent;
-import org.terasology.entitySystem.event.ReceiveEvent;
-import org.terasology.entitySystem.systems.BaseComponentSystem;
-import org.terasology.entitySystem.systems.RegisterMode;
-import org.terasology.entitySystem.systems.RegisterSystem;
-import org.terasology.entitySystem.systems.UpdateSubscriberSystem;
+import org.terasology.engine.core.Time;
+import org.terasology.engine.entitySystem.entity.EntityBuilder;
+import org.terasology.engine.entitySystem.entity.EntityManager;
+import org.terasology.engine.entitySystem.entity.EntityRef;
+import org.terasology.engine.entitySystem.entity.lifecycleEvents.BeforeDeactivateComponent;
+import org.terasology.engine.entitySystem.entity.lifecycleEvents.OnActivatedComponent;
+import org.terasology.engine.entitySystem.event.ReceiveEvent;
+import org.terasology.engine.entitySystem.systems.BaseComponentSystem;
+import org.terasology.engine.entitySystem.systems.RegisterMode;
+import org.terasology.engine.entitySystem.systems.RegisterSystem;
+import org.terasology.engine.entitySystem.systems.UpdateSubscriberSystem;
+import org.terasology.engine.logic.location.LocationComponent;
+import org.terasology.engine.registry.In;
+import org.terasology.engine.rendering.assets.material.Material;
+import org.terasology.engine.rendering.logic.MeshComponent;
+import org.terasology.engine.world.block.Block;
+import org.terasology.engine.world.block.BlockManager;
 import org.terasology.gestalt.assets.management.AssetManager;
-import org.terasology.logic.location.LocationComponent;
 import org.terasology.math.geom.Vector3f;
-import org.terasology.registry.In;
-import org.terasology.rendering.assets.material.Material;
-import org.terasology.rendering.logic.MeshComponent;
 import org.terasology.structureTemplates.components.FallingBlockComponent;
-import org.terasology.world.block.Block;
-import org.terasology.world.block.BlockManager;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -49,24 +36,19 @@ public class FallingBlockPlacementClientSystem extends BaseComponentSystem imple
      * A strongly rounded gravity value
      */
     public static final float FALLING_BLOCK_ACCELERATION_IN_M_PER_MS = -10f / (1000f * 100f);
-
+    private final Map<EntityRef, EntityRef> dataToVisualEntityMap = new LinkedHashMap<>();
     @In
     private Time time;
-
     @In
     private EntityManager entityManager;
-
     @In
     private BlockManager blockManager;
-
     @In
     private AssetManager assetManager;
 
-    private Map<EntityRef, EntityRef> dataToVisualEntityMap = new LinkedHashMap<>();
-
     @Override
     public void update(float delta) {
-        for (Map.Entry<EntityRef, EntityRef> entry: dataToVisualEntityMap.entrySet()) {
+        for (Map.Entry<EntityRef, EntityRef> entry : dataToVisualEntityMap.entrySet()) {
             EntityRef dataEntity = entry.getKey();
             EntityRef visualEntity = entry.getValue();
 
@@ -90,11 +72,12 @@ public class FallingBlockPlacementClientSystem extends BaseComponentSystem imple
             position = finalPosition;
         } else {
             float totalFallDurationInMs = component.stopGameTimeInMs - component.startGameTimeInMs;
-            float totalFallHeight = 0.5f*(-FALLING_BLOCK_ACCELERATION_IN_M_PER_MS) * totalFallDurationInMs * totalFallDurationInMs;
+            float totalFallHeight =
+                    0.5f * (-FALLING_BLOCK_ACCELERATION_IN_M_PER_MS) * totalFallDurationInMs * totalFallDurationInMs;
 
             float fallDuration = (component.startGameTimeInMs - time.getGameTimeInMs());
 
-            float amountFallen = 0.5f*(-FALLING_BLOCK_ACCELERATION_IN_M_PER_MS) * fallDuration * fallDuration;
+            float amountFallen = 0.5f * (-FALLING_BLOCK_ACCELERATION_IN_M_PER_MS) * fallDuration * fallDuration;
 
             float finalY = finalPosition.getY();
             float initialY = finalY + totalFallHeight;
@@ -107,7 +90,8 @@ public class FallingBlockPlacementClientSystem extends BaseComponentSystem imple
 
     @ReceiveEvent
     public void onActivatedFallingBlockComponent(OnActivatedComponent event, EntityRef dataEntity,
-                                             FallingBlockComponent component, LocationComponent dataLocationComponent) {
+                                                 FallingBlockComponent component,
+                                                 LocationComponent dataLocationComponent) {
         EntityBuilder entityBuilder = entityManager.newBuilder();
         entityBuilder.setPersistent(false);
         Block block = blockManager.getBlock(component.blockUri);
@@ -116,7 +100,6 @@ public class FallingBlockPlacementClientSystem extends BaseComponentSystem imple
         meshComponent.material = assetManager.getAsset("engine:terrain", Material.class).get();
         meshComponent.translucent = block.isTranslucent();
         entityBuilder.addComponent(meshComponent);
-        ;
         LocationComponent locationComponent = new LocationComponent();
         locationComponent.setWorldPosition(determineVisualFallingBlockPosition(dataEntity));
         locationComponent.setWorldScale(0.9999f);
@@ -129,7 +112,7 @@ public class FallingBlockPlacementClientSystem extends BaseComponentSystem imple
 
     @ReceiveEvent
     public void onBeforeDeactivateFallingBlockComponent(BeforeDeactivateComponent event, EntityRef dataEntity,
-                                                    FallingBlockComponent component) {
+                                                        FallingBlockComponent component) {
         EntityRef visualEntity = dataToVisualEntityMap.remove(dataEntity);
         if (visualEntity != null) {
             visualEntity.destroy();

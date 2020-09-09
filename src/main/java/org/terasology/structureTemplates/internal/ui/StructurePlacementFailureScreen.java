@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.structureTemplates.internal.ui;
 
-import org.terasology.rendering.nui.CoreScreenLayer;
+import org.terasology.engine.rendering.nui.CoreScreenLayer;
 import org.terasology.nui.WidgetUtil;
 import org.terasology.nui.widgets.UILabel;
 
@@ -13,7 +13,7 @@ public class StructurePlacementFailureScreen extends CoreScreenLayer {
 
     @Override
     public void initialise() {
-        WidgetUtil.trySubscribe(this, "okButton",  button -> getManager().popScreen());
+        WidgetUtil.trySubscribe(this, "okButton", button -> getManager().popScreen());
     }
 
     public void setMessage(String message) {

@@ -5,36 +5,36 @@ package org.terasology.structureTemplates.internal.ui;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import org.terasology.entitySystem.entity.EntityManager;
-import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.entitySystem.event.Event;
-import org.terasology.entitySystem.prefab.Prefab;
-import org.terasology.entitySystem.prefab.PrefabManager;
+import org.terasology.engine.entitySystem.entity.EntityManager;
+import org.terasology.engine.entitySystem.entity.EntityRef;
+import org.terasology.engine.entitySystem.event.Event;
+import org.terasology.engine.entitySystem.prefab.Prefab;
+import org.terasology.engine.entitySystem.prefab.PrefabManager;
+import org.terasology.engine.logic.clipboard.ClipboardManager;
+import org.terasology.engine.logic.inventory.ItemComponent;
+import org.terasology.engine.logic.players.LocalPlayer;
+import org.terasology.engine.registry.In;
+import org.terasology.engine.rendering.assets.texture.Texture;
+import org.terasology.engine.rendering.assets.texture.TextureRegion;
+import org.terasology.engine.rendering.assets.texture.TextureRegionAsset;
+import org.terasology.engine.rendering.nui.BaseInteractionScreen;
+import org.terasology.engine.world.block.BlockExplorer;
+import org.terasology.engine.world.block.BlockManager;
+import org.terasology.engine.world.block.BlockUri;
+import org.terasology.engine.world.block.shapes.BlockShape;
+import org.terasology.engine.world.block.tiles.WorldAtlas;
 import org.terasology.gestalt.assets.ResourceUrn;
 import org.terasology.gestalt.assets.management.AssetManager;
-import org.terasology.logic.clipboard.ClipboardManager;
-import org.terasology.logic.inventory.ItemComponent;
-import org.terasology.logic.players.LocalPlayer;
 import org.terasology.nui.UIWidget;
 import org.terasology.nui.databinding.ReadOnlyBinding;
 import org.terasology.nui.widgets.UIButton;
 import org.terasology.nui.widgets.treeView.Tree;
-import org.terasology.registry.In;
-import org.terasology.rendering.assets.texture.Texture;
-import org.terasology.rendering.assets.texture.TextureRegion;
-import org.terasology.rendering.assets.texture.TextureRegionAsset;
-import org.terasology.rendering.nui.BaseInteractionScreen;
 import org.terasology.structureTemplates.components.StructureTemplateComponent;
 import org.terasology.structureTemplates.events.BlockFromToolboxRequest;
 import org.terasology.structureTemplates.events.ItemFromToolboxRequest;
 import org.terasology.structureTemplates.events.StructureSpawnerFromToolboxRequest;
 import org.terasology.structureTemplates.events.StructureTemplateFromToolboxRequest;
 import org.terasology.structureTemplates.util.ItemType;
-import org.terasology.world.block.BlockExplorer;
-import org.terasology.world.block.BlockManager;
-import org.terasology.world.block.BlockUri;
-import org.terasology.world.block.shapes.BlockShape;
-import org.terasology.world.block.tiles.WorldAtlas;
 
 import java.util.Comparator;
 import java.util.List;
@@ -146,7 +146,8 @@ public class ToolboxScreen extends BaseInteractionScreen {
 
                         blockFamiliyTree.addChild(new ToolboxTreeValue(shareUrn.toString(),
                                 genericBlockTexture,
-                                () -> new BlockFromToolboxRequest(new BlockUri(block.getBlockFamilyDefinitionUrn(), shareUrn))));
+                                () -> new BlockFromToolboxRequest(new BlockUri(block.getBlockFamilyDefinitionUrn(),
+                                        shareUrn))));
                     }
                 }
                 blockTree.addChild(blockFamiliyTree);
@@ -177,7 +178,8 @@ public class ToolboxScreen extends BaseInteractionScreen {
         tree.addChild(createBlockNode(new BlockUri("StructureTemplates:StructureTemplateOrigin")));
         tree.addChild(createItemNode(getPrefab("StructureTemplates:StructureTemplateGenerator")));
         tree.addChild(createBlockNode(new BlockUri("StructureTemplates:StructurePlaceholder")));
-        tree.addChild(createItemNodeWithIcon(getPrefab("StructureTemplates:WallReplacer"), "StructureTemplates:WallReplacer16x16"));
+        tree.addChild(createItemNodeWithIcon(getPrefab("StructureTemplates:WallReplacer"), "StructureTemplates" +
+                ":WallReplacer16x16"));
 
         return tree;
     }
@@ -199,12 +201,14 @@ public class ToolboxScreen extends BaseInteractionScreen {
 
     private ToolboxTree createSubTree(final ItemType itemType, final Function<Prefab, Event> itemRequest) {
 
-        Optional<TextureRegionAsset> optionalTextureRegion = assetManager.getAsset(itemType.thumbnailUrn, TextureRegionAsset.class);
+        Optional<TextureRegionAsset> optionalTextureRegion = assetManager.getAsset(itemType.thumbnailUrn,
+                TextureRegionAsset.class);
         TextureRegion texture = optionalTextureRegion.orElse(null);
 
         ToolboxTree subTree = new ToolboxTree(new ToolboxTreeValue("Structure" + itemType.suffix, texture, null));
 
-        Prefab structureTemplateOriginPrefab = assetManager.getAsset("StructureTemplates:StructureTemplateOrigin", Prefab.class).get();
+        Prefab structureTemplateOriginPrefab = assetManager.getAsset("StructureTemplates:StructureTemplateOrigin",
+                Prefab.class).get();
         List<Prefab> prefabs = prefabManager.listPrefabs(StructureTemplateComponent.class).stream()
                 .filter(prefab -> prefab != structureTemplateOriginPrefab)
                 .sorted(Comparator.comparing(o -> o.getUrn().toString()))

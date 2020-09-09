@@ -2,44 +2,44 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.structureTemplates.internal.systems;
 
-import org.terasology.engine.Time;
-import org.terasology.entitySystem.entity.EntityBuilder;
-import org.terasology.entitySystem.entity.EntityManager;
-import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.entitySystem.entity.lifecycleEvents.BeforeDeactivateComponent;
-import org.terasology.entitySystem.entity.lifecycleEvents.OnActivatedComponent;
-import org.terasology.entitySystem.entity.lifecycleEvents.OnChangedComponent;
-import org.terasology.entitySystem.event.ReceiveEvent;
-import org.terasology.entitySystem.prefab.Prefab;
-import org.terasology.entitySystem.systems.BaseComponentSystem;
-import org.terasology.entitySystem.systems.RegisterMode;
-import org.terasology.entitySystem.systems.RegisterSystem;
-import org.terasology.entitySystem.systems.UpdateSubscriberSystem;
-import org.terasology.input.InputSystem;
-import org.terasology.logic.clipboard.ClipboardManager;
-import org.terasology.logic.common.DisplayNameComponent;
-import org.terasology.logic.inventory.InventoryComponent;
-import org.terasology.logic.inventory.InventoryManager;
-import org.terasology.logic.inventory.SelectedInventorySlotComponent;
-import org.terasology.logic.inventory.events.InventorySlotChangedEvent;
-import org.terasology.logic.location.LocationComponent;
-import org.terasology.logic.players.LocalPlayer;
-import org.terasology.logic.players.PlayerTargetChangedEvent;
-import org.terasology.math.Region3i;
-import org.terasology.math.Side;
+import org.terasology.engine.core.Time;
+import org.terasology.engine.entitySystem.entity.EntityBuilder;
+import org.terasology.engine.entitySystem.entity.EntityManager;
+import org.terasology.engine.entitySystem.entity.EntityRef;
+import org.terasology.engine.entitySystem.entity.lifecycleEvents.BeforeDeactivateComponent;
+import org.terasology.engine.entitySystem.entity.lifecycleEvents.OnActivatedComponent;
+import org.terasology.engine.entitySystem.entity.lifecycleEvents.OnChangedComponent;
+import org.terasology.engine.entitySystem.event.ReceiveEvent;
+import org.terasology.engine.entitySystem.prefab.Prefab;
+import org.terasology.engine.entitySystem.systems.BaseComponentSystem;
+import org.terasology.engine.entitySystem.systems.RegisterMode;
+import org.terasology.engine.entitySystem.systems.RegisterSystem;
+import org.terasology.engine.entitySystem.systems.UpdateSubscriberSystem;
+import org.terasology.engine.input.InputSystem;
+import org.terasology.engine.logic.clipboard.ClipboardManager;
+import org.terasology.engine.logic.common.DisplayNameComponent;
+import org.terasology.engine.logic.location.LocationComponent;
+import org.terasology.engine.logic.players.LocalPlayer;
+import org.terasology.engine.logic.players.PlayerTargetChangedEvent;
+import org.terasology.engine.math.Region3i;
+import org.terasology.engine.math.Side;
+import org.terasology.engine.registry.In;
+import org.terasology.engine.rendering.logic.RegionOutlineComponent;
+import org.terasology.engine.rendering.nui.NUIManager;
+import org.terasology.engine.world.block.BlockComponent;
+import org.terasology.inventory.logic.InventoryComponent;
+import org.terasology.inventory.logic.InventoryManager;
+import org.terasology.inventory.logic.SelectedInventorySlotComponent;
+import org.terasology.inventory.logic.events.InventorySlotChangedEvent;
 import org.terasology.math.geom.Vector3f;
 import org.terasology.math.geom.Vector3i;
-import org.terasology.registry.In;
-import org.terasology.rendering.logic.RegionOutlineComponent;
 import org.terasology.nui.Color;
-import org.terasology.rendering.nui.NUIManager;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent;
 import org.terasology.structureTemplates.components.SpawnStructureActionComponent;
 import org.terasology.structureTemplates.events.CheckSpawnConditionEvent;
 import org.terasology.structureTemplates.internal.events.StructureSpawnFailedEvent;
 import org.terasology.structureTemplates.internal.ui.StructurePlacementFailureScreen;
 import org.terasology.structureTemplates.util.BlockRegionTransform;
-import org.terasology.world.block.BlockComponent;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -47,33 +47,27 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Shows a preview/outline of the structure to spawn when the player hold a item with
- * {@link SpawnStructureActionComponent} and {@link SpawnBlockRegionsComponent}.
+ * Shows a preview/outline of the structure to spawn when the player hold a item with {@link
+ * SpawnStructureActionComponent} and {@link SpawnBlockRegionsComponent}.
  */
 @RegisterSystem(RegisterMode.CLIENT)
 public class StructureSpawnClientSystem extends BaseComponentSystem implements UpdateSubscriberSystem {
 
-    public static final String STRUCTURE_PLACEMENT_FAILURE_OVERLAY = "StructureTemplates:StructurePlacementFailureScreen";
+    public static final String STRUCTURE_PLACEMENT_FAILURE_OVERLAY = "StructureTemplates" +
+            ":StructurePlacementFailureScreen";
+    private final List<EntityRef> regionOutlineEntities = new ArrayList<>();
     @In
     private ClipboardManager clipboardManager;
-
     @In
     private LocalPlayer locatPlayer;
-
     @In
     private EntityManager entityManager;
-
     @In
     private InventoryManager inventoryManager;
-
     @In
     private NUIManager nuiManager;
-
     @In
     private InputSystem inputSystem;
-
-    private List<EntityRef> regionOutlineEntities = new ArrayList<>();
-
     private Vector3i spawnPosition;
 
     private Side directionPlayerLooksAt;
@@ -213,7 +207,8 @@ public class StructureSpawnClientSystem extends BaseComponentSystem implements U
 
         Side wantedFrontOfStructure = directionPlayerLooksAt.reverse();
 
-        BlockRegionTransform regionTransform = StructureSpawnServerSystem.createBlockRegionTransformForCharacterTargeting(
+        BlockRegionTransform regionTransform =
+                StructureSpawnServerSystem.createBlockRegionTransformForCharacterTargeting(
                 Side.FRONT, wantedFrontOfStructure, spawnPosition);
 
         List<ColoredRegion> regionsToDraw = new ArrayList<>();
@@ -233,25 +228,6 @@ public class StructureSpawnClientSystem extends BaseComponentSystem implements U
         }
         return regionsToDraw;
     }
-
-    private static final class ColoredRegion {
-        private Region3i region;
-        private Color color;
-
-        public ColoredRegion(Region3i region, Color color) {
-            this.region = region;
-            this.color = color;
-        }
-
-        public Region3i getRegion() {
-            return region;
-        }
-
-        public Color getColor() {
-            return color;
-        }
-    }
-
 
     @ReceiveEvent
     public void onStructureSpawnFailedEvent(StructureSpawnFailedEvent event, EntityRef entity,
@@ -278,5 +254,23 @@ public class StructureSpawnClientSystem extends BaseComponentSystem implements U
         StructurePlacementFailureScreen messagePopup = nuiManager.pushScreen(
                 STRUCTURE_PLACEMENT_FAILURE_OVERLAY, StructurePlacementFailureScreen.class);
         messagePopup.setMessage(message);
+    }
+
+    private static final class ColoredRegion {
+        private final Region3i region;
+        private final Color color;
+
+        public ColoredRegion(Region3i region, Color color) {
+            this.region = region;
+            this.color = color;
+        }
+
+        public Region3i getRegion() {
+            return region;
+        }
+
+        public Color getColor() {
+            return color;
+        }
     }
 }
