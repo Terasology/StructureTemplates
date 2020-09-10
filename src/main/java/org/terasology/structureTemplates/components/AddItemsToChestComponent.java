@@ -6,7 +6,7 @@ import org.terasology.engine.entitySystem.Component;
 import org.terasology.engine.entitySystem.prefab.Prefab;
 import org.terasology.engine.world.block.family.BlockFamily;
 import org.terasology.math.geom.Vector3i;
-import org.terasology.reflection.MappedContainer;
+import org.terasology.nui.reflection.MappedContainer;
 import org.terasology.structureTemplates.events.SpawnStructureEvent;
 
 import java.util.List;
