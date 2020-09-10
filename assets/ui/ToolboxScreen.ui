@@ -4,7 +4,7 @@
     "type": "RelativeLayout",
     "contents": [
       {
-        "type": "engine:UIBox",
+        "type": "nui:UIBox",
         "layoutInfo": {
           "width": 700,
           "height": 600,
@@ -28,7 +28,7 @@
                   }
                 },
                 {
-                  "type": "engine:UISpace",
+                  "type": "nui:UISpace",
                   "layoutInfo": {}
                 }
               ],
@@ -43,14 +43,14 @@
               "type": "RowLayout",
               "contents": [
                 {
-                  "type": "engine:UISpace",
+                  "type": "nui:UISpace",
                   "layoutInfo": {}
                 }
               ],
               "layoutInfo": {}
             },
             {
-              "type": "engine:RelativeLayout",
+              "type": "nui:RelativeLayout",
               "id": "bottomRow",
               "layoutInfo": {
                 "position-bottom": {},
@@ -84,7 +84,7 @@
               ]
             },
             {
-              "type": "engine:ScrollableArea",
+              "type": "nui:ScrollableArea",
               "layoutInfo": {
                 "position-top": {
                   "widget": "topRow",

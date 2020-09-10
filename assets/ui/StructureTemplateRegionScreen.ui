@@ -5,7 +5,7 @@
     "type": "RelativeLayout",
     "contents": [
       {
-        "type": "engine:UIBox",
+        "type": "nui:UIBox",
         "layoutInfo": {
           "use-content-height": true,
           "width": 240,

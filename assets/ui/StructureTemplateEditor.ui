@@ -5,7 +5,7 @@
     "type": "RelativeLayout",
     "contents": [
       {
-        "type": "engine:UIBox",
+        "type": "nui:UIBox",
         "layoutInfo": {
           "use-content-height": true,
           "width": 300,
@@ -47,19 +47,19 @@
               "id": "createTemplateButton"
             },
             {
-              "type": "engine:RowLayout",
+              "type": "nui:rowLayout",
               "id": "newWidget",
               "layoutInfo": {},
               "contents": [
                 {
-                  "type": "engine:UICheckbox",
+                  "type": "nui:UICheckbox",
                   "id": "recordBlockAdditionCheckBox",
                   "layoutInfo": {
                     "relativeWidth": 0.1
                   }
                 },
                 {
-                  "type": "engine:UILabel",
+                  "type": "nui:UILabel",
                   "layoutInfo": {
                     "useContentWidth": true
                   },
@@ -68,19 +68,19 @@
               ]
             },
             {
-              "type": "engine:RowLayout",
+              "type": "nui:rowLayout",
               "id": "newWidget",
               "layoutInfo": {},
               "contents": [
                 {
-                  "type": "engine:UICheckbox",
+                  "type": "nui:UICheckbox",
                   "id": "recordBlockRemovalCheckBox",
                   "layoutInfo": {
                     "relativeWidth": 0.1
                   }
                 },
                 {
-                  "type": "engine:UILabel",
+                  "type": "nui:UILabel",
                   "layoutInfo": {
                     "useContentWidth": true
                   },

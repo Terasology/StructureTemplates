@@ -4,7 +4,7 @@
     "type": "RelativeLayout",
     "contents": [
       {
-        "type": "engine:UIBox",
+        "type": "nui:UIBox",
         "layoutInfo": {
           "width": 400,
           "height": 140,
@@ -19,7 +19,7 @@
               "type": "RelativeLayout",
               "contents": [
                 {
-                  "type": "engine:UILabel",
+                  "type": "nui:UILabel",
                   "layoutInfo": {
                     "position-left": {},
                     "use-content-width": true,
@@ -29,7 +29,7 @@
                   "id": "replacementTypeLabel"
                 },
                 {
-                  "type": "engine:UIDropdown",
+                  "type": "nui:UIDropdown",
                   "id": "replacementTypeComboBox",
                   "layoutInfo": {
                     "position-left": {
@@ -57,7 +57,7 @@
               "type": "RelativeLayout",
               "contents": [
                 {
-                  "type": "engine:UILabel",
+                  "type": "nui:UILabel",
                   "layoutInfo": {
                     "position-left": {},
                     "use-content-width": true,
@@ -67,7 +67,7 @@
                   "id": "blockLabel"
                 },
                 {
-                  "type": "engine:UIDropdownScrollable",
+                  "type": "nui:UIDropdownScrollable",
                   "id": "blockComboBox",
                   "layoutInfo": {
                     "position-left": {
