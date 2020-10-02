@@ -34,6 +34,7 @@ import org.terasology.logic.characters.CharacterComponent;
 import org.terasology.logic.common.ActivateEvent;
 import org.terasology.logic.health.DoDestroyEvent;
 import org.terasology.logic.inventory.InventoryManager;
+import org.terasology.math.JomlUtil;
 import org.terasology.math.Region3i;
 import org.terasology.math.Side;
 import org.terasology.math.geom.Vector3f;
@@ -134,7 +135,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         Vector3i position = blockComponent.getPosition();
 
 
-        Vector3f directionVector = event.getDirection();
+        Vector3f directionVector = JomlUtil.from(event.getDirection());
         Side directionStructureIsIn = Side.inHorizontalDirection(directionVector.getX(), directionVector.getZ());
         Side frontDirectionOfStructure = directionStructureIsIn.reverse();
 
@@ -722,7 +723,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         }
 
         Vector3i position = blockComponent.getPosition();
-        Vector3f directionVector = event.getDirection();
+        Vector3f directionVector = JomlUtil.from(event.getDirection());
         Side directionStructureIsIn = Side.inHorizontalDirection(directionVector.getX(), directionVector.getZ());
         Side frontDirectionOfStructure = directionStructureIsIn.reverse();
 
