@@ -19,6 +19,7 @@ import org.terasology.entitySystem.Component;
 import org.terasology.math.Region3i;
 import org.terasology.network.FieldReplicateType;
 import org.terasology.network.Replicate;
+import org.terasology.world.block.BlockRegion;
 
 /**
  * Add this component to an item to make it spawn a structure on activation.
@@ -26,6 +27,6 @@ import org.terasology.network.Replicate;
 public class SpawnStructureActionComponent implements Component {
 
     @Replicate(FieldReplicateType.SERVER_TO_OWNER)
-    public Region3i unconfirmSpawnErrorRegion;
+    public BlockRegion unconfirmSpawnErrorRegion;
 
 }

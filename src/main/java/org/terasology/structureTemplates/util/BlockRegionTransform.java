@@ -15,15 +15,20 @@
  */
 package org.terasology.structureTemplates.util;
 
+import org.joml.AxisAngle4f;
+import org.joml.Math;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
+import org.joml.Vector3i;
+import org.terasology.math.JomlUtil;
 import org.terasology.math.Region3i;
 import org.terasology.math.Side;
-import org.terasology.math.geom.Quat4f;
-import org.terasology.math.geom.Vector3f;
-import org.terasology.math.geom.Vector3i;
 import org.terasology.structureTemplates.components.BlockRegionTransformComponent;
 import org.terasology.world.block.Block;
+import org.terasology.world.block.BlockRegion;
 import org.terasology.world.block.family.AttachedToSurfaceFamily;
 import org.terasology.world.block.family.BlockFamily;
+import org.terasology.world.block.family.BlockPlacementData;
 import org.terasology.world.block.family.SideDefinedBlockFamily;
 
 /**
@@ -82,7 +87,13 @@ public class BlockRegionTransform {
     }
 
     public Region3i transformRegion(Region3i region) {
-        return Region3i.createBounded(transformVector3i(region.min()), transformVector3i(region.max()));
+        return Region3i.createBounded(JomlUtil.from(transformVector3i(JomlUtil.from(region.min()))), JomlUtil.from(transformVector3i(JomlUtil.from(region.max()))));
+    }
+
+
+    public BlockRegion transformRegion(BlockRegion region) {
+        return new BlockRegion(transformVector3i(region.getMin(new Vector3i())),
+            transformVector3i(region.getMax(new Vector3i())));
     }
 
     public Block transformBlock(Block block) {
@@ -92,7 +103,7 @@ public class BlockRegionTransform {
             return sideDefinedBlockFamily.getBlockForSide(transformSide(block.getDirection()));
         } else if (blockFamily instanceof AttachedToSurfaceFamily) {
             // TODO add some proper method to block famility to not have to do this hack
-            return blockFamily.getBlockForPlacement(null, transformSide(block.getDirection()), null);
+            return blockFamily.getBlockForPlacement(new BlockPlacementData(new Vector3i(), transformSide(block.getDirection()), new Vector3f()));
         }
         return block;
     }
@@ -103,7 +114,7 @@ public class BlockRegionTransform {
 
     public Vector3i transformVector3i(Vector3i vectorToTransform) {
         Vector3i result = vectorRotatedClockWiseHorizontallyNTimes(vectorToTransform,
-                counterClockWiseHorizontal90DegreeRotations);
+            counterClockWiseHorizontal90DegreeRotations);
         result.add(offset);
         return result;
     }
@@ -113,27 +124,27 @@ public class BlockRegionTransform {
         for (int i = 0; i < amount; i++) {
             int xBackup = result.x();
             int zBackup = result.z();
-            result.setX(-zBackup);
-            result.setZ(xBackup);
+            result.x = -zBackup;
+            result.z = xBackup;
         }
         return result;
     }
 
-    public Quat4f transformRotation(Quat4f rotation) {
+    public Quaternionf transformRotation(Quaternionf rotation) {
         Side side = transformSide(Side.FRONT);
-        Quat4f calculatedRotation = new Quat4f(0, 0, 0, 0);
+        Quaternionf calculatedRotation = new Quaternionf(0, 0, 0, 0);
         switch (side) {
             case FRONT:
-                calculatedRotation = new Quat4f(Vector3f.up(), (float) Math.toRadians(0));
+                calculatedRotation = new Quaternionf(new AxisAngle4f(Math.toRadians(0), 0, 1, 0));
                 break;
             case RIGHT:
-                calculatedRotation = new Quat4f(Vector3f.up(), (float) Math.toRadians(90));
+                calculatedRotation = new Quaternionf(new AxisAngle4f(Math.toRadians(90), 0, 1, 0));
                 break;
             case BACK:
-                calculatedRotation = new Quat4f(Vector3f.up(), (float) Math.toRadians(180));
+                calculatedRotation = new Quaternionf(new AxisAngle4f(Math.toRadians(180), 0, 1, 0));
                 break;
             case LEFT:
-                calculatedRotation = new Quat4f(Vector3f.up(), (float) Math.toRadians(270));
+                calculatedRotation = new Quaternionf(new AxisAngle4f(Math.toRadians(270), 0, 1, 0));
                 break;
         }
         calculatedRotation.mul(rotation);
@@ -142,17 +153,16 @@ public class BlockRegionTransform {
 
     public BlockRegionTransformComponent toComponent() {
         BlockRegionTransformComponent component = new BlockRegionTransformComponent();
-        component.offset = this.offset;
+        component.offset = JomlUtil.from(this.offset);
         component.counterClockWiseHorizontal90DegreeRotations = this.counterClockWiseHorizontal90DegreeRotations;
         return component;
     }
 
     public static BlockRegionTransform createFromComponent(BlockRegionTransformComponent component) {
-        return new BlockRegionTransform(component.counterClockWiseHorizontal90DegreeRotations, component.offset);
+        return new BlockRegionTransform(component.counterClockWiseHorizontal90DegreeRotations, JomlUtil.from(component.offset));
     }
 
     /**
-     *
      * @return a transformation that does nothing
      */
     public static BlockRegionTransform getTransformationThatDoesNothing() {

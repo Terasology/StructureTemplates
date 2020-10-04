@@ -16,6 +16,9 @@
 package org.terasology.structureTemplates.internal.systems;
 
 import com.google.common.collect.Lists;
+import org.joml.Vector3f;
+import org.joml.Vector3i;
+import org.joml.Vector3ic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.entitySystem.MutableComponentContainer;
@@ -37,8 +40,6 @@ import org.terasology.logic.inventory.InventoryManager;
 import org.terasology.math.JomlUtil;
 import org.terasology.math.Region3i;
 import org.terasology.math.Side;
-import org.terasology.math.geom.Vector3f;
-import org.terasology.math.geom.Vector3i;
 import org.terasology.network.NetworkComponent;
 import org.terasology.registry.In;
 import org.terasology.structureTemplates.components.BlockPlaceholderComponent;
@@ -75,6 +76,8 @@ import org.terasology.world.WorldProvider;
 import org.terasology.world.block.Block;
 import org.terasology.world.block.BlockComponent;
 import org.terasology.world.block.BlockManager;
+import org.terasology.world.block.BlockRegion;
+import org.terasology.world.block.BlockRegionIterable;
 import org.terasology.world.block.entity.placement.PlaceBlocks;
 import org.terasology.world.block.family.BlockFamily;
 import org.terasology.world.block.family.HorizontalFamily;
@@ -98,9 +101,9 @@ import java.util.stream.Collectors;
  */
 @RegisterSystem(RegisterMode.AUTHORITY)
 public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
-    private static final Comparator<RegionToFill> REGION_BY_MIN_X_COMPARATOR = Comparator.comparing(r -> r.region.minX());
-    private static final Comparator<RegionToFill> REGION_BY_MIN_Y_COMPARATOR = Comparator.comparing(r -> r.region.minY());
-    private static final Comparator<RegionToFill> REGION_BY_MIN_Z_COMPARATOR = Comparator.comparing(r -> r.region.minZ());
+    private static final Comparator<RegionToFill> REGION_BY_MIN_X_COMPARATOR = Comparator.comparing(r -> r.region.getMinX());
+    private static final Comparator<RegionToFill> REGION_BY_MIN_Y_COMPARATOR = Comparator.comparing(r -> r.region.getMinY());
+    private static final Comparator<RegionToFill> REGION_BY_MIN_Z_COMPARATOR = Comparator.comparing(r -> r.region.getMinZ());
     private static final Comparator<RegionToFill> REGION_BY_BLOCK_TYPE_COMPARATOR = Comparator.comparing(r -> r.blockType.getURI().toString());
     private static final Logger LOGGER = LoggerFactory.getLogger(StructureTemplateEditorServerSystem.class);
 
@@ -132,17 +135,17 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         if (blockComponent == null) {
             return;
         }
-        Vector3i position = blockComponent.getPosition();
+        Vector3i position = JomlUtil.from(blockComponent.position);
 
 
-        Vector3f directionVector = JomlUtil.from(event.getDirection());
-        Side directionStructureIsIn = Side.inHorizontalDirection(directionVector.getX(), directionVector.getZ());
+        Vector3f directionVector = event.getDirection();
+        Side directionStructureIsIn = Side.inHorizontalDirection(directionVector.x(), directionVector.z());
         Side frontDirectionOfStructure = directionStructureIsIn.reverse();
 
         StructureTemplateComponent component = new StructureTemplateComponent();
 
         boolean originPlaced = placeOriginMarkerWithTemplateData(event, position, frontDirectionOfStructure,
-                Lists.newArrayList(), component);
+            Lists.newArrayList(), component);
         if (!originPlaced) {
             return;
         }
@@ -210,7 +213,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         if (editorComponent == null) {
             return; // can happen if entity got destroyed
         }
-        Set<Vector3i> positionSet = Collections.singleton(blockComponent.getPosition());
+        Set<Vector3i> positionSet = Collections.singleton(JomlUtil.from(blockComponent.position));
         if (editTemplateRegionProcessComponent.recordBlockAddition && !editTemplateRegionProcessComponent.recordBlockRemoval) {
             removeBlockPositionsFromTemplate(positionSet, editorEnitity, editorComponent);
         }
@@ -220,26 +223,26 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
     }
 
     private void addBlockPositionsToTemplate(Set<Vector3i> positions, EntityRef templateEnitity, StructureTemplateOriginComponent templateComponent) {
-        List<Region3i> originalRegions = templateComponent.absoluteTemplateRegions;
+        List<BlockRegion> originalRegions = templateComponent.absoluteTemplateRegions;
         Set<Vector3i> positionsInTemplate = RegionMergeUtil.positionsOfRegions(originalRegions);
         if (positionsInTemplate.containsAll(positions)) {
             // nothing to do
         } else {
             positionsInTemplate.addAll(positions);
-            List<Region3i> newTemplateRegions = RegionMergeUtil.mergePositionsIntoRegions(positionsInTemplate);
+            List<BlockRegion> newTemplateRegions = RegionMergeUtil.mergePositionsIntoRegions(positionsInTemplate);
             templateComponent.absoluteTemplateRegions = newTemplateRegions;
             templateEnitity.saveComponent(templateComponent);
         }
     }
 
     private void removeBlockPositionsFromTemplate(Set<Vector3i> positions, EntityRef templateEntity, StructureTemplateOriginComponent templateComponent) {
-        List<Region3i> originalRegions = templateComponent.absoluteTemplateRegions;
+        List<BlockRegion> originalRegions = templateComponent.absoluteTemplateRegions;
         Set<Vector3i> positionsInTemplate = RegionMergeUtil.positionsOfRegions(originalRegions);
         if (!positionsInTemplate.containsAll(positions)) {
             // nothing to do
         } else {
             positionsInTemplate.removeAll(positions);
-            List<Region3i> newTemplateRegions = RegionMergeUtil.mergePositionsIntoRegions(positionsInTemplate);
+            List<BlockRegion> newTemplateRegions = RegionMergeUtil.mergePositionsIntoRegions(positionsInTemplate);
             templateComponent.absoluteTemplateRegions = newTemplateRegions;
             templateEntity.saveComponent(templateComponent);
         }
@@ -383,23 +386,22 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         BlockRegionTransform transformToRelative = createAbsoluteToRelativeTransform(blockComponent);
 
         Map<Block, Set<Vector3i>> blockToAbsPositionsMap = createBlockToAbsolutePositionsMap(
-                structureTemplateOriginComponent);
+            structureTemplateOriginComponent);
 
 
         BuildStructureTemplateEntityEvent createTemplateEvent = new BuildStructureTemplateEntityEvent(templateEntity,
-                transformToRelative, blockToAbsPositionsMap);
+            transformToRelative, blockToAbsPositionsMap);
         editorEntity.send(createTemplateEvent);
     }
 
     @ReceiveEvent
     public void onBuildStructureTemplate(BuildStructureTemplateEntityEvent event, EntityRef entity,
-                                                StructureTemplateComponent componentOfEditor) {
+                                         StructureTemplateComponent componentOfEditor) {
         MutableComponentContainer templateEntity = event.getTemplateEntity();
         templateEntity.addOrSaveComponent(componentLibrary.copy(componentOfEditor));
         if (componentOfEditor.animationType == AnimationType.FallingBlock) {
             templateEntity.addOrSaveComponent(new FallingBlocksPlacementAlgorithmComponent());
-        }
-        else if (componentOfEditor.animationType == AnimationType.NoAnimation) {
+        } else if (componentOfEditor.animationType == AnimationType.NoAnimation) {
             templateEntity.addOrSaveComponent(new NoConstructionAnimationComponent());
         }
     }
@@ -410,7 +412,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         BlockRegionTransform transformToRelative = event.getTransformToRelative();
         SpawnBlockRegionsComponent spawnBlockRegionsComponent = new SpawnBlockRegionsComponent();
         spawnBlockRegionsComponent.regionsToFill = createRegionsToFill(structureTemplateOriginComponent,
-                transformToRelative);
+            transformToRelative);
         MutableComponentContainer templateEntity = event.getTemplateEntity();
         templateEntity.addOrSaveComponent(spawnBlockRegionsComponent);
     }
@@ -421,18 +423,18 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         BlockFamily blockFamily = blockManager.getBlockFamily("StructureTemplates:StructurePlaceholder");
 
         List<ScheduleStructurePlacementComponent.PlacementToSchedule> placementToSchedules = new ArrayList<>();
-        for (Vector3i position: event.findAbsolutePositionsOf(blockFamily)) {
+        for (Vector3i position : event.findAbsolutePositionsOf(blockFamily)) {
             EntityRef blockEntity = blockEntityRegistry.getBlockEntityAt(position);
             StructurePlaceholderComponent structurePlaceholderComponent = blockEntity.getComponent(
-                    StructurePlaceholderComponent.class);
+                StructurePlaceholderComponent.class);
             if (structurePlaceholderComponent.selectedPrefab == null) {
                 continue;
             }
             BlockComponent blockComponent = blockEntity.getComponent(BlockComponent.class);
             ScheduleStructurePlacementComponent.PlacementToSchedule placementToSchedule = new ScheduleStructurePlacementComponent.PlacementToSchedule();
-            placementToSchedule.position = transformToRelative.transformVector3i(blockComponent.getPosition());
-            placementToSchedule.position.subY(1); // placeholder is on top of marked block
-            placementToSchedule.front = transformToRelative.transformSide(blockComponent.getBlock().getDirection());
+            placementToSchedule.position = transformToRelative.transformVector3i(JomlUtil.from(blockComponent.position));
+            placementToSchedule.position.y -= 1; // placeholder is on top of marked block
+            placementToSchedule.front = transformToRelative.transformSide(blockComponent.block.getDirection());
             placementToSchedule.structureTemplateType = structurePlaceholderComponent.selectedPrefab;
             placementToSchedules.add(placementToSchedule);
         }
@@ -445,7 +447,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
 
     @ReceiveEvent(priority = EventPriority.PRIORITY_CRITICAL)
     public void onBuildTemplateComponentString(BuildStructureTemplateStringEvent event, EntityRef template,
-                                                      StructureTemplateComponent component) {
+                                               StructureTemplateComponent component) {
         StringBuilder sb = new StringBuilder();
         sb.append("    \"StructureTemplate\": {\n");
         boolean firstProperty = true;
@@ -473,7 +475,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
 
     @ReceiveEvent(priority = EventPriority.PRIORITY_HIGH)
     public void onBuildTemplateStringWithBlockRegions(BuildStructureTemplateStringEvent event, EntityRef template,
-                                               SpawnBlockRegionsComponent component) {
+                                                      SpawnBlockRegionsComponent component) {
         StringBuilder sb = new StringBuilder();
         sb.append("    \"SpawnBlockRegions\": {\n");
         sb.append("        \"regionsToFill\": [\n");
@@ -508,27 +510,27 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         sb.append("    \"ScheduleStructurePlacement\": {\n");
         sb.append("        \"placementsToSchedule\": [\n");
         ListUtil.visitList(component.placementsToSchedule,
-                (ScheduleStructurePlacementComponent.PlacementToSchedule placementToSchedule, boolean last)-> {
-            sb.append("            {\n");
-            sb.append("                \"structureTemplateType\": \"");
-            sb.append(placementToSchedule.structureTemplateType.getUrn().toString());
-            sb.append("\",\n");
-            sb.append("                \"front\": \"");
-            sb.append(placementToSchedule.front.name());
-            sb.append("\",\n");
-            sb.append("                \"position\": [");
-            sb.append(placementToSchedule.position.x);
-            sb.append(", ");
-            sb.append(placementToSchedule.position.y);
-            sb.append(", ");
-            sb.append(placementToSchedule.position.z);
-            sb.append("]\n");
-            if (last) {
-                sb.append("        }\n");
-            } else {
-                sb.append("        },\n");
-            }
-        });
+            (ScheduleStructurePlacementComponent.PlacementToSchedule placementToSchedule, boolean last) -> {
+                sb.append("            {\n");
+                sb.append("                \"structureTemplateType\": \"");
+                sb.append(placementToSchedule.structureTemplateType.getUrn().toString());
+                sb.append("\",\n");
+                sb.append("                \"front\": \"");
+                sb.append(placementToSchedule.front.name());
+                sb.append("\",\n");
+                sb.append("                \"position\": [");
+                sb.append(placementToSchedule.position.x);
+                sb.append(", ");
+                sb.append(placementToSchedule.position.y);
+                sb.append(", ");
+                sb.append(placementToSchedule.position.z);
+                sb.append("]\n");
+                if (last) {
+                    sb.append("        }\n");
+                } else {
+                    sb.append("        },\n");
+                }
+            });
         sb.append("        ]\n");
         sb.append("    }");
         event.addJsonForComponent(sb.toString(), ScheduleStructurePlacementComponent.class);
@@ -580,10 +582,10 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
 
     @ReceiveEvent(components = {BlockItemComponent.class})
     public void onBlockItemPlaced(OnBlockItemPlaced event, EntityRef itemEntity,
-                         StructureTemplateOriginComponent editorComponentOfItem) {
+                                  StructureTemplateOriginComponent editorComponentOfItem) {
         EntityRef placedBlockEntity = event.getPlacedBlock();
 
-        StructureTemplateOriginComponent editorComponentOfBlock = placedBlockEntity.getComponent(StructureTemplateOriginComponent.class );
+        StructureTemplateOriginComponent editorComponentOfBlock = placedBlockEntity.getComponent(StructureTemplateOriginComponent.class);
         if (editorComponentOfBlock == null) {
             editorComponentOfBlock = new StructureTemplateOriginComponent();
         }
@@ -599,7 +601,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
 
     @ReceiveEvent(components = {})
     public void onBlockToItem(OnBlockToItem event, EntityRef blockEntity,
-                                   StructureTemplateOriginComponent componentOfBlock) {
+                              StructureTemplateOriginComponent componentOfBlock) {
         EntityRef item = event.getItem();
         StructureTemplateOriginComponent componentOfItem = item.getComponent(StructureTemplateOriginComponent.class);
         if (componentOfItem == null) {
@@ -615,13 +617,13 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         item.addOrSaveComponent(componentLibrary.copy(structureTemplateComponentOfBlock));
     }
 
-    private Map<Block,Set<Vector3i>> createBlockToAbsolutePositionsMap(
-            StructureTemplateOriginComponent structureTemplateOriginComponent) {
-        List<Region3i> absoluteRegions = structureTemplateOriginComponent.absoluteTemplateRegions;
+    private Map<Block, Set<Vector3i>> createBlockToAbsolutePositionsMap(
+        StructureTemplateOriginComponent structureTemplateOriginComponent) {
+        List<BlockRegion> absoluteRegions = structureTemplateOriginComponent.absoluteTemplateRegions;
 
         Map<Block, Set<Vector3i>> map = new HashMap<>();
-        for (Region3i absoluteRegion : absoluteRegions) {
-            for (Vector3i absolutePosition : absoluteRegion) {
+        for (BlockRegion absoluteRegion : absoluteRegions) {
+            for (Vector3ic absolutePosition : BlockRegionIterable.region(absoluteRegion).build()) {
                 Block block = worldProvider.getBlock(absolutePosition);
                 Set<Vector3i> positions = map.get(block);
                 if (positions == null) {
@@ -637,11 +639,11 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
 
     private List<RegionToFill> createRegionsToFill(StructureTemplateOriginComponent structureTemplateOriginComponent,
                                                    BlockRegionTransform transformToRelative) {
-        List<Region3i> absoluteRegions = structureTemplateOriginComponent.absoluteTemplateRegions;
+        List<BlockRegion> absoluteRegions = structureTemplateOriginComponent.absoluteTemplateRegions;
 
         List<RegionToFill> regionsToFill = new ArrayList<>();
-        for (Region3i absoluteRegion: absoluteRegions) {
-            for (Vector3i absolutePosition : absoluteRegion) {
+        for (BlockRegion absoluteRegion : absoluteRegions) {
+            for (Vector3ic absolutePosition : BlockRegionIterable.region(absoluteRegion).build()) {
                 EntityRef blockEntity = blockEntityRegistry.getBlockEntityAt(absolutePosition);
                 BlockPlaceholderComponent placeholderComponent = blockEntity.getComponent(BlockPlaceholderComponent.class);
                 Block block;
@@ -655,8 +657,8 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
                 }
                 Block relativeBlock = transformToRelative.transformBlock(block);
                 RegionToFill regionToFill = new RegionToFill();
-                Vector3i relativePosition = transformToRelative.transformVector3i(absolutePosition);
-                Region3i region = Region3i.createBounded(relativePosition, relativePosition);
+                Vector3i relativePosition = transformToRelative.transformVector3i(new Vector3i(absolutePosition));
+                BlockRegion region = new BlockRegion().union(relativePosition).union(relativePosition);
                 regionToFill.region = region;
                 regionToFill.blockType = relativeBlock;
                 regionsToFill.add(regionToFill);
@@ -666,24 +668,23 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         }
         RegionMergeUtil.mergeRegionsToFill(regionsToFill);
         regionsToFill.sort(REGION_BY_BLOCK_TYPE_COMPARATOR.thenComparing(REGION_BY_MIN_Z_COMPARATOR)
-                .thenComparing(REGION_BY_MIN_X_COMPARATOR).thenComparing(REGION_BY_MIN_Y_COMPARATOR));
+            .thenComparing(REGION_BY_MIN_X_COMPARATOR).thenComparing(REGION_BY_MIN_Y_COMPARATOR));
         return regionsToFill;
     }
 
 
-
     // TODO move 2 methods to utility class
     public static BlockRegionTransform createAbsoluteToRelativeTransform(BlockComponent blockComponent) {
-        Side front = blockComponent.getBlock().getDirection();
+        Side front = blockComponent.block.getDirection();
         Vector3i minusOrigin = new Vector3i(0, 0, 0);
-        minusOrigin.sub(blockComponent.getPosition());
+        minusOrigin.sub(JomlUtil.from(blockComponent.position));
         return BlockRegionTransform.createMovingThenRotating(minusOrigin, front, Side.FRONT);
     }
-    public static BlockRegionTransform createRelativeToAbsoluteTransform(BlockComponent blockComponent) {
-        Side front = blockComponent.getBlock().getDirection();
-        return BlockRegionTransform.createRotationThenMovement(Side.FRONT, front, blockComponent.getPosition());
-    }
 
+    public static BlockRegionTransform createRelativeToAbsoluteTransform(BlockComponent blockComponent) {
+        Side front = blockComponent.block.getDirection();
+        return BlockRegionTransform.createRotationThenMovement(Side.FRONT, front, JomlUtil.from(blockComponent.position));
+    }
 
 
     static String formatAsString(List<RegionToFill> regionsToFill) {
@@ -692,17 +693,17 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
             sb.append("            { \"blockType\": \"");
             sb.append(regionToFill.blockType);
             sb.append("\", \"region\": { \"min\": [");
-            sb.append(regionToFill.region.minX());
+            sb.append(regionToFill.region.getMinX());
             sb.append(", ");
-            sb.append(regionToFill.region.minY());
+            sb.append(regionToFill.region.getMinY());
             sb.append(", ");
-            sb.append(regionToFill.region.minZ());
+            sb.append(regionToFill.region.getMinZ());
             sb.append("], \"size\": [");
-            sb.append(regionToFill.region.sizeX());
+            sb.append(regionToFill.region.getSizeX());
             sb.append(", ");
-            sb.append(regionToFill.region.sizeY());
+            sb.append(regionToFill.region.getSizeY());
             sb.append(", ");
-            sb.append(regionToFill.region.sizeZ());
+            sb.append(regionToFill.region.getSizeZ());
             if (last) {
                 sb.append("]}}\n");
             } else {
@@ -722,23 +723,23 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
             return;
         }
 
-        Vector3i position = blockComponent.getPosition();
-        Vector3f directionVector = JomlUtil.from(event.getDirection());
-        Side directionStructureIsIn = Side.inHorizontalDirection(directionVector.getX(), directionVector.getZ());
+        Vector3i position = JomlUtil.from(blockComponent.position);
+        Vector3f directionVector = event.getDirection();
+        Side directionStructureIsIn = Side.inHorizontalDirection(directionVector.x(), directionVector.z());
         Side frontDirectionOfStructure = directionStructureIsIn.reverse();
 
 
-        List<Region3i> absoluteRegions = getAbsolutePlacementRegionsOfTemplate(entity, position, frontDirectionOfStructure);
+        List<BlockRegion> absoluteRegions = getAbsolutePlacementRegionsOfTemplate(entity, position, frontDirectionOfStructure);
 
 
         BlockRegionTransform blockRegionTransform = StructureSpawnServerSystem.getBlockRegionTransformForStructurePlacement(
-                event, blockComponent);
+            event, blockComponent);
         entity.send(new SpawnTemplateEvent(blockRegionTransform));
 
         StructureTemplateComponent structureTemplateComponentOfItem = entity.getComponent(StructureTemplateComponent.class);
         StructureTemplateComponent newStructureTemplateComponent = componentLibrary.copy(structureTemplateComponentOfItem);
         placeOriginMarkerWithTemplateData(event, position, frontDirectionOfStructure, absoluteRegions,
-                newStructureTemplateComponent);
+            newStructureTemplateComponent);
     }
 
     @ReceiveEvent(priority = EventPriority.PRIORITY_NORMAL)
@@ -754,7 +755,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
             HorizontalFamily horizontalBlockFamily = (HorizontalFamily) blockFamily;
             Block block = horizontalBlockFamily.getBlockForSide(side);
             Vector3i positionAbove = new Vector3i(actualPosition);
-            positionAbove.addY(1);
+            positionAbove.y += 1;
             worldProvider.setBlock(positionAbove, block);
             EntityRef blockEntity = blockEntityRegistry.getBlockEntityAt(positionAbove);
             StructurePlaceholderComponent structurePlaceholderComponent = blockEntity.getComponent(StructurePlaceholderComponent.class);
@@ -765,24 +766,24 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
     }
 
 
-    List<Region3i> getAbsolutePlacementRegionsOfTemplate(EntityRef entity, Vector3i position, Side frontDirectionOfStructure) {
-        List<Region3i> relativeRegions = getPlacementRegionsOfTemplate(entity);
+    List<BlockRegion> getAbsolutePlacementRegionsOfTemplate(EntityRef entity, Vector3i position, Side frontDirectionOfStructure) {
+        List<BlockRegion> relativeRegions = getPlacementRegionsOfTemplate(entity);
 
         BlockRegionTransform rotation = BlockRegionTransform.createRotationThenMovement(Side.FRONT,
-                frontDirectionOfStructure, position);
-        List<Region3i> absoluteRegions = new ArrayList<>();
-        for (Region3i relativeRegion: relativeRegions) {
-            Region3i absoluteRegion = rotation.transformRegion(relativeRegion);
+            frontDirectionOfStructure, position);
+        List<BlockRegion> absoluteRegions = new ArrayList<>();
+        for (BlockRegion relativeRegion : relativeRegions) {
+            BlockRegion absoluteRegion = rotation.transformRegion(relativeRegion);
             absoluteRegions.add(absoluteRegion);
         }
 
         Set<Vector3i> positionsInTemplate = RegionMergeUtil.positionsOfRegions(absoluteRegions);
-        List<Region3i> newTemplateRegions = RegionMergeUtil.mergePositionsIntoRegions(positionsInTemplate);
+        List<BlockRegion> newTemplateRegions = RegionMergeUtil.mergePositionsIntoRegions(positionsInTemplate);
         return newTemplateRegions;
     }
 
-    private List<Region3i> getPlacementRegionsOfTemplate(EntityRef entity) {
-        List<Region3i> relativeRegions = Lists.newArrayList();
+    private List<BlockRegion> getPlacementRegionsOfTemplate(EntityRef entity) {
+        List<BlockRegion> relativeRegions = Lists.newArrayList();
         SpawnBlockRegionsComponent blockRegionsComponent = entity.getComponent(SpawnBlockRegionsComponent.class);
         if (blockRegionsComponent != null) {
             for (RegionToFill regionToFill : blockRegionsComponent.regionsToFill) {
@@ -792,27 +793,27 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         return relativeRegions;
     }
 
-    private Region3i getPlacementBoundingsOfTemplate(EntityRef entity) {
-        Region3i unrotatedRegion = null;
+    private BlockRegion getPlacementBoundingsOfTemplate(EntityRef entity) {
+        BlockRegion unrotatedRegion = null;
         SpawnBlockRegionsComponent blockRegionsComponent = entity.getComponent(SpawnBlockRegionsComponent.class);
         if (blockRegionsComponent != null) {
             for (RegionToFill regionToFill : blockRegionsComponent.regionsToFill) {
                 if (unrotatedRegion == null) {
                     unrotatedRegion = regionToFill.region;
                 } else {
-                    unrotatedRegion = unrotatedRegion.expandToContain(regionToFill.region.min());
-                    unrotatedRegion = unrotatedRegion.expandToContain(regionToFill.region.max());
+                    unrotatedRegion.union(regionToFill.region.getMin(new Vector3i()));
+                    unrotatedRegion.union(regionToFill.region.getMax(new Vector3i()));
                 }
             }
         }
         if (unrotatedRegion == null) {
-            unrotatedRegion = Region3i.createBounded(new Vector3i(0, 0, 0), new Vector3i(0, 0, 0));
+            unrotatedRegion.setMin(0, 0, 0).setMax(0, 0, 0);
         }
         return unrotatedRegion;
     }
 
     boolean placeOriginMarkerWithTemplateData(ActivateEvent event, Vector3i position, Side frontDirectionOfStructure,
-                                              List<Region3i> regions,
+                                              List<BlockRegion> regions,
                                               StructureTemplateComponent newStructureTemplateComponent) {
         boolean originPlaced = placeOriginMarkerBlockWithoutData(event, position, frontDirectionOfStructure);
         if (!originPlaced) {
@@ -824,7 +825,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         return true;
     }
 
-    private void addTemplateDataToBlockEntity(Vector3i position, List<Region3i> regions, EntityRef originBlockEntity,
+    private void addTemplateDataToBlockEntity(Vector3i position, List<BlockRegion> regions, EntityRef originBlockEntity,
                                               StructureTemplateComponent newStructureTemplateComponent) {
         StructureTemplateOriginComponent editorComponent = originBlockEntity.getComponent(StructureTemplateOriginComponent.class);
         editorComponent.absoluteTemplateRegions = new ArrayList<>(regions);

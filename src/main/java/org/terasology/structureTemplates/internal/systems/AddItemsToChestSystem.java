@@ -15,6 +15,7 @@
  */
 package org.terasology.structureTemplates.internal.systems;
 
+import org.joml.Vector3i;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.entitySystem.entity.EntityManager;
@@ -26,7 +27,7 @@ import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.logic.inventory.InventoryManager;
 import org.terasology.logic.inventory.ItemComponent;
-import org.terasology.math.geom.Vector3i;
+import org.terasology.math.JomlUtil;
 import org.terasology.registry.In;
 import org.terasology.structureTemplates.components.AddItemsToChestComponent;
 import org.terasology.structureTemplates.events.BuildStructureTemplateEntityEvent;
@@ -83,10 +84,10 @@ public class AddItemsToChestSystem extends BaseComponentSystem {
     private void addItemsToChest(AddItemsToChestComponent component, BlockRegionTransform transformation) {
         BlockItemFactory blockFactory = new BlockItemFactory(entityManager);
 
-        for (AddItemsToChestComponent.ChestToFill chestToFill: component.chestsToFill) {
+        for (AddItemsToChestComponent.ChestToFill chestToFill : component.chestsToFill) {
             Vector3i absolutePosition = transformation.transformVector3i(chestToFill.position);
             EntityRef chest = blockEntityRegistry.getBlockEntityAt(absolutePosition);
-            for (AddItemsToChestComponent.Item item: chestToFill.items) {
+            for (AddItemsToChestComponent.Item item : chestToFill.items) {
                 addItemToChest(chest, item, blockFactory);
             }
         }
@@ -125,13 +126,13 @@ public class AddItemsToChestSystem extends BaseComponentSystem {
 
     private List<AddItemsToChestComponent.ChestToFill> describeChestContent(BuildStructureTemplateEntityEvent event, BlockFamily blockFamily) {
         List<AddItemsToChestComponent.ChestToFill> chestsToFill = new ArrayList<>();
-        for (Vector3i position: event.findAbsolutePositionsOf(blockFamily)) {
+        for (Vector3i position : event.findAbsolutePositionsOf(blockFamily)) {
             EntityRef blockEntity = blockEntityRegistry.getBlockEntityAt(position);
             BlockComponent blockComponent = blockEntity.getComponent(BlockComponent.class);
             List<AddItemsToChestComponent.Item> itemsToAdd = describeItemsOfEntity(blockEntity);
             if (itemsToAdd.size() > 0) {
                 AddItemsToChestComponent.ChestToFill chestToFill = new AddItemsToChestComponent.ChestToFill();
-                Vector3i absolutePosition = new Vector3i(blockComponent.getPosition());
+                Vector3i absolutePosition = new Vector3i(JomlUtil.from(blockComponent.position));
                 Vector3i relativePosition = event.getTransformToRelative().transformVector3i(absolutePosition);
                 chestToFill.position = relativePosition;
                 chestToFill.items = itemsToAdd;
@@ -144,7 +145,7 @@ public class AddItemsToChestSystem extends BaseComponentSystem {
     private List<AddItemsToChestComponent.Item> describeItemsOfEntity(EntityRef blockEntity) {
         List<AddItemsToChestComponent.Item> itemsToAdd = new ArrayList<>();
         int numberOfSlots = inventoryManager.getNumSlots(blockEntity);
-        for (int slot = 0;slot < numberOfSlots; slot++) {
+        for (int slot = 0; slot < numberOfSlots; slot++) {
             Optional<AddItemsToChestComponent.Item> optionalItem = describeItemInSlot(blockEntity, slot);
             if (optionalItem.isPresent()) {
                 itemsToAdd.add(optionalItem.get());
@@ -193,7 +194,7 @@ public class AddItemsToChestSystem extends BaseComponentSystem {
             sb.append(chestToFill.position.z);
             sb.append("],\n");
             sb.append("                \"items\": [\n");
-            ListUtil.visitList(chestToFill.items, (AddItemsToChestComponent.Item item, boolean lastItem) ->  {
+            ListUtil.visitList(chestToFill.items, (AddItemsToChestComponent.Item item, boolean lastItem) -> {
                 sb.append("                        ");
                 appendItemJson(sb, item);
                 if (lastItem) {
@@ -249,7 +250,5 @@ public class AddItemsToChestSystem extends BaseComponentSystem {
         }
         sb.append("}");
     }
-
-
 
 }

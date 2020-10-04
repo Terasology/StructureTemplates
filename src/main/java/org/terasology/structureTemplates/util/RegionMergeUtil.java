@@ -15,9 +15,11 @@
  */
 package org.terasology.structureTemplates.util;
 
-import org.terasology.math.Region3i;
-import org.terasology.math.geom.Vector3i;
+import org.joml.Vector3i;
+import org.joml.Vector3ic;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent;
+import org.terasology.world.block.BlockRegion;
+import org.terasology.world.block.BlockRegionIterable;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -26,12 +28,15 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Utility class for merging touching {@link Region3i} and {@link SpawnBlockRegionsComponent.RegionToFill} together.
+ * Utility class for merging touching {@link BlockRegion} and {@link SpawnBlockRegionsComponent.RegionToFill} together.
  *
  * Typically you create first a list of region 3i that contain each a single block position. Then you use the
  * methods of this class to merge them together to fewer larget regions that cover the same blocks.
  */
-public class RegionMergeUtil {
+public final class RegionMergeUtil {
+    private RegionMergeUtil() {
+
+    }
 
     public static void mergeRegionsToFill(List<SpawnBlockRegionsComponent.RegionToFill> regionsToFill) {
         mergeRegionsToFillByX(regionsToFill);
@@ -40,27 +45,27 @@ public class RegionMergeUtil {
     }
 
 
-    public static List<Region3i> mergePositionsIntoRegions(Set<Vector3i> positionsInTemplate) {
-        List<Region3i> newTemplateRegions = new ArrayList<>();
-        for (Vector3i position: positionsInTemplate) {
-            newTemplateRegions.add(Region3i.createFromMinMax(position, position));
+    public static List<BlockRegion> mergePositionsIntoRegions(Set<Vector3i> positionsInTemplate) {
+        List<BlockRegion> newTemplateRegions = new ArrayList<>();
+        for (Vector3i position : positionsInTemplate) {
+            newTemplateRegions.add(new BlockRegion(position, position));
         }
         RegionMergeUtil.mergeSingleBlockRegions(newTemplateRegions);
         return newTemplateRegions;
     }
 
-    private static void mergeSingleBlockRegions(List<Region3i> regions) {
+    private static void mergeSingleBlockRegions(List<BlockRegion> regions) {
         mergeRegionsByX(regions);
         mergeRegionsByY(regions);
         mergeRegionsByZ(regions);
     }
 
 
-    public static Set<Vector3i> positionsOfRegions(List<Region3i> originalRegions) {
+    public static Set<Vector3i> positionsOfRegions(List<BlockRegion> originalRegions) {
         Set<Vector3i> positionsInTemplate = new HashSet<>();
-        for (Region3i region: originalRegions) {
-            for (Vector3i position: region) {
-                positionsInTemplate.add(position);
+        for (BlockRegion region : originalRegions) {
+            for (Vector3ic position : BlockRegionIterable.region(region).build()) {
+                positionsInTemplate.add(new Vector3i(position));
             }
         }
         return positionsInTemplate;
@@ -70,16 +75,16 @@ public class RegionMergeUtil {
     static void mergeRegionsToFillByDimension(List<SpawnBlockRegionsComponent.RegionToFill> regions, RegionDimension dimensionToMerge,
                                               RegionDimension secondaryDimension, RegionDimension thirdDimension) {
         regions.sort(secondaryDimension.regionToFillComparator().thenComparing(thirdDimension.regionToFillComparator()).
-                thenComparing(dimensionToMerge.regionToFillComparator()));
+            thenComparing(dimensionToMerge.regionToFillComparator()));
         List<SpawnBlockRegionsComponent.RegionToFill> newList = new ArrayList<>();
         SpawnBlockRegionsComponent.RegionToFill previous = null;
-        for (SpawnBlockRegionsComponent.RegionToFill r: regions) {
-            boolean canMerge = previous != null && dimensionToMerge.getMax(previous.region) == dimensionToMerge.getMin(r.region) -1
-                    && secondaryDimension.getMin(r.region) == secondaryDimension.getMin(previous.region)
-                    && secondaryDimension.getMax(r.region) == secondaryDimension.getMax(previous.region)
-                    && thirdDimension.getMin(r.region) == thirdDimension.getMin(previous.region)
-                    && thirdDimension.getMax(r.region) == thirdDimension.getMax(previous.region)
-                    && r.blockType.equals(previous.blockType);
+        for (SpawnBlockRegionsComponent.RegionToFill r : regions) {
+            boolean canMerge = previous != null && dimensionToMerge.getMax(previous.region) == dimensionToMerge.getMin(r.region) - 1
+                && secondaryDimension.getMin(r.region) == secondaryDimension.getMin(previous.region)
+                && secondaryDimension.getMax(r.region) == secondaryDimension.getMax(previous.region)
+                && thirdDimension.getMin(r.region) == thirdDimension.getMin(previous.region)
+                && thirdDimension.getMax(r.region) == thirdDimension.getMax(previous.region)
+                && r.blockType.equals(previous.blockType);
             if (canMerge) {
                 previous.region = dimensionToMerge.regionCopyWithMaxSetTo(previous.region, dimensionToMerge.getMax(r.region));
             } else {
@@ -91,21 +96,21 @@ public class RegionMergeUtil {
         regions.addAll(newList);
     }
 
-    static void mergeRegionsByDimension(List<Region3i> regions, RegionDimension dimensionToMerge,
+    static void mergeRegionsByDimension(List<BlockRegion> regions, RegionDimension dimensionToMerge,
                                         RegionDimension secondaryDimension, RegionDimension thirdDimension) {
         regions.sort(secondaryDimension.regionComparator().thenComparing(thirdDimension.regionComparator()).
-                thenComparing(dimensionToMerge.regionComparator()));
-        List<Region3i> newList = new ArrayList<>();
-        Region3i previous = null;
-        for (Region3i r: regions) {
-            boolean canMerge = previous != null && dimensionToMerge.getMax(previous) == dimensionToMerge.getMin(r) -1
-                    && secondaryDimension.getMin(r) == secondaryDimension.getMin(previous)
-                    && secondaryDimension.getMax(r) == secondaryDimension.getMax(previous)
-                    && thirdDimension.getMin(r) == thirdDimension.getMin(previous)
-                    && thirdDimension.getMax(r) == thirdDimension.getMax(previous);
+            thenComparing(dimensionToMerge.regionComparator()));
+        List<BlockRegion> newList = new ArrayList<>();
+        BlockRegion previous = null;
+        for (BlockRegion r : regions) {
+            boolean canMerge = previous != null && dimensionToMerge.getMax(previous) == dimensionToMerge.getMin(r) - 1
+                && secondaryDimension.getMin(r) == secondaryDimension.getMin(previous)
+                && secondaryDimension.getMax(r) == secondaryDimension.getMax(previous)
+                && thirdDimension.getMin(r) == thirdDimension.getMin(previous)
+                && thirdDimension.getMax(r) == thirdDimension.getMax(previous);
             if (canMerge) {
                 // Remove previous:
-                newList.remove(newList.size()-1);
+                newList.remove(newList.size() - 1);
                 previous = dimensionToMerge.regionCopyWithMaxOfSecond(previous, r);
                 newList.add(previous);
             } else {
@@ -130,97 +135,101 @@ public class RegionMergeUtil {
     }
 
 
-
-
-    static void mergeRegionsByX(List<Region3i> regions) {
+    static void mergeRegionsByX(List<BlockRegion> regions) {
         mergeRegionsByDimension(regions, RegionDimension.X, RegionDimension.Y, RegionDimension.Z);
     }
 
-    static void mergeRegionsByY(List<Region3i> regions) {
+    static void mergeRegionsByY(List<BlockRegion> regions) {
         mergeRegionsByDimension(regions, RegionDimension.Y, RegionDimension.Z, RegionDimension.X);
     }
 
-    static void mergeRegionsByZ(List<Region3i> regions) {
+    static void mergeRegionsByZ(List<BlockRegion> regions) {
         mergeRegionsByDimension(regions, RegionDimension.Z, RegionDimension.X, RegionDimension.Y);
     }
 
 
     private enum RegionDimension {
         X {
-            public int getMin(Region3i r) {
-                return r.minX();
+            public int getMin(BlockRegion r) {
+                return r.getMinX();
             }
 
-            public int getMax(Region3i r) {
-                return r.maxX();
+            public int getMax(BlockRegion r) {
+                return r.getMaxX();
             }
 
-            public Region3i regionCopyWithMaxSetTo(Region3i r, int newMax) {
-                Vector3i max = new Vector3i(newMax, r.maxY(), r.maxZ());
-                return Region3i.createBounded(r.min(), max);
+            public BlockRegion regionCopyWithMaxSetTo(BlockRegion r, int newMax) {
+                Vector3i max = new Vector3i(newMax, r.getMaxY(), r.getMaxZ());
+                return new BlockRegion().union(r.getMin(new Vector3i())).union(max);
             }
 
             public Comparator<SpawnBlockRegionsComponent.RegionToFill> regionToFillComparator() {
-                return Comparator.comparing(r -> r.region.minX());
+                return Comparator.comparing(r -> r.region.getMinX());
             }
 
-            public Comparator<Region3i> regionComparator() {
-                return Comparator.comparing(r -> r.minX());
+            public Comparator<BlockRegion> regionComparator() {
+                return Comparator.comparing(r -> r.getMinX());
             }
         },
         Y {
-            public int getMin(Region3i r) {
-                return r.minY();
+            public int getMin(BlockRegion r) {
+                return r.getMinY();
             }
 
-            public int getMax(Region3i r) {
-                return r.maxY();
+            public int getMax(BlockRegion r) {
+                return r.getMaxY();
             }
 
-            public Region3i regionCopyWithMaxSetTo(Region3i r, int newMax) {
-                Vector3i max = new Vector3i(r.maxX(), newMax, r.maxZ());
-                return Region3i.createBounded(r.min(), max);
+            public BlockRegion regionCopyWithMaxSetTo(BlockRegion r, int newMax) {
+                Vector3i max = new Vector3i(r.getMaxX(), newMax, r.getMaxZ());
+                return new BlockRegion().union(r.getMin(new Vector3i())).union(max);
             }
 
             public Comparator<SpawnBlockRegionsComponent.RegionToFill> regionToFillComparator() {
-                return Comparator.comparing(r -> r.region.minY());
+                return Comparator.comparing(r -> r.region.getMinY());
             }
 
-            public Comparator<Region3i> regionComparator() {
-                return Comparator.comparing(r -> r.minY());
+            public Comparator<BlockRegion> regionComparator() {
+                return Comparator.comparing(r -> r.getMinY());
             }
         },
         Z {
-            public int getMin(Region3i r) {
-                return r.minZ();
+            public int getMin(BlockRegion r) {
+                return r.getMinZ();
             }
 
-            public int getMax(Region3i r) {
-                return r.maxZ();
+            public int getMax(BlockRegion r) {
+                return r.getMaxZ();
             }
 
-            public Region3i regionCopyWithMaxSetTo(Region3i r, int newMax) {
-                Vector3i max = new Vector3i(r.maxX(), r.maxY(), newMax);
-                return Region3i.createBounded(r.min(), max);
+            public BlockRegion regionCopyWithMaxSetTo(BlockRegion r, int newMax) {
+                Vector3i max = new Vector3i(r.getMaxX(), r.getMaxY(), newMax);
+                return new BlockRegion().union(r.getMin(new Vector3i())).union(max);
             }
 
             public Comparator<SpawnBlockRegionsComponent.RegionToFill> regionToFillComparator() {
-                return Comparator.comparing(r -> r.region.minZ());
+                return Comparator.comparing(r -> r.region.getMinZ());
             }
 
-            public Comparator<Region3i> regionComparator() {
-                return Comparator.comparing(r -> r.minZ());
+            public Comparator<BlockRegion> regionComparator() {
+                return Comparator.comparing(r -> r.getMinZ());
             }
         };
-        public abstract int getMin(Region3i r);
-        public abstract int getMax(Region3i r);
-        public abstract Region3i regionCopyWithMaxSetTo(Region3i r, int newMax);
-        public Region3i regionCopyWithMaxOfSecond(Region3i regionToCopy, Region3i regionWithMax) {
+
+        public abstract int getMin(BlockRegion r);
+
+        public abstract int getMax(BlockRegion r);
+
+        public abstract BlockRegion regionCopyWithMaxSetTo(BlockRegion r, int newMax);
+
+        public BlockRegion regionCopyWithMaxOfSecond(BlockRegion regionToCopy, BlockRegion regionWithMax) {
             int newMax = getMax(regionWithMax);
             return regionCopyWithMaxSetTo(regionToCopy, newMax);
         }
+
         public abstract Comparator<SpawnBlockRegionsComponent.RegionToFill> regionToFillComparator();
-        public abstract Comparator<Region3i> regionComparator();
+
+        public abstract Comparator<BlockRegion> regionComparator();
     }
 
 }
