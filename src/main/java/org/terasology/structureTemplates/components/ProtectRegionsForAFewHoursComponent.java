@@ -17,6 +17,7 @@ package org.terasology.structureTemplates.components;
 
 import org.terasology.entitySystem.Component;
 import org.terasology.math.Region3i;
+import org.terasology.world.block.BlockRegion;
 
 import java.util.List;
 
@@ -26,6 +27,6 @@ import java.util.List;
  *
  */
 public class ProtectRegionsForAFewHoursComponent implements Component {
-    public List<Region3i> regions;
+    public List<BlockRegion> regions;
     public float hoursToProtect = 2.0f;
 }

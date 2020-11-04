@@ -15,6 +15,7 @@
  */
 package org.terasology.structureTemplates.util;
 
+import org.terasology.math.JomlUtil;
 import org.terasology.math.Region3i;
 import org.terasology.math.Side;
 import org.terasology.math.geom.Quat4f;
@@ -22,6 +23,7 @@ import org.terasology.math.geom.Vector3f;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.structureTemplates.components.BlockRegionTransformComponent;
 import org.terasology.world.block.Block;
+import org.terasology.world.block.BlockRegion;
 import org.terasology.world.block.family.AttachedToSurfaceFamily;
 import org.terasology.world.block.family.BlockFamily;
 import org.terasology.world.block.family.SideDefinedBlockFamily;
@@ -85,6 +87,10 @@ public class BlockRegionTransform {
         return Region3i.createBounded(transformVector3i(region.min()), transformVector3i(region.max()));
     }
 
+    public BlockRegion transformRegion(BlockRegion region) {
+        return new BlockRegion(transformVector3i(region.getMin(new org.joml.Vector3i())), transformVector3i(region.getMax(new org.joml.Vector3i())));
+    }
+
     public Block transformBlock(Block block) {
         BlockFamily blockFamily = block.getBlockFamily();
         if (blockFamily instanceof SideDefinedBlockFamily) {
@@ -108,6 +114,13 @@ public class BlockRegionTransform {
         return result;
     }
 
+    public org.joml.Vector3i transformVector3i(org.joml.Vector3i vectorToTransform) {
+        org.joml.Vector3i result = vectorRotatedClockWiseHorizontallyNTimes(vectorToTransform,
+                counterClockWiseHorizontal90DegreeRotations);
+        result.add(JomlUtil.from(offset));
+        return result;
+    }
+
     private static Vector3i vectorRotatedClockWiseHorizontallyNTimes(Vector3i vectorToTransform, int amount) {
         Vector3i result = new Vector3i(vectorToTransform);
         for (int i = 0; i < amount; i++) {
@@ -115,6 +128,16 @@ public class BlockRegionTransform {
             int zBackup = result.z();
             result.setX(-zBackup);
             result.setZ(xBackup);
+        }
+        return result;
+    }
+
+    private static org.joml.Vector3i vectorRotatedClockWiseHorizontallyNTimes(org.joml.Vector3i vectorToTransform, int amount) {
+        org.joml.Vector3i result = new org.joml.Vector3i(vectorToTransform);
+        for (int i = 0; i < amount; i++) {
+            int xBackup = result.x();
+            int zBackup = result.z();
+            result.set(-zBackup, result.y(), xBackup);
         }
         return result;
     }

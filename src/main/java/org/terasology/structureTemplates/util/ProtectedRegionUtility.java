@@ -17,10 +17,12 @@ package org.terasology.structureTemplates.util;
 
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.logic.location.LocationComponent;
+import org.terasology.math.JomlUtil;
 import org.terasology.math.Region3i;
 import org.terasology.math.geom.Quat4f;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.structureTemplates.components.ProtectedRegionsComponent;
+import org.terasology.world.block.BlockRegion;
 
 import java.util.Collection;
 import java.util.List;
@@ -36,11 +38,11 @@ public class ProtectedRegionUtility {
      */
     public static boolean isInProtectedRegion(Collection<Vector3i> positions, EntityRef regionEntity) {
         ProtectedRegionsComponent protectedRegionsComponent = regionEntity.getComponent(ProtectedRegionsComponent.class);
-        List<Region3i> protectedRegions = protectedRegionsComponent.regions;
+        List<BlockRegion> protectedRegions = protectedRegionsComponent.regions;
         if (protectedRegions != null) {
-            for (Region3i region : protectedRegions) {
+            for (BlockRegion region : protectedRegions) {
                 for (Vector3i position : positions) {
-                    if (region.encompasses(position)) {
+                    if (region.containsPoint(JomlUtil.from(position))) {
                         return true;
                     }
                 }
