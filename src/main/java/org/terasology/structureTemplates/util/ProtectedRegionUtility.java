@@ -16,10 +16,7 @@
 package org.terasology.structureTemplates.util;
 
 import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.logic.location.LocationComponent;
 import org.terasology.math.JomlUtil;
-import org.terasology.math.Region3i;
-import org.terasology.math.geom.Quat4f;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.structureTemplates.components.ProtectedRegionsComponent;
 import org.terasology.world.block.BlockRegion;
@@ -37,7 +34,8 @@ public class ProtectedRegionUtility {
      * @return
      */
     public static boolean isInProtectedRegion(Collection<Vector3i> positions, EntityRef regionEntity) {
-        ProtectedRegionsComponent protectedRegionsComponent = regionEntity.getComponent(ProtectedRegionsComponent.class);
+        ProtectedRegionsComponent protectedRegionsComponent =
+                regionEntity.getComponent(ProtectedRegionsComponent.class);
         List<BlockRegion> protectedRegions = protectedRegionsComponent.regions;
         if (protectedRegions != null) {
             for (BlockRegion region : protectedRegions) {
