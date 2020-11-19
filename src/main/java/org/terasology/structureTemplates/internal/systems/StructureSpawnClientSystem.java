@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.structureTemplates.internal.systems;
 
+import org.joml.Vector3f;
+import org.joml.Vector3i;
 import org.terasology.engine.Time;
 import org.terasology.entitySystem.entity.EntityBuilder;
 import org.terasology.entitySystem.entity.EntityManager;
@@ -25,13 +27,11 @@ import org.terasology.logic.inventory.events.InventorySlotChangedEvent;
 import org.terasology.logic.location.LocationComponent;
 import org.terasology.logic.players.LocalPlayer;
 import org.terasology.logic.players.PlayerTargetChangedEvent;
-import org.terasology.math.Region3i;
+import org.terasology.math.JomlUtil;
 import org.terasology.math.Side;
-import org.terasology.math.geom.Vector3f;
-import org.terasology.math.geom.Vector3i;
+import org.terasology.nui.Color;
 import org.terasology.registry.In;
 import org.terasology.rendering.logic.RegionOutlineComponent;
-import org.terasology.nui.Color;
 import org.terasology.rendering.nui.NUIManager;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent;
 import org.terasology.structureTemplates.components.SpawnStructureActionComponent;
@@ -40,6 +40,7 @@ import org.terasology.structureTemplates.internal.events.StructureSpawnFailedEve
 import org.terasology.structureTemplates.internal.ui.StructurePlacementFailureScreen;
 import org.terasology.structureTemplates.util.BlockRegionTransform;
 import org.terasology.world.block.BlockComponent;
+import org.terasology.world.block.BlockRegion;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -94,8 +95,8 @@ public class StructureSpawnClientSystem extends BaseComponentSystem implements U
             return;
         }
 
-        Vector3f directionVector = locationComponent.getWorldDirection();
-        Side newDirection = Side.inHorizontalDirection(directionVector.getX(), directionVector.getZ());
+        Vector3f directionVector = locationComponent.getWorldDirection(new Vector3f());
+        Side newDirection = Side.inHorizontalDirection(directionVector.x(), directionVector.z());
         if (directionPlayerLooksAt != newDirection) {
             directionPlayerLooksAt = newDirection;
             updateOutlineEntity();
@@ -137,7 +138,7 @@ public class StructureSpawnClientSystem extends BaseComponentSystem implements U
         EntityRef newTarget = event.getNewTarget();
         BlockComponent blockComponent = newTarget.getComponent(BlockComponent.class);
         if (blockComponent != null) {
-            spawnPosition = blockComponent.getPosition();
+            spawnPosition = blockComponent.getPosition(new Vector3i());
         } else {
             spawnPosition = null;
         }
@@ -157,19 +158,19 @@ public class StructureSpawnClientSystem extends BaseComponentSystem implements U
         }
 
         for (ColoredRegion coloredRegion : regionsToDraw) {
-            Region3i region = coloredRegion.region;
+            BlockRegion region = coloredRegion.region;
             Color color = coloredRegion.getColor();
             EntityRef entity = createOutlineEntity(region, color);
             regionOutlineEntities.add(entity);
         }
     }
 
-    private EntityRef createOutlineEntity(Region3i region, Color color) {
+    private EntityRef createOutlineEntity(BlockRegion region, Color color) {
         EntityBuilder entityBuilder = entityManager.newBuilder();
         entityBuilder.setPersistent(false);
         RegionOutlineComponent regionOutlineComponent = new RegionOutlineComponent();
-        regionOutlineComponent.corner1 = new Vector3i(region.min());
-        regionOutlineComponent.corner2 = new Vector3i(region.max());
+        regionOutlineComponent.corner1 = JomlUtil.from(new Vector3i(region.getMin(new Vector3i())));
+        regionOutlineComponent.corner2 = JomlUtil.from(new Vector3i(region.getMax(new Vector3i())));
         regionOutlineComponent.color = color;
         entityBuilder.addComponent(regionOutlineComponent);
         return entityBuilder.build();
@@ -220,14 +221,14 @@ public class StructureSpawnClientSystem extends BaseComponentSystem implements U
         CheckSpawnConditionEvent checkSpawnEvent = new CheckSpawnConditionEvent(regionTransform);
         item.send(checkSpawnEvent);
         if (checkSpawnEvent.isPreventSpawn()) {
-            Region3i problematicRegion = checkSpawnEvent.getSpawnPreventingRegion();
+            BlockRegion problematicRegion = checkSpawnEvent.getSpawnPreventingRegion();
             if (problematicRegion != null) {
                 regionsToDraw.add(new ColoredRegion(problematicRegion, Color.RED));
             }
         }
 
         for (SpawnBlockRegionsComponent.RegionToFill regionToFill : spawnBlockRegionsComponent.regionsToFill) {
-            Region3i region = regionToFill.region;
+            BlockRegion region = regionToFill.region;
             region = regionTransform.transformRegion(region);
             regionsToDraw.add(new ColoredRegion(region, Color.WHITE));
         }
@@ -235,15 +236,15 @@ public class StructureSpawnClientSystem extends BaseComponentSystem implements U
     }
 
     private static final class ColoredRegion {
-        private Region3i region;
+        private BlockRegion region;
         private Color color;
 
-        public ColoredRegion(Region3i region, Color color) {
+        public ColoredRegion(BlockRegion region, Color color) {
             this.region = region;
             this.color = color;
         }
 
-        public Region3i getRegion() {
+        public BlockRegion getRegion() {
             return region;
         }
 
@@ -260,7 +261,7 @@ public class StructureSpawnClientSystem extends BaseComponentSystem implements U
         DisplayNameComponent displayNameComponent = failedConditionPrefab != null ? failedConditionPrefab
                 .getComponent(DisplayNameComponent.class) : null;
         String spawnConditionName = displayNameComponent != null ? displayNameComponent.name : null;
-        Region3i region = event.getSpawnPreventingRegion();
+        BlockRegion region = event.getSpawnPreventingRegion();
         String message;
         if (region != null) {
             if (spawnConditionName != null) {

@@ -213,7 +213,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         if (editorComponent == null) {
             return; // can happen if entity got destroyed
         }
-        Set<Vector3i> positionSet = Collections.singleton(JomlUtil.from(blockComponent.position));
+        Set<org.terasology.math.geom.Vector3i> positionSet = Collections.singleton(blockComponent.position);
         if (editTemplateRegionProcessComponent.recordBlockAddition && !editTemplateRegionProcessComponent.recordBlockRemoval) {
             removeBlockPositionsFromTemplate(positionSet, editorEnitity, editorComponent);
         }
@@ -222,9 +222,9 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         }
     }
 
-    private void addBlockPositionsToTemplate(Set<Vector3i> positions, EntityRef templateEnitity, StructureTemplateOriginComponent templateComponent) {
+    private void addBlockPositionsToTemplate(Set<org.terasology.math.geom.Vector3i> positions, EntityRef templateEnitity, StructureTemplateOriginComponent templateComponent) {
         List<BlockRegion> originalRegions = templateComponent.absoluteTemplateRegions;
-        Set<Vector3i> positionsInTemplate = RegionMergeUtil.positionsOfRegions(originalRegions);
+        Set<org.terasology.math.geom.Vector3i> positionsInTemplate = RegionMergeUtil.positionsOfRegions(originalRegions);
         if (positionsInTemplate.containsAll(positions)) {
             // nothing to do
         } else {
@@ -235,9 +235,9 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         }
     }
 
-    private void removeBlockPositionsFromTemplate(Set<Vector3i> positions, EntityRef templateEntity, StructureTemplateOriginComponent templateComponent) {
+    private void removeBlockPositionsFromTemplate(Set<org.terasology.math.geom.Vector3i> positions, EntityRef templateEntity, StructureTemplateOriginComponent templateComponent) {
         List<BlockRegion> originalRegions = templateComponent.absoluteTemplateRegions;
-        Set<Vector3i> positionsInTemplate = RegionMergeUtil.positionsOfRegions(originalRegions);
+        Set<org.terasology.math.geom.Vector3i> positionsInTemplate = RegionMergeUtil.positionsOfRegions(originalRegions);
         if (!positionsInTemplate.containsAll(positions)) {
             // nothing to do
         } else {
@@ -777,7 +777,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
             absoluteRegions.add(absoluteRegion);
         }
 
-        Set<Vector3i> positionsInTemplate = RegionMergeUtil.positionsOfRegions(absoluteRegions);
+        Set<org.terasology.math.geom.Vector3i> positionsInTemplate = RegionMergeUtil.positionsOfRegions(absoluteRegions);
         List<BlockRegion> newTemplateRegions = RegionMergeUtil.mergePositionsIntoRegions(positionsInTemplate);
         return newTemplateRegions;
     }
@@ -838,7 +838,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         HorizontalFamily horizontalBlockFamily = (HorizontalFamily) blockFamily;
         Block block = horizontalBlockFamily.getBlockForSide(frontDirectionOfStructure);
 
-        PlaceBlocks placeBlocks = new PlaceBlocks(position, block, event.getInstigator());
+        PlaceBlocks placeBlocks = new PlaceBlocks(JomlUtil.from(position), block, event.getInstigator());
         worldProvider.getWorldEntity().send(placeBlocks);
         return !placeBlocks.isConsumed();
     }

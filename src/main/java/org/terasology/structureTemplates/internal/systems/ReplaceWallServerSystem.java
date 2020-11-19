@@ -31,6 +31,7 @@ import org.terasology.structureTemplates.internal.events.ReplaceBlocksRequest;
 import org.terasology.world.WorldProvider;
 import org.terasology.world.block.Block;
 import org.terasology.world.block.BlockManager;
+import org.terasology.world.block.BlockRegion;
 import org.terasology.world.block.entity.placement.PlaceBlocks;
 
 import java.util.HashMap;
@@ -58,7 +59,7 @@ public class ReplaceWallServerSystem extends BaseComponentSystem {
         }
         Block block = blockManager.getBlock(component.blockUri);
         Map<Vector3i, Block> map = new HashMap<>();
-        for (Region3i region: previewComponent.wallRegions) {
+        for (BlockRegion region: previewComponent.wallRegions) {
             for (Vector3i v:region) {
                 map.put(new Vector3i(v), block);
             }

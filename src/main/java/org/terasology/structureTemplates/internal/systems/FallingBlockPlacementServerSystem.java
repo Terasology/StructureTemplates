@@ -15,6 +15,8 @@
  */
 package org.terasology.structureTemplates.internal.systems;
 
+import org.joml.Vector3f;
+import org.joml.Vector3i;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.assets.management.AssetManager;
@@ -29,18 +31,17 @@ import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.logic.delay.DelayManager;
 import org.terasology.logic.delay.DelayedActionTriggeredEvent;
 import org.terasology.logic.location.LocationComponent;
-import org.terasology.math.geom.Vector3f;
-import org.terasology.math.geom.Vector3i;
+import org.terasology.math.JomlUtil;
 import org.terasology.network.NetworkComponent;
 import org.terasology.registry.In;
 import org.terasology.structureTemplates.components.CompletionTimeComponent;
-import org.terasology.structureTemplates.components.PrepareFallingBlockEntityComponent;
 import org.terasology.structureTemplates.components.FallingBlockComponent;
 import org.terasology.structureTemplates.components.FallingBlocksPlacementAlgorithmComponent;
-import org.terasology.structureTemplates.events.SpawnStructureEvent;
+import org.terasology.structureTemplates.components.PrepareFallingBlockEntityComponent;
 import org.terasology.structureTemplates.events.GetStructureTemplateBlocksForMidAirEvent;
-import org.terasology.structureTemplates.events.StructureSpawnStartedEvent;
+import org.terasology.structureTemplates.events.SpawnStructureEvent;
 import org.terasology.structureTemplates.events.StructureBlocksSpawnedEvent;
+import org.terasology.structureTemplates.events.StructureSpawnStartedEvent;
 import org.terasology.structureTemplates.util.BlockRegionTransform;
 import org.terasology.world.WorldProvider;
 import org.terasology.world.block.Block;
@@ -174,10 +175,10 @@ public class FallingBlockPlacementServerSystem extends BaseComponentSystem {
 
 
     private void replacePlacementLocationWithAir(Set<Vector3i> locations) {
-        Map<Vector3i, Block> airBlocksToPlace = new HashMap<>();
+        Map<org.terasology.math.geom.Vector3i, Block> airBlocksToPlace = new HashMap<>();
         Block air = blockManager.getBlock(BlockManager.AIR_ID);
         for (Vector3i position:locations) {
-            airBlocksToPlace.put(position, air);
+            airBlocksToPlace.put(JomlUtil.from(position), air);
         }
         worldProvider.setBlocks(airBlocksToPlace);
     }
@@ -193,7 +194,7 @@ public class FallingBlockPlacementServerSystem extends BaseComponentSystem {
 
 
         LocationComponent locationComponent = new LocationComponent();
-        locationComponent.setWorldPosition(fallingBlockEntityComponent.targetPosition.toVector3f());
+        locationComponent.setWorldPosition(new Vector3f(fallingBlockEntityComponent.targetPosition));
         entityBuilder.addComponent(locationComponent);
 
         long fallDurationInMs = fallingBlockEntityComponent.fallDurationInMs;
@@ -224,12 +225,12 @@ public class FallingBlockPlacementServerSystem extends BaseComponentSystem {
                         FallingBlockComponent component, LocationComponent locationComponent) {
         if (event.getActionId().equals(PLACE_BLOCK_ACTION_ID)) {
             delayManager.addDelayedAction(entityRef, DESTROY_ENTITY_ACTION_ID, 1);
-            Vector3f pos = locationComponent.getWorldPosition();
+            Vector3f pos = locationComponent.getWorldPosition(new Vector3f());
             Block block = blockManager.getBlock(component.blockUri);
             if (block == null) {
                 logger.error("Block with url not found, block placement of fallen block skipped: " + Objects.toString(component.blockUri));
             }
-            Vector3i roundedPos = new Vector3i(Math.round(pos.getX()), Math.round(pos.getY()), Math.round(pos.getZ()));
+            Vector3i roundedPos = new Vector3i(Math.round(pos.x()), Math.round(pos.y()), Math.round(pos.z()));
             logger.debug("Placing block at " + roundedPos);
             worldProvider.setBlock(roundedPos, block);
         }

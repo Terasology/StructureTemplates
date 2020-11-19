@@ -17,9 +17,9 @@ package org.terasology.structureTemplates.internal.events;
 
 import org.terasology.entitySystem.event.Event;
 import org.terasology.entitySystem.prefab.Prefab;
-import org.terasology.math.Region3i;
 import org.terasology.network.OwnerEvent;
 import org.terasology.structureTemplates.components.SpawnStructureActionComponent;
+import org.terasology.world.block.BlockRegion;
 
 /**
  * Sent by the server to the owner of an item when a attempt to spawn a structure fails.
@@ -32,9 +32,9 @@ import org.terasology.structureTemplates.components.SpawnStructureActionComponen
 @OwnerEvent
 public class StructureSpawnFailedEvent implements Event {
     private Prefab failedSpawnCondition;
-    private Region3i spawnPreventingRegion;
+    private BlockRegion spawnPreventingRegion;
 
-    public StructureSpawnFailedEvent(Prefab failedSpawnCondition, Region3i spawnPreventingRegion) {
+    public StructureSpawnFailedEvent(Prefab failedSpawnCondition, BlockRegion spawnPreventingRegion) {
         this.failedSpawnCondition = failedSpawnCondition;
         this.spawnPreventingRegion = spawnPreventingRegion;
     }
@@ -47,7 +47,7 @@ public class StructureSpawnFailedEvent implements Event {
         return failedSpawnCondition;
     }
 
-    public Region3i getSpawnPreventingRegion() {
+    public BlockRegion getSpawnPreventingRegion() {
         return spawnPreventingRegion;
     }
 }

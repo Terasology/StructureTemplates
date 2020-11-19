@@ -36,7 +36,6 @@ import org.terasology.logic.delay.DelayedActionTriggeredEvent;
 import org.terasology.logic.inventory.InventoryManager;
 import org.terasology.logic.location.LocationComponent;
 import org.terasology.math.JomlUtil;
-import org.terasology.math.Region3i;
 import org.terasology.math.Side;
 import org.terasology.registry.In;
 import org.terasology.structureTemplates.components.CompletionTimeComponent;
@@ -123,7 +122,7 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
                                                 NoConstructionAnimationComponent noConstructionAnimationComponent) {
         BlockRegionTransform transformation = event.getTransformation();
 
-        Map<Vector3i, Block> blocksToPlace = Maps.newHashMap();
+        Map<org.terasology.math.geom.Vector3i, Block> blocksToPlace = Maps.newHashMap();
 
         for (RegionToFill regionToFill : spawnBlockRegionsComponent.regionsToFill) {
             Block block = regionToFill.blockType;
@@ -131,12 +130,12 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
                 continue;
             }
 
-            Region3i region = regionToFill.region;
+            BlockRegion region = regionToFill.region;
             region = transformation.transformRegion(region);
             block = transformation.transformBlock(block);
 
             for (Vector3i pos : region) {
-                blocksToPlace.put(pos, block);
+                blocksToPlace.put(JomlUtil.from(pos), block);
             }
         }
 
@@ -212,7 +211,7 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
                 continue;
             }
 
-            Region3i region = regionToFill.region;
+            BlockRegion region = regionToFill.region;
             region = transformation.transformRegion(region);
             block = transformation.transformBlock(block);
 
@@ -233,10 +232,10 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
         List<BuildStep> buildSteps = buildStepwiseStructureComponent.getBuildSteps();
         BuildStep step = buildSteps.get(currentStepCount);
 
-        Map<Vector3i, Block> blocksToPlace = Maps.newHashMap();
+        Map<org.terasology.math.geom.Vector3i, Block> blocksToPlace = Maps.newHashMap();
 
         for (BlockToPlace blockToPlace : step.blocksInStep) {
-            blocksToPlace.put(blockToPlace.pos, blockToPlace.block);
+            blocksToPlace.put(JomlUtil.from(blockToPlace.pos), blockToPlace.block);
         }
 
         worldProvider.setBlocks(blocksToPlace); //TODO: finish migration

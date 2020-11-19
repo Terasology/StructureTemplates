@@ -15,11 +15,11 @@
  */
 package org.terasology.structureTemplates.events;
 
+import org.joml.Vector3i;
 import org.terasology.entitySystem.event.Event;
-import org.terasology.math.Region3i;
-import org.terasology.math.geom.Vector3i;
 import org.terasology.structureTemplates.util.BlockRegionTransform;
 import org.terasology.world.block.Block;
+import org.terasology.world.block.BlockRegion;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -44,7 +44,7 @@ public class GetStructureTemplateBlocksForMidAirEvent implements Event {
         return blocksToPlace;
     }
 
-    public void fillRegion(Region3i region, Block block) {
+    public void fillRegion(BlockRegion region, Block block) {
         for (Vector3i pos : region) {
             blocksToPlace.put(pos, block);
         }

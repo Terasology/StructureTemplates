@@ -17,9 +17,9 @@ package org.terasology.structureTemplates.events;
 
 import org.terasology.entitySystem.event.AbstractConsumableEvent;
 import org.terasology.entitySystem.prefab.Prefab;
-import org.terasology.math.Region3i;
 import org.terasology.structureTemplates.components.CheckBlockRegionConditionComponent;
 import org.terasology.structureTemplates.util.BlockRegionTransform;
+import org.terasology.world.block.BlockRegion;
 
 /**
  * Sent to entities with spawn condition components, in order to check if the spawn conditions are met at a certain
@@ -35,7 +35,7 @@ public class CheckSpawnConditionEvent extends AbstractConsumableEvent {
     /** Meta data about result */
     private Prefab failedSpawnCondition;
     /** Meta data about result */
-    private Region3i spawnPreventingRegion;
+    private BlockRegion spawnPreventingRegion;
 
     public CheckSpawnConditionEvent(BlockRegionTransform blockRegionTransform) {
         this.blockRegionTransform = blockRegionTransform;
@@ -64,7 +64,7 @@ public class CheckSpawnConditionEvent extends AbstractConsumableEvent {
         this.failedSpawnCondition = failedSpawnCondition;
     }
 
-    public void setSpawnPreventingRegion(Region3i spawnPreventingRegion) {
+    public void setSpawnPreventingRegion(BlockRegion spawnPreventingRegion) {
         this.spawnPreventingRegion = spawnPreventingRegion;
     }
 
@@ -76,7 +76,7 @@ public class CheckSpawnConditionEvent extends AbstractConsumableEvent {
         return failedSpawnCondition;
     }
 
-    public Region3i getSpawnPreventingRegion() {
+    public BlockRegion getSpawnPreventingRegion() {
         return spawnPreventingRegion;
     }
 }

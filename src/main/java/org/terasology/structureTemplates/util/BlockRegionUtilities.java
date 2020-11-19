@@ -49,26 +49,26 @@ public final class BlockRegionUtilities {
         if (regionsToFill == null) {
             return null;
         }
-        Vector3i max = new Vector3i(JomlUtil.from(regionsToFill.get(0).region.max()));
-        Vector3i min = new Vector3i(JomlUtil.from(regionsToFill.get(0).region.min()));
+        Vector3i max = new Vector3i(regionsToFill.get(0).region.getMax(new Vector3i()));
+        Vector3i min = new Vector3i(regionsToFill.get(0).region.getMin(new Vector3i()));
         for (SpawnBlockRegionsComponent.RegionToFill regionToFill : regionsToFill) {
-            if (regionToFill.region.maxX() > max.x()) {
-                max.x = regionToFill.region.maxX();
+            if (regionToFill.region.getMaxX() > max.x()) {
+                max.x = regionToFill.region.getMaxX();
             }
-            if (regionToFill.region.maxY() > max.y()) {
-                max.y = regionToFill.region.maxY();
+            if (regionToFill.region.getMaxY() > max.y()) {
+                max.y = regionToFill.region.getMaxY();
             }
-            if (regionToFill.region.maxZ() > max.z()) {
-                max.z = regionToFill.region.maxZ();
+            if (regionToFill.region.getMaxZ() > max.z()) {
+                max.z = regionToFill.region.getMaxZ();
             }
-            if (regionToFill.region.minX() < min.x()) {
-                min.x = regionToFill.region.minX();
+            if (regionToFill.region.getMinX() < min.x()) {
+                min.x = regionToFill.region.getMinX();
             }
-            if (regionToFill.region.minY() < min.y()) {
-                min.y = regionToFill.region.minY();
+            if (regionToFill.region.getMinY() < min.y()) {
+                min.y = regionToFill.region.getMinY();
             }
-            if (regionToFill.region.minZ() < min.z()) {
-                min.z = regionToFill.region.minZ();
+            if (regionToFill.region.getMinZ() < min.z()) {
+                min.z = regionToFill.region.getMinZ();
             }
         }
         return new BlockRegion(min, max);
