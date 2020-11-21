@@ -134,7 +134,7 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
             region = transformation.transformRegion(region);
             block = transformation.transformBlock(block);
 
-            for (Vector3i pos : region) {
+            for (Vector3ic pos : BlockRegionIterable.region(region).build()) {
                 blocksToPlace.put(JomlUtil.from(pos), block);
             }
         }
