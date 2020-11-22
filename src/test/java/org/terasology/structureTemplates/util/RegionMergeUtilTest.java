@@ -15,12 +15,12 @@
  */
 package org.terasology.structureTemplates.util;
 
+import org.joml.Vector3i;
 import org.junit.Before;
 import org.junit.Test;
-import org.terasology.math.Region3i;
-import org.terasology.math.geom.Vector3i;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent.RegionToFill;
 import org.terasology.world.block.Block;
+import org.terasology.world.block.BlockRegion;
 import org.terasology.world.block.BlockUri;
 
 import java.util.ArrayList;
@@ -213,21 +213,21 @@ public class RegionMergeUtilTest {
     }
 
     private RegionToFill createRegion(Block blockType, int minX, int minY, int minZ,
-                                                                 int maxX, int maxY, int maxZ) {
+                                      int maxX, int maxY, int maxZ) {
         RegionToFill r = new RegionToFill();
-        r.region = Region3i.createBounded(new Vector3i(minX, minY, minZ), new Vector3i(maxX, maxY, maxZ));
+        r.region = new BlockRegion(new Vector3i(minX, minY, minZ), new Vector3i(maxX, maxY, maxZ));
         r.blockType = blockType;
         return r;
     }
 
     private static String regionToString(RegionToFill r) {
-        return String.format("block: \"%s\", min: [%d, %d, %d], max: [%d, %d, %d]", r.blockType, r.region.minX(),
-                r. region.minY(), r. region.minZ(), r. region.maxX(), r. region.maxY(), r. region.maxZ());
+        return String.format("block: \"%s\", min: [%d, %d, %d], max: [%d, %d, %d]", r.blockType, r.region.getMinX(),
+            r.region.getMinY(), r.region.getMinZ(), r.region.getMaxX(), r.region.getMaxY(), r.region.getMaxZ());
     }
 
     private static String regionsToString(List<RegionToFill> regions) {
         StringBuilder sb = new StringBuilder();
-        for (RegionToFill r: regions) {
+        for (RegionToFill r : regions) {
             sb.append(regionToString(r));
             sb.append("\n");
         }
