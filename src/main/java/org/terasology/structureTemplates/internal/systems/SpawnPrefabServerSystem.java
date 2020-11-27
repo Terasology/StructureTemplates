@@ -15,6 +15,9 @@
  */
 package org.terasology.structureTemplates.internal.systems;
 
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
+import org.joml.Vector3i;
 import org.terasology.assets.management.AssetManager;
 import org.terasology.entitySystem.entity.EntityBuilder;
 import org.terasology.entitySystem.entity.EntityManager;
@@ -24,8 +27,6 @@ import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.logic.location.LocationComponent;
-import org.terasology.math.geom.Quat4f;
-import org.terasology.math.geom.Vector3i;
 import org.terasology.registry.In;
 import org.terasology.structureTemplates.components.SpawnPrefabsComponent;
 import org.terasology.structureTemplates.events.StructureBlocksSpawnedEvent;
@@ -50,15 +51,14 @@ public class SpawnPrefabServerSystem extends BaseComponentSystem {
                                                 SpawnPrefabsComponent component) {
         for (SpawnPrefabsComponent.PrefabToSpawn prefabToSpawn : component.prefabsToSpawn) {
             Vector3i position = event.getTransformation().transformVector3i(prefabToSpawn.position);
-            Quat4f rotation = event.getTransformation().transformRotation(prefabToSpawn.rotation);
+            Quaternionf rotation = event.getTransformation().transformRotation(prefabToSpawn.rotation);
 
             EntityBuilder entityBuilder = entityManager.newBuilder(prefabToSpawn.prefab);
             LocationComponent locationComponent = entityBuilder.getComponent(LocationComponent.class);
-            locationComponent.setWorldPosition(position.toVector3f());
+            locationComponent.setWorldPosition(new Vector3f(position));
             locationComponent.setWorldRotation(rotation);
 
             entityBuilder.build();
         }
-
     }
 }

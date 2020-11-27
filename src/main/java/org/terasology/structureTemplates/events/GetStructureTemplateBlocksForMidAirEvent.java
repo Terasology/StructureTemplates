@@ -15,11 +15,13 @@
  */
 package org.terasology.structureTemplates.events;
 
+import org.joml.Vector3i;
+import org.joml.Vector3ic;
 import org.terasology.entitySystem.event.Event;
-import org.terasology.math.Region3i;
-import org.terasology.math.geom.Vector3i;
 import org.terasology.structureTemplates.util.BlockRegionTransform;
 import org.terasology.world.block.Block;
+import org.terasology.world.block.BlockRegion;
+import org.terasology.world.block.BlockRegionIterable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,8 +29,8 @@ import java.util.Map;
 public class GetStructureTemplateBlocksForMidAirEvent implements Event {
     private BlockRegionTransform transformation;
     /**
-     * Final placement position to final block type map: The transformation is already applied.
-     * The position is the coordinate of the block in the world.
+     * Final placement position to final block type map: The transformation is already applied. The position is the
+     * coordinate of the block in the world.
      */
     private Map<Vector3i, Block> blocksToPlace = new HashMap<>();
 
@@ -44,9 +46,9 @@ public class GetStructureTemplateBlocksForMidAirEvent implements Event {
         return blocksToPlace;
     }
 
-    public void fillRegion(Region3i region, Block block) {
-        for (Vector3i pos : region) {
-            blocksToPlace.put(pos, block);
+    public void fillRegion(BlockRegion region, Block block) {
+        for (Vector3ic pos : BlockRegionIterable.region(region).build()) {
+            blocksToPlace.put(new Vector3i(pos), block);
         }
     }
 }

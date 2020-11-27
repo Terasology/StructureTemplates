@@ -4,13 +4,13 @@ package org.terasology.structureTemplates.internal.ui;
 
 import org.terasology.logic.clipboard.ClipboardManager;
 import org.terasology.logic.players.LocalPlayer;
-import org.terasology.math.Region3i;
-import org.terasology.math.geom.Vector3i;
+import org.joml.Vector3i;
 import org.terasology.registry.In;
 import org.terasology.rendering.nui.CoreScreenLayer;
 import org.terasology.nui.UIWidget;
 import org.terasology.nui.widgets.UIButton;
 import org.terasology.nui.widgets.UIText;
+import org.terasology.world.block.BlockRegion;
 
 import java.util.function.Consumer;
 
@@ -27,7 +27,7 @@ public class StructureTemplateRegionScreen extends CoreScreenLayer {
     private UIText sizeZField;
     private UIButton okButton;
     private UIButton cancelButton;
-    private Consumer<Region3i> okHandler;
+    private Consumer<BlockRegion> okHandler;
 
     @In
     private ClipboardManager clipboardManager;
@@ -37,8 +37,8 @@ public class StructureTemplateRegionScreen extends CoreScreenLayer {
     private LocalPlayer localPlayer;
 
 
-    public Region3i getRegion() {
-        return Region3i.createFromMinAndSize(
+    public BlockRegion getRegion() {
+        return new BlockRegion(
                 new Vector3i(integerFromField(minXField), integerFromField(minYField), integerFromField(minZField)),
                 new Vector3i(integerFromField(sizeXField), integerFromField(sizeYField), integerFromField(sizeZField))
         );
@@ -52,13 +52,13 @@ public class StructureTemplateRegionScreen extends CoreScreenLayer {
         }
     }
 
-    public void setRegion(Region3i region) {
-        minXField.setText(Integer.toString(region.minX()));
-        minYField.setText(Integer.toString(region.minY()));
-        minZField.setText(Integer.toString(region.minZ()));
-        sizeXField.setText(Integer.toString(region.sizeX()));
-        sizeYField.setText(Integer.toString(region.sizeY()));
-        sizeZField.setText(Integer.toString(region.sizeZ()));
+    public void setRegion(BlockRegion region) {
+        minXField.setText(Integer.toString(region.getMinX()));
+        minYField.setText(Integer.toString(region.getMinY()));
+        minZField.setText(Integer.toString(region.getMinZ()));
+        sizeXField.setText(Integer.toString(region.getSizeX()));
+        sizeYField.setText(Integer.toString(region.getSizeY()));
+        sizeZField.setText(Integer.toString(region.getSizeZ()));
     }
 
     @Override
@@ -93,7 +93,7 @@ public class StructureTemplateRegionScreen extends CoreScreenLayer {
         getManager().popScreen();
     }
 
-    public void setOkHandler(Consumer<Region3i> okHandler) {
+    public void setOkHandler(Consumer<BlockRegion> okHandler) {
         this.okHandler = okHandler;
     }
 }

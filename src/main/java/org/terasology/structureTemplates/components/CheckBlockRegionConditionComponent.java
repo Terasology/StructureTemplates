@@ -17,10 +17,10 @@ package org.terasology.structureTemplates.components;
 
 import org.terasology.entitySystem.Component;
 import org.terasology.entitySystem.prefab.Prefab;
-import org.terasology.math.Region3i;
 import org.terasology.reflection.MappedContainer;
 import org.terasology.structureTemplates.events.CheckSpawnConditionEvent;
 import org.terasology.structureTemplates.events.GetBlockPredicateEvent;
+import org.terasology.world.block.BlockRegion;
 
 import java.util.List;
 import java.util.function.Predicate;
@@ -49,6 +49,6 @@ public class CheckBlockRegionConditionComponent implements Component {
         /**
          * Region which should be checked against the condition.
          */
-        public Region3i region;
+        public BlockRegion region;
     }
 }

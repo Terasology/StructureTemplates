@@ -15,10 +15,10 @@
  */
 package org.terasology.structureTemplates.components;
 
+import org.joml.Quaternionf;
+import org.joml.Vector3i;
 import org.terasology.entitySystem.Component;
 import org.terasology.entitySystem.prefab.Prefab;
-import org.terasology.math.geom.Quat4f;
-import org.terasology.math.geom.Vector3i;
 import org.terasology.reflection.MappedContainer;
 
 import java.util.List;
@@ -34,7 +34,6 @@ public class SpawnPrefabsComponent implements Component {
     public static class PrefabToSpawn {
         public Prefab prefab;
         public Vector3i position;
-        public Quat4f rotation = new Quat4f(0,0,0, 0);
+        public Quaternionf rotation = new Quaternionf();
     }
-
 }

@@ -15,12 +15,11 @@
  */
 package org.terasology.structureTemplates.util;
 
+import org.joml.Vector3i;
 import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.logic.location.LocationComponent;
-import org.terasology.math.Region3i;
-import org.terasology.math.geom.Quat4f;
-import org.terasology.math.geom.Vector3i;
+import org.terasology.math.JomlUtil;
 import org.terasology.structureTemplates.components.ProtectedRegionsComponent;
+import org.terasology.world.block.BlockRegion;
 
 import java.util.Collection;
 import java.util.List;
@@ -34,13 +33,14 @@ public class ProtectedRegionUtility {
      * @param regionEntity
      * @return
      */
-    public static boolean isInProtectedRegion(Collection<Vector3i> positions, EntityRef regionEntity) {
-        ProtectedRegionsComponent protectedRegionsComponent = regionEntity.getComponent(ProtectedRegionsComponent.class);
-        List<Region3i> protectedRegions = protectedRegionsComponent.regions;
+    public static boolean isInProtectedRegion(Collection<org.terasology.math.geom.Vector3i> positions, EntityRef regionEntity) {
+        ProtectedRegionsComponent protectedRegionsComponent =
+                regionEntity.getComponent(ProtectedRegionsComponent.class);
+        List<BlockRegion> protectedRegions = protectedRegionsComponent.regions;
         if (protectedRegions != null) {
-            for (Region3i region : protectedRegions) {
-                for (Vector3i position : positions) {
-                    if (region.encompasses(position)) {
+            for (BlockRegion region : protectedRegions) {
+                for (org.terasology.math.geom.Vector3i position : positions) {
+                    if (region.containsPoint(JomlUtil.from(position))) {
                         return true;
                     }
                 }

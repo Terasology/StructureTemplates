@@ -15,9 +15,9 @@
  */
 package org.terasology.structureTemplates.internal.systems;
 
+import org.joml.Vector3i;
 import org.junit.Test;
 import org.terasology.math.Side;
-import org.terasology.math.geom.Vector3i;
 import org.terasology.structureTemplates.util.BlockRegionTransform;
 
 import static org.junit.Assert.assertEquals;

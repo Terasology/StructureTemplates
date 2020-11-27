@@ -15,9 +15,9 @@
  */
 package org.terasology.structureTemplates.components;
 
+import org.joml.Vector3i;
 import org.terasology.entitySystem.Component;
 import org.terasology.entitySystem.prefab.Prefab;
-import org.terasology.math.geom.Vector3i;
 import org.terasology.reflection.MappedContainer;
 import org.terasology.structureTemplates.events.SpawnStructureEvent;
 import org.terasology.world.block.family.BlockFamily;

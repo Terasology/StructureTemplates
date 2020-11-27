@@ -17,9 +17,9 @@ package org.terasology.structureTemplates.internal.components;
 
 import com.google.common.collect.Lists;
 import org.terasology.entitySystem.Component;
-import org.terasology.math.Region3i;
 import org.terasology.network.FieldReplicateType;
 import org.terasology.network.Replicate;
+import org.terasology.world.block.BlockRegion;
 import org.terasology.world.block.ForceBlockActive;
 
 import java.util.List;
@@ -35,6 +35,6 @@ public class StructureTemplateOriginComponent implements Component {
      * Edited regions in absolute coordinates
      */
     @Replicate(FieldReplicateType.SERVER_TO_CLIENT)
-    public List<Region3i> absoluteTemplateRegions = Lists.newArrayList();
+    public List<BlockRegion> absoluteTemplateRegions = Lists.newArrayList();
 
 }

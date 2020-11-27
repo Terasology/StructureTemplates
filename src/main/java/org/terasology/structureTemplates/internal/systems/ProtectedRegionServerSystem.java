@@ -31,7 +31,6 @@ import org.terasology.logic.characters.events.AttackEvent;
 import org.terasology.logic.common.ActivateEvent;
 import org.terasology.logic.common.lifespan.LifespanComponent;
 import org.terasology.logic.location.LocationComponent;
-import org.terasology.math.Region3i;
 import org.terasology.math.geom.Vector3f;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.network.ClientComponent;
@@ -42,6 +41,7 @@ import org.terasology.structureTemplates.events.StructureBlocksSpawnedEvent;
 import org.terasology.structureTemplates.internal.components.NoInteractionWhenProtected;
 import org.terasology.structureTemplates.util.ProtectedRegionUtility;
 import org.terasology.world.block.BlockComponent;
+import org.terasology.world.block.BlockRegion;
 import org.terasology.world.block.entity.placement.PlaceBlocks;
 import org.terasology.world.block.regions.BlockRegionComponent;
 
@@ -119,8 +119,8 @@ public class ProtectedRegionServerSystem extends BaseComponentSystem {
         EntityBuilder entityBuilder = entityManager.newBuilder();
         entityBuilder.setPersistent(true);
         entityBuilder.addOrSaveComponent(component);
-        List<Region3i> absoluteRegions = Lists.newArrayList();
-        for (Region3i relativeRegion : component.regions) {
+        List<BlockRegion> absoluteRegions = Lists.newArrayList();
+        for (BlockRegion relativeRegion : component.regions) {
             absoluteRegions.add(event.getTransformation().transformRegion(relativeRegion));
         }
         ProtectedRegionsComponent protectedRegionsComponent = new ProtectedRegionsComponent();

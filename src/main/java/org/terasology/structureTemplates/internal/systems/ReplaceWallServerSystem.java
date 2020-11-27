@@ -15,6 +15,7 @@
  */
 package org.terasology.structureTemplates.internal.systems;
 
+import org.joml.Vector3ic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.entitySystem.entity.EntityRef;
@@ -22,7 +23,7 @@ import org.terasology.entitySystem.event.ReceiveEvent;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
-import org.terasology.math.Region3i;
+import org.terasology.math.JomlUtil;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.registry.In;
 import org.terasology.structureTemplates.components.WallPreviewComponent;
@@ -31,6 +32,8 @@ import org.terasology.structureTemplates.internal.events.ReplaceBlocksRequest;
 import org.terasology.world.WorldProvider;
 import org.terasology.world.block.Block;
 import org.terasology.world.block.BlockManager;
+import org.terasology.world.block.BlockRegion;
+import org.terasology.world.block.BlockRegionIterable;
 import org.terasology.world.block.entity.placement.PlaceBlocks;
 
 import java.util.HashMap;
@@ -58,9 +61,9 @@ public class ReplaceWallServerSystem extends BaseComponentSystem {
         }
         Block block = blockManager.getBlock(component.blockUri);
         Map<Vector3i, Block> map = new HashMap<>();
-        for (Region3i region: previewComponent.wallRegions) {
-            for (Vector3i v:region) {
-                map.put(new Vector3i(v), block);
+        for (BlockRegion region: previewComponent.wallRegions) {
+            for (Vector3ic v: BlockRegionIterable.region(region).build()) {
+                map.put(new Vector3i(JomlUtil.from(v)), block);
             }
         }
         PlaceBlocks placeBlocks = new PlaceBlocks(map, item.getOwner());

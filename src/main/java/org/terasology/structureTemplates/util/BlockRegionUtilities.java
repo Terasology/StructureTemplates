@@ -15,23 +15,28 @@
  */
 package org.terasology.structureTemplates.util;
 
-import org.terasology.math.Region3i;
-import org.terasology.math.geom.Vector3f;
-import org.terasology.math.geom.Vector3i;
+import org.joml.RoundingMode;
+import org.joml.Vector3f;
+import org.joml.Vector3i;
+import org.terasology.math.JomlUtil;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent;
+import org.terasology.world.block.BlockRegion;
 
 import java.util.List;
 
-public class BlockRegionUtilities {
+public final class BlockRegionUtilities {
+
+    private BlockRegionUtilities() {
+    }
 
     /**
      * @param spawnBlockRegionsComponent
      * @return the bottom center point of a spawnBlockRegion
      */
     public static Vector3i determineBottomCenter(SpawnBlockRegionsComponent spawnBlockRegionsComponent) {
-        Vector3f bbCenter = getBoundingBox(spawnBlockRegionsComponent).center();
-        Vector3i center = new Vector3i(bbCenter.x, (float) getBoundingBox(spawnBlockRegionsComponent).minY(), bbCenter.z);
-
+        Vector3f bbCenter = getBoundingBox(spawnBlockRegionsComponent).center(new Vector3f());
+        Vector3i center = new Vector3i(new Vector3f(bbCenter.x, (float) getBoundingBox(spawnBlockRegionsComponent).getMinY(),
+            bbCenter.z), RoundingMode.FLOOR);
         return center;
     }
 
@@ -39,33 +44,33 @@ public class BlockRegionUtilities {
      * @param spawnBlockRegionsComponent
      * @return the region encompassing the spawnBlockRegion
      */
-    public static Region3i getBoundingBox(SpawnBlockRegionsComponent spawnBlockRegionsComponent) {
+    public static BlockRegion getBoundingBox(SpawnBlockRegionsComponent spawnBlockRegionsComponent) {
         List<SpawnBlockRegionsComponent.RegionToFill> regionsToFill = spawnBlockRegionsComponent.regionsToFill;
         if (regionsToFill == null) {
             return null;
         }
-        Vector3i max = new Vector3i(regionsToFill.get(0).region.max());
-        Vector3i min = new Vector3i(regionsToFill.get(0).region.min());
+        Vector3i max = new Vector3i(regionsToFill.get(0).region.getMax(new Vector3i()));
+        Vector3i min = new Vector3i(regionsToFill.get(0).region.getMin(new Vector3i()));
         for (SpawnBlockRegionsComponent.RegionToFill regionToFill : regionsToFill) {
-            if (regionToFill.region.maxX() > max.x()) {
-                max.x = regionToFill.region.maxX();
+            if (regionToFill.region.getMaxX() > max.x()) {
+                max.x = regionToFill.region.getMaxX();
             }
-            if (regionToFill.region.maxY() > max.y()) {
-                max.y = regionToFill.region.maxY();
+            if (regionToFill.region.getMaxY() > max.y()) {
+                max.y = regionToFill.region.getMaxY();
             }
-            if (regionToFill.region.maxZ() > max.z()) {
-                max.z = regionToFill.region.maxZ();
+            if (regionToFill.region.getMaxZ() > max.z()) {
+                max.z = regionToFill.region.getMaxZ();
             }
-            if (regionToFill.region.minX() < min.x()) {
-                min.x = regionToFill.region.minX();
+            if (regionToFill.region.getMinX() < min.x()) {
+                min.x = regionToFill.region.getMinX();
             }
-            if (regionToFill.region.minY() < min.y()) {
-                min.y = regionToFill.region.minY();
+            if (regionToFill.region.getMinY() < min.y()) {
+                min.y = regionToFill.region.getMinY();
             }
-            if (regionToFill.region.minZ() < min.z()) {
-                min.z = regionToFill.region.minZ();
+            if (regionToFill.region.getMinZ() < min.z()) {
+                min.z = regionToFill.region.getMinZ();
             }
         }
-        return Region3i.createFromMinMax(min, max);
+        return new BlockRegion(min, max);
     }
 }
