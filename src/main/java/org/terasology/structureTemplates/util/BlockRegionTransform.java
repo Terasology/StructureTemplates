@@ -94,7 +94,7 @@ public class BlockRegionTransform {
     public BlockRegion transformRegion(BlockRegion region) {
         return new BlockRegion(
         	transformVector3i(region.getMin(new Vector3i())),
-        	transformVector3i(region.getMax(new Vector3i()))).correctBounds();
+        	transformVector3i(region.getMax(new Vector3i())).correctBounds();
 
             transformVector3i(region.getMax(new Vector3i())));
     }
