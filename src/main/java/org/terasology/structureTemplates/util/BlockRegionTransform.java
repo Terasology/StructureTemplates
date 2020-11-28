@@ -92,9 +92,9 @@ public class BlockRegionTransform {
 
 
     public BlockRegion transformRegion(BlockRegion region) {
-        return new BlockRegion().union(
-            transformVector3i(region.getMin(new Vector3i()))).union(
-            transformVector3i(region.getMax(new Vector3i())));
+        return new BlockRegion()
+                .union(transformVector3i(region.getMin(new Vector3i())))
+                .union(transformVector3i(region.getMax(new Vector3i())));
     }
 
     public Block transformBlock(Block block) {
