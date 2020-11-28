@@ -65,6 +65,7 @@ import org.terasology.world.block.BlockComponent;
 import org.terasology.world.block.BlockManager;
 import org.terasology.world.block.BlockRegion;
 import org.terasology.world.block.BlockRegionIterable;
+import org.terasology.world.block.BlockRegions;
 
 import java.util.List;
 import java.util.Map;
@@ -134,7 +135,7 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
             region = transformation.transformRegion(region);
             block = transformation.transformBlock(block);
 
-            for (Vector3ic pos : BlockRegionIterable.region(region).build()) {
+            for (Vector3ic pos : BlockRegions.iterableInPlace(region)) {
                 blocksToPlace.put(JomlUtil.from(pos), block);
             }
         }
@@ -179,7 +180,7 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
             region = transformation.transformRegion(region);
             block = transformation.transformBlock(block);
 
-            for (Vector3ic pos : BlockRegionIterable.region(region).build()) {
+            for (Vector3ic pos : BlockRegions.iterableInPlace(region)) {
                 final int y = pos.y();
                 if (!blocksPerLayer.containsKey(y)) {
                     blocksPerLayer.put(y, Lists.newArrayList());

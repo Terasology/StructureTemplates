@@ -87,7 +87,8 @@ public class BlockRegionTransform {
     }
 
     public Region3i transformRegion(Region3i region) {
-        return Region3i.createBounded(JomlUtil.from(transformVector3i(JomlUtil.from(region.min()))), JomlUtil.from(transformVector3i(JomlUtil.from(region.max()))));
+        return Region3i.createBounded(JomlUtil.from(transformVector3i(JomlUtil.from(region.min()))),
+                JomlUtil.from(transformVector3i(JomlUtil.from(region.max()))));
     }
 
 
@@ -104,7 +105,8 @@ public class BlockRegionTransform {
             return sideDefinedBlockFamily.getBlockForSide(transformSide(block.getDirection()));
         } else if (blockFamily instanceof AttachedToSurfaceFamily) {
             // TODO add some proper method to block famility to not have to do this hack
-            return blockFamily.getBlockForPlacement(new BlockPlacementData(new Vector3i(), transformSide(block.getDirection()), new Vector3f()));
+            return blockFamily.getBlockForPlacement(new BlockPlacementData(new Vector3i(),
+                    transformSide(block.getDirection()), new Vector3f()));
         }
         return block;
     }
@@ -115,7 +117,7 @@ public class BlockRegionTransform {
 
     public Vector3i transformVector3i(Vector3i vectorToTransform) {
         Vector3i result = vectorRotatedClockWiseHorizontallyNTimes(vectorToTransform,
-            counterClockWiseHorizontal90DegreeRotations);
+                counterClockWiseHorizontal90DegreeRotations);
         result.add(offset);
         return result;
     }
@@ -160,7 +162,8 @@ public class BlockRegionTransform {
     }
 
     public static BlockRegionTransform createFromComponent(BlockRegionTransformComponent component) {
-        return new BlockRegionTransform(component.counterClockWiseHorizontal90DegreeRotations, JomlUtil.from(component.offset));
+        return new BlockRegionTransform(component.counterClockWiseHorizontal90DegreeRotations,
+                JomlUtil.from(component.offset));
     }
 
     /**

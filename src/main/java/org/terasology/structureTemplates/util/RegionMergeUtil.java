@@ -21,6 +21,7 @@ import org.terasology.math.JomlUtil;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent;
 import org.terasology.world.block.BlockRegion;
 import org.terasology.world.block.BlockRegionIterable;
+import org.terasology.world.block.BlockRegions;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -65,7 +66,7 @@ public final class RegionMergeUtil {
     public static Set<org.terasology.math.geom.Vector3i> positionsOfRegions(List<BlockRegion> originalRegions) {
         Set<org.terasology.math.geom.Vector3i> positionsInTemplate = new HashSet<>();
         for (BlockRegion region : originalRegions) {
-            for (Vector3ic position : BlockRegionIterable.region(region).build()) {
+            for (Vector3ic position : BlockRegions.iterableInPlace(region)) {
                 positionsInTemplate.add(JomlUtil.from(new Vector3i(position)));
             }
         }

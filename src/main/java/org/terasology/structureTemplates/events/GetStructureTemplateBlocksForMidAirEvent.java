@@ -22,6 +22,7 @@ import org.terasology.structureTemplates.util.BlockRegionTransform;
 import org.terasology.world.block.Block;
 import org.terasology.world.block.BlockRegion;
 import org.terasology.world.block.BlockRegionIterable;
+import org.terasology.world.block.BlockRegions;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -47,8 +48,8 @@ public class GetStructureTemplateBlocksForMidAirEvent implements Event {
     }
 
     public void fillRegion(BlockRegion region, Block block) {
-        for (Vector3ic pos : BlockRegionIterable.region(region).build()) {
-            blocksToPlace.put(new Vector3i(pos), block);
+        for (Vector3i pos : BlockRegions.iterable(region)) {
+            blocksToPlace.put(pos, block);
         }
     }
 }
