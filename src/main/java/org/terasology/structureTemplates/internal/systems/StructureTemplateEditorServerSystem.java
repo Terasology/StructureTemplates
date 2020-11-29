@@ -78,6 +78,7 @@ import org.terasology.world.block.BlockComponent;
 import org.terasology.world.block.BlockManager;
 import org.terasology.world.block.BlockRegion;
 import org.terasology.world.block.BlockRegionIterable;
+import org.terasology.world.block.BlockRegions;
 import org.terasology.world.block.entity.placement.PlaceBlocks;
 import org.terasology.world.block.family.BlockFamily;
 import org.terasology.world.block.family.HorizontalFamily;
@@ -623,7 +624,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
 
         Map<Block, Set<Vector3i>> map = new HashMap<>();
         for (BlockRegion absoluteRegion : absoluteRegions) {
-            for (Vector3ic absolutePosition : BlockRegionIterable.region(absoluteRegion).build()) {
+            for (Vector3ic absolutePosition : BlockRegions.iterableInPlace(absoluteRegion)) {
                 Block block = worldProvider.getBlock(absolutePosition);
                 Set<Vector3i> positions = map.get(block);
                 if (positions == null) {
@@ -643,7 +644,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
 
         List<RegionToFill> regionsToFill = new ArrayList<>();
         for (BlockRegion absoluteRegion : absoluteRegions) {
-            for (Vector3ic absolutePosition : BlockRegionIterable.region(absoluteRegion).build()) {
+            for (Vector3ic absolutePosition : BlockRegions.iterableInPlace(absoluteRegion)) {
                 EntityRef blockEntity = blockEntityRegistry.getBlockEntityAt(absolutePosition);
                 BlockPlaceholderComponent placeholderComponent = blockEntity.getComponent(BlockPlaceholderComponent.class);
                 Block block;
