@@ -31,6 +31,7 @@ import org.terasology.logic.characters.events.AttackEvent;
 import org.terasology.logic.common.ActivateEvent;
 import org.terasology.logic.common.lifespan.LifespanComponent;
 import org.terasology.logic.location.LocationComponent;
+import org.terasology.math.JomlUtil;
 import org.terasology.math.geom.Vector3f;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.network.ClientComponent;
@@ -42,6 +43,7 @@ import org.terasology.structureTemplates.internal.components.NoInteractionWhenPr
 import org.terasology.structureTemplates.util.ProtectedRegionUtility;
 import org.terasology.world.block.BlockComponent;
 import org.terasology.world.block.BlockRegion;
+import org.terasology.world.block.BlockRegions;
 import org.terasology.world.block.entity.placement.PlaceBlocks;
 import org.terasology.world.block.regions.BlockRegionComponent;
 
@@ -72,10 +74,10 @@ public class ProtectedRegionServerSystem extends BaseComponentSystem {
     @ReceiveEvent(priority = EventPriority.PRIORITY_CRITICAL)
     public void onAttackBlockRegion(AttackEvent event, EntityRef targetEntity, BlockRegionComponent blockRegionComponent) {
         List<Vector3i> positions = Lists.newArrayList();
-        for (Vector3i pos: blockRegionComponent.region) {
-            positions.add(pos);
+        for (org.joml.Vector3i pos: BlockRegions.iterable(blockRegionComponent.region)) {
+            positions.add(JomlUtil.from(pos));
         }
-        
+
         if (isInProtectedRegion(positions)) {
             event.consume();
         }
