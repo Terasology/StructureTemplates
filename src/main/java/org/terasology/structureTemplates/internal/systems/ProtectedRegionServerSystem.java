@@ -50,6 +50,7 @@ import org.terasology.world.block.regions.BlockRegionComponent;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -101,8 +102,10 @@ public class ProtectedRegionServerSystem extends BaseComponentSystem {
         if (!player.hasComponent(ClientComponent.class)) {
             return;
         }
-
-        if (isInProtectedRegion(event.getBlocks().keySet().stream().map(JomlUtil::from).collect(Collectors.toSet()))) {
+        //TODO: drop `.stream().map(JomlUtil::from).collect(Collectors.toSet())` once PlaceBlocks is migrated to JOML
+        final Set<Vector3i> jomlBlockPositions =
+                event.getBlocks().keySet().stream().map(JomlUtil::from).collect(Collectors.toSet());
+        if (isInProtectedRegion(jomlBlockPositions)) {
             event.consume();
         }
     }
