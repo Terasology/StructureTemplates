@@ -16,6 +16,8 @@
 package org.terasology.structureTemplates.internal.systems;
 
 import com.google.common.collect.Lists;
+import org.joml.Vector3f;
+import org.joml.Vector3i;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.entitySystem.entity.EntityBuilder;
@@ -32,8 +34,6 @@ import org.terasology.logic.common.ActivateEvent;
 import org.terasology.logic.common.lifespan.LifespanComponent;
 import org.terasology.logic.location.LocationComponent;
 import org.terasology.math.JomlUtil;
-import org.terasology.math.geom.Vector3f;
-import org.terasology.math.geom.Vector3i;
 import org.terasology.network.ClientComponent;
 import org.terasology.registry.In;
 import org.terasology.structureTemplates.components.ProtectRegionsForAFewHoursComponent;
@@ -50,6 +50,7 @@ import org.terasology.world.block.regions.BlockRegionComponent;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * System to make {@link ProtectedRegionsComponent} work.
@@ -64,7 +65,7 @@ public class ProtectedRegionServerSystem extends BaseComponentSystem {
 
     @ReceiveEvent(priority = EventPriority.PRIORITY_CRITICAL)
     public void onAttackBlock(AttackEvent event, EntityRef targetEntity, BlockComponent blockComponent) {
-        Vector3i pos = blockComponent.getPosition();
+        Vector3i pos = blockComponent.getPosition(new Vector3i());
 
         if (isInProtectedRegion(Collections.singleton(pos))) {
             event.consume();
@@ -72,10 +73,11 @@ public class ProtectedRegionServerSystem extends BaseComponentSystem {
     }
 
     @ReceiveEvent(priority = EventPriority.PRIORITY_CRITICAL)
-    public void onAttackBlockRegion(AttackEvent event, EntityRef targetEntity, BlockRegionComponent blockRegionComponent) {
+    public void onAttackBlockRegion(AttackEvent event, EntityRef targetEntity,
+                                    BlockRegionComponent blockRegionComponent) {
         List<Vector3i> positions = Lists.newArrayList();
-        for (org.joml.Vector3i pos: BlockRegions.iterable(blockRegionComponent.region)) {
-            positions.add(JomlUtil.from(pos));
+        for (Vector3i pos : BlockRegions.iterable(blockRegionComponent.region)) {
+            positions.add(pos);
         }
 
         if (isInProtectedRegion(positions)) {
@@ -92,7 +94,6 @@ public class ProtectedRegionServerSystem extends BaseComponentSystem {
         return false;
     }
 
-
     @ReceiveEvent(priority = EventPriority.PRIORITY_CRITICAL)
     public void onPlaceBlocks(PlaceBlocks event, EntityRef entity) {
         EntityRef instigator = event.getInstigator();
@@ -100,14 +101,16 @@ public class ProtectedRegionServerSystem extends BaseComponentSystem {
         if (!player.hasComponent(ClientComponent.class)) {
             return;
         }
-        if (isInProtectedRegion(event.getBlocks().keySet())) {
+
+        if (isInProtectedRegion(event.getBlocks().keySet().stream().map(JomlUtil::from).collect(Collectors.toSet()))) {
             event.consume();
         }
     }
 
     @ReceiveEvent(priority = EventPriority.PRIORITY_CRITICAL, components = {NoInteractionWhenProtected.class})
     public void onActivation(ActivateEvent event, EntityRef target) {
-        Vector3f position = event.getTarget().getComponent(LocationComponent.class).getWorldPosition();
+        Vector3f position = event.getTarget().getComponent(LocationComponent.class).getWorldPosition(new Vector3f());
+        //TODO: is this equivalent to  new Vector3i(position, RoundingMode.HALF_UP);
         Vector3i roundedPosition = new Vector3i(Math.round(position.x), Math.round(position.y), Math.round(position.z));
         if (isInProtectedRegion(Collections.singleton(roundedPosition))) {
             event.getInstigator().send(new ActivationRequestDenied(event.getActivationId()));
