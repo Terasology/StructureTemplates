@@ -15,6 +15,8 @@
  */
 package org.terasology.structureTemplates.internal.systems;
 
+import org.joml.Vector3f;
+import org.joml.Vector3i;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.entitySystem.entity.EntityManager;
@@ -26,8 +28,6 @@ import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.logic.characters.events.ActivationPredicted;
 import org.terasology.logic.location.LocationComponent;
-import org.terasology.math.geom.Vector3f;
-import org.terasology.math.geom.Vector3i;
 import org.terasology.registry.In;
 import org.terasology.structureTemplates.components.ProtectedRegionsComponent;
 import org.terasology.structureTemplates.internal.components.NoInteractionWhenProtected;
@@ -58,7 +58,8 @@ public class ProtectedRegionClientSystem extends BaseComponentSystem {
 
     @ReceiveEvent(priority = EventPriority.PRIORITY_CRITICAL, components = {NoInteractionWhenProtected.class})
     public void onActivationPredicted(ActivationPredicted event, EntityRef target) {
-        Vector3f position = event.getTarget().getComponent(LocationComponent.class).getWorldPosition();
+        Vector3f position = event.getTarget().getComponent(LocationComponent.class).getWorldPosition(new Vector3f());
+        //TODO: is this equivalent to  new Vector3i(position, RoundingMode.HALF_UP);
         Vector3i roundedPosition = new Vector3i(Math.round(position.x), Math.round(position.y), Math.round(position.z));
         logger.info(roundedPosition + " " + isInProtectedRegion(Collections.singleton(roundedPosition)));
         if (isInProtectedRegion(Collections.singleton(roundedPosition))) {
