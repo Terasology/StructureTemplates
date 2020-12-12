@@ -839,7 +839,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         HorizontalFamily horizontalBlockFamily = (HorizontalFamily) blockFamily;
         Block block = horizontalBlockFamily.getBlockForSide(frontDirectionOfStructure);
 
-        PlaceBlocks placeBlocks = new PlaceBlocks(JomlUtil.from(position), block, event.getInstigator());
+        PlaceBlocks placeBlocks = new PlaceBlocks(position, block, event.getInstigator());
         worldProvider.getWorldEntity().send(placeBlocks);
         return !placeBlocks.isConsumed();
     }
