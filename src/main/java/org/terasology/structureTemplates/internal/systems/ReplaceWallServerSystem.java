@@ -61,10 +61,10 @@ public class ReplaceWallServerSystem extends BaseComponentSystem {
             return;
         }
         Block block = blockManager.getBlock(component.blockUri);
-        Map<Vector3i, Block> map = new HashMap<>();
+        Map<org.joml.Vector3i, Block> map = new HashMap<>();
         for (BlockRegion region: previewComponent.wallRegions) {
-            for (Vector3ic v: BlockRegions.iterableInPlace(region)) {
-                map.put(new Vector3i(JomlUtil.from(v)), block);
+            for (org.joml.Vector3i v: BlockRegions.iterable(region)) {
+                map.put(v, block);
             }
         }
         PlaceBlocks placeBlocks = new PlaceBlocks(map, item.getOwner());
