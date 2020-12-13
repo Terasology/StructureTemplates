@@ -206,7 +206,7 @@ public class ReplaceWallClientSystem extends BaseComponentSystem implements Upda
 
 
     private List<BlockRegion> getRegionsOfWall(EntityRef item) {
-        Set<org.terasology.math.geom.Vector3i> positionsToAdd = getWallPositions(item);
+        Set<Vector3i> positionsToAdd = getWallPositions(item);
         return RegionMergeUtil.mergePositionsIntoRegions(positionsToAdd);
     }
 
@@ -232,7 +232,7 @@ public class ReplaceWallClientSystem extends BaseComponentSystem implements Upda
         throw new RuntimeException("Unsupported side " + side);
     }
 
-    private Set<org.terasology.math.geom.Vector3i> getWallPositions(EntityRef item) {
+    private Set<Vector3i> getWallPositions(EntityRef item) {
         ReplaceWallItemComponent replaceWallItemComponent = item.getComponent(ReplaceWallItemComponent.class);
         if (replaceWallItemComponent == null) {
             return Collections.emptySet();
@@ -252,7 +252,7 @@ public class ReplaceWallClientSystem extends BaseComponentSystem implements Upda
         Vector3i upDirection = getAbsoluteOffset(directionPlayerLooksAt, Direction.UP);
         Vector3i downDirection = getAbsoluteOffset(directionPlayerLooksAt, Direction.DOWN);
 
-        Set<org.terasology.math.geom.Vector3i> positionsToAdd = new HashSet<>();
+        Set<Vector3i> positionsToAdd = new HashSet<>();
         Set<Vector3i> positionsChecked = new HashSet<>();
         LinkedList<Vector3i> positionsToCheck = new LinkedList<>();
         positionsToCheck.add(spawnPosition);
@@ -284,25 +284,25 @@ public class ReplaceWallClientSystem extends BaseComponentSystem implements Upda
     private void addPositionsBadedReplacementType(ReplaceWallItemComponent replaceWallItemComponent,
                                                   Vector3i leftDirection, Vector3i rightDirection,
                                                   Vector3i upDirection, Vector3i downDirection,
-                                                  Collection<org.terasology.math.geom.Vector3i> collectionToExtend,
+                                                  Collection<Vector3i> collectionToExtend,
                                                   Vector3i wallPos, Vector3i infrontWallPos) {
         switch (replaceWallItemComponent.replacementType) {
             case AIR_INFRONT_OF_WALL:
-                collectionToExtend.add(JomlUtil.from(infrontWallPos));
+                collectionToExtend.add(infrontWallPos);
                 break;
             case WALL:
-                collectionToExtend.add(JomlUtil.from(wallPos));
+                collectionToExtend.add(wallPos);
                 break;
             case WALL_WITH_BORDER:
-                collectionToExtend.add(JomlUtil.from(wallPos));
-                collectionToExtend.add(JomlUtil.from(vectorCopyWithOffset(wallPos, leftDirection)));
-                collectionToExtend.add(JomlUtil.from(vectorCopyWithOffset(wallPos, rightDirection)));
-                collectionToExtend.add(JomlUtil.from(vectorCopyWithOffset(wallPos, upDirection)));
-                collectionToExtend.add(JomlUtil.from(vectorCopyWithOffset(wallPos, downDirection)));
-                collectionToExtend.add(JomlUtil.from(vectorCopyWithOffsets(wallPos, leftDirection, upDirection)));
-                collectionToExtend.add(JomlUtil.from(vectorCopyWithOffsets(wallPos, leftDirection, downDirection)));
-                collectionToExtend.add(JomlUtil.from(vectorCopyWithOffsets(wallPos, rightDirection, upDirection)));
-                collectionToExtend.add(JomlUtil.from(vectorCopyWithOffsets(wallPos, rightDirection, downDirection)));
+                collectionToExtend.add(wallPos);
+                collectionToExtend.add(vectorCopyWithOffset(wallPos, leftDirection));
+                collectionToExtend.add(vectorCopyWithOffset(wallPos, rightDirection));
+                collectionToExtend.add(vectorCopyWithOffset(wallPos, upDirection));
+                collectionToExtend.add(vectorCopyWithOffset(wallPos, downDirection));
+                collectionToExtend.add(vectorCopyWithOffsets(wallPos, leftDirection, upDirection));
+                collectionToExtend.add(vectorCopyWithOffsets(wallPos, leftDirection, downDirection));
+                collectionToExtend.add(vectorCopyWithOffsets(wallPos, rightDirection, upDirection));
+                collectionToExtend.add(vectorCopyWithOffsets(wallPos, rightDirection, downDirection));
                 break;
         }
     }

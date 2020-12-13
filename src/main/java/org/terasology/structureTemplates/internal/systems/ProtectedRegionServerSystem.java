@@ -102,9 +102,7 @@ public class ProtectedRegionServerSystem extends BaseComponentSystem {
         if (!player.hasComponent(ClientComponent.class)) {
             return;
         }
-        //TODO: drop `.stream().map(JomlUtil::from).collect(Collectors.toSet())` once PlaceBlocks is migrated to JOML
-        final Set<Vector3i> jomlBlockPositions =
-                event.getBlocks().keySet().stream().map(JomlUtil::from).collect(Collectors.toSet());
+        final Set<Vector3i> jomlBlockPositions = event.getBlocks().keySet();
         if (isInProtectedRegion(jomlBlockPositions)) {
             event.consume();
         }

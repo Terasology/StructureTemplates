@@ -47,10 +47,10 @@ public final class RegionMergeUtil {
     }
 
 
-    public static List<BlockRegion> mergePositionsIntoRegions(Set<org.terasology.math.geom.Vector3i> positionsInTemplate) {
+    public static List<BlockRegion> mergePositionsIntoRegions(Set<Vector3i> positionsInTemplate) {
         List<BlockRegion> newTemplateRegions = new ArrayList<>();
-        for (org.terasology.math.geom.Vector3i position : positionsInTemplate) {
-            newTemplateRegions.add(new BlockRegion(JomlUtil.from(position), JomlUtil.from(position)));
+        for (Vector3i position : positionsInTemplate) {
+            newTemplateRegions.add(new BlockRegion(position, position));
         }
         RegionMergeUtil.mergeSingleBlockRegions(newTemplateRegions);
         return newTemplateRegions;
@@ -63,11 +63,11 @@ public final class RegionMergeUtil {
     }
 
 
-    public static Set<org.terasology.math.geom.Vector3i> positionsOfRegions(List<BlockRegion> originalRegions) {
-        Set<org.terasology.math.geom.Vector3i> positionsInTemplate = new HashSet<>();
+    public static Set<Vector3i> positionsOfRegions(List<BlockRegion> originalRegions) {
+        Set<Vector3i> positionsInTemplate = new HashSet<>();
         for (BlockRegion region : originalRegions) {
             for (Vector3ic position : BlockRegions.iterableInPlace(region)) {
-                positionsInTemplate.add(JomlUtil.from(new Vector3i(position)));
+                positionsInTemplate.add(new Vector3i(position));
             }
         }
         return positionsInTemplate;

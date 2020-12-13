@@ -219,7 +219,7 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
             regionsOneHigher.add(new BlockRegion(relativeRegion.getMin(new Vector3i()), max));
         }
 
-        Set<org.terasology.math.geom.Vector3i> positions = RegionMergeUtil.positionsOfRegions(regionsOneHigher);
+        Set<Vector3i> positions = RegionMergeUtil.positionsOfRegions(regionsOneHigher);
         List<BlockRegion> regions = RegionMergeUtil.mergePositionsIntoRegions(positions);
 
         String string = formatRegionsAsGroundCondition(regions);
