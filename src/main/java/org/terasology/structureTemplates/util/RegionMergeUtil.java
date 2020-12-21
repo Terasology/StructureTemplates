@@ -17,10 +17,8 @@ package org.terasology.structureTemplates.util;
 
 import org.joml.Vector3i;
 import org.joml.Vector3ic;
-import org.terasology.math.JomlUtil;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent;
 import org.terasology.world.block.BlockRegion;
-import org.terasology.world.block.BlockRegionIterable;
 import org.terasology.world.block.BlockRegions;
 
 import java.util.ArrayList;
@@ -161,8 +159,8 @@ public final class RegionMergeUtil {
             }
 
             public BlockRegion regionCopyWithMaxSetTo(BlockRegion r, int newMax) {
-                Vector3i max = new Vector3i(newMax, r.getMaxY(), r.getMaxZ());
-                return new BlockRegion().union(r.getMin(new Vector3i())).union(max);
+                // this behaves differently than before, as it may throw IllegalArgumentException if `newMax` is too small
+                return r.copy().maxX(newMax);
             }
 
             public Comparator<SpawnBlockRegionsComponent.RegionToFill> regionToFillComparator() {
@@ -170,7 +168,7 @@ public final class RegionMergeUtil {
             }
 
             public Comparator<BlockRegion> regionComparator() {
-                return Comparator.comparing(r -> r.getMinX());
+                return Comparator.comparing(BlockRegion::minX);
             }
         },
         Y {
@@ -183,8 +181,7 @@ public final class RegionMergeUtil {
             }
 
             public BlockRegion regionCopyWithMaxSetTo(BlockRegion r, int newMax) {
-                Vector3i max = new Vector3i(r.getMaxX(), newMax, r.getMaxZ());
-                return new BlockRegion().union(r.getMin(new Vector3i())).union(max);
+                return r.copy().maxY(newMax);
             }
 
             public Comparator<SpawnBlockRegionsComponent.RegionToFill> regionToFillComparator() {
@@ -192,7 +189,7 @@ public final class RegionMergeUtil {
             }
 
             public Comparator<BlockRegion> regionComparator() {
-                return Comparator.comparing(r -> r.getMinY());
+                return Comparator.comparing(BlockRegion::minY);
             }
         },
         Z {
@@ -205,8 +202,7 @@ public final class RegionMergeUtil {
             }
 
             public BlockRegion regionCopyWithMaxSetTo(BlockRegion r, int newMax) {
-                Vector3i max = new Vector3i(r.getMaxX(), r.getMaxY(), newMax);
-                return new BlockRegion().union(r.getMin(new Vector3i())).union(max);
+                return r.copy().maxZ(newMax);
             }
 
             public Comparator<SpawnBlockRegionsComponent.RegionToFill> regionToFillComparator() {
@@ -214,7 +210,7 @@ public final class RegionMergeUtil {
             }
 
             public Comparator<BlockRegion> regionComparator() {
-                return Comparator.comparing(r -> r.getMinZ());
+                return Comparator.comparing(BlockRegion::minZ);
             }
         };
 

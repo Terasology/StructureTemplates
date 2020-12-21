@@ -659,8 +659,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
                 Block relativeBlock = transformToRelative.transformBlock(block);
                 RegionToFill regionToFill = new RegionToFill();
                 Vector3i relativePosition = transformToRelative.transformVector3i(new Vector3i(absolutePosition));
-                BlockRegion region = new BlockRegion().union(relativePosition).union(relativePosition);
-                regionToFill.region = region;
+                regionToFill.region = new BlockRegion(relativePosition);
                 regionToFill.blockType = relativeBlock;
                 regionsToFill.add(regionToFill);
 
@@ -694,17 +693,17 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
             sb.append("            { \"blockType\": \"");
             sb.append(regionToFill.blockType);
             sb.append("\", \"region\": { \"min\": [");
-            sb.append(regionToFill.region.getMinX());
+            sb.append(regionToFill.region.minX());
             sb.append(", ");
-            sb.append(regionToFill.region.getMinY());
+            sb.append(regionToFill.region.minY());
             sb.append(", ");
-            sb.append(regionToFill.region.getMinZ());
+            sb.append(regionToFill.region.minZ());
             sb.append("], \"size\": [");
-            sb.append(regionToFill.region.getSizeX());
+            sb.append(regionToFill.region.sizeX());
             sb.append(", ");
-            sb.append(regionToFill.region.getSizeY());
+            sb.append(regionToFill.region.sizeY());
             sb.append(", ");
-            sb.append(regionToFill.region.getSizeZ());
+            sb.append(regionToFill.region.sizeZ());
             if (last) {
                 sb.append("]}}\n");
             } else {

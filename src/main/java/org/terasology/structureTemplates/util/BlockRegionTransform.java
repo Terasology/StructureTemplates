@@ -26,6 +26,7 @@ import org.terasology.math.Side;
 import org.terasology.structureTemplates.components.BlockRegionTransformComponent;
 import org.terasology.world.block.Block;
 import org.terasology.world.block.BlockRegion;
+import org.terasology.world.block.BlockRegions;
 import org.terasology.world.block.family.AttachedToSurfaceFamily;
 import org.terasology.world.block.family.BlockFamily;
 import org.terasology.world.block.family.BlockPlacementData;
@@ -93,9 +94,9 @@ public class BlockRegionTransform {
 
 
     public BlockRegion transformRegion(BlockRegion region) {
-        return new BlockRegion()
-                .union(transformVector3i(region.getMin(new Vector3i())))
-                .union(transformVector3i(region.getMax(new Vector3i())));
+        return BlockRegions.encompassing(
+                transformVector3i(region.getMin(new Vector3i())),
+                transformVector3i(region.getMax(new Vector3i())));
     }
 
     public Block transformBlock(Block block) {

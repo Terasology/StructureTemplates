@@ -53,12 +53,12 @@ public class StructureTemplateRegionScreen extends CoreScreenLayer {
     }
 
     public void setRegion(BlockRegion region) {
-        minXField.setText(Integer.toString(region.getMinX()));
-        minYField.setText(Integer.toString(region.getMinY()));
-        minZField.setText(Integer.toString(region.getMinZ()));
-        sizeXField.setText(Integer.toString(region.getSizeX()));
-        sizeYField.setText(Integer.toString(region.getSizeY()));
-        sizeZField.setText(Integer.toString(region.getSizeZ()));
+        minXField.setText(Integer.toString(region.minX()));
+        minYField.setText(Integer.toString(region.minY()));
+        minZField.setText(Integer.toString(region.minZ()));
+        sizeXField.setText(Integer.toString(region.sizeX()));
+        sizeYField.setText(Integer.toString(region.sizeY()));
+        sizeZField.setText(Integer.toString(region.sizeZ()));
     }
 
     @Override
