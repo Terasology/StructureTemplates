@@ -29,7 +29,6 @@ import org.terasology.structureTemplates.util.ListUtil;
 import org.terasology.structureTemplates.util.RegionMergeUtil;
 import org.terasology.world.block.BlockComponent;
 import org.terasology.world.block.BlockRegion;
-import org.terasology.world.block.BlockRegions;
 
 import java.util.List;
 import java.util.Set;
@@ -201,7 +200,7 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
      * @return the union of all regions; an invalid region of {@code regions} is empty
      */
     private BlockRegion getBoundingRegion(List<BlockRegion> regions) {
-        return regions.stream().reduce(BlockRegions.INVALID, BlockRegion::union, BlockRegion::union);
+        return regions.stream().reduce(new BlockRegion(BlockRegion.INVALID), BlockRegion::union, BlockRegion::union);
     }
 
     // TODO add item that can do this job or introduce a better way that makes it superflous
@@ -237,7 +236,7 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
             stringBuilder.append(String.format(
                     "            {\"condition\": \"StructureTemplates:IsGroundLike\", \"region\" :{\"min\": [%d, %d, " +
                             "%d], \"size\": [%d, %d, %d]}}",
-                    region.minX(), region.minY(), region.minZ(), region.sizeX(), region.sizeY(), region.sizeZ()));
+                    region.minX(), region.minY(), region.minZ(), region.getSizeX(), region.getSizeY(), region.getSizeZ()));
             if (last) {
                 stringBuilder.append("\n");
             } else {
