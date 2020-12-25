@@ -221,8 +221,8 @@ public class RegionMergeUtilTest {
     }
 
     private static String regionToString(RegionToFill r) {
-        return String.format("block: \"%s\", min: [%d, %d, %d], max: [%d, %d, %d]", r.blockType, r.region.getMinX(),
-            r.region.getMinY(), r.region.getMinZ(), r.region.getMaxX(), r.region.getMaxY(), r.region.getMaxZ());
+        return String.format("block: \"%s\", min: [%d, %d, %d], max: [%d, %d, %d]", r.blockType, r.region.minX(),
+            r.region.minY(), r.region.minZ(), r.region.maxX(), r.region.maxY(), r.region.maxZ());
     }
 
     private static String regionsToString(List<RegionToFill> regions) {

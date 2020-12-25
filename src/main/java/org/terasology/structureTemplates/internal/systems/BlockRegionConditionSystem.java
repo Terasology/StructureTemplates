@@ -74,8 +74,8 @@ public class BlockRegionConditionSystem extends BaseComponentSystem implements B
     @Override
     public boolean allBlocksMatch(BlockRegion untransformedRegion, BlockRegionTransform transform, Predicate<Block> condition) {
         BlockRegion region = transform.transformRegion(untransformedRegion);
-        return allBlocksInAABBMatch(region.getMinX(), region.getMaxX(), region.getMinY(), region.getMaxY(), region.getMinZ(),
-                region.getMaxZ(), condition, transform);
+        return allBlocksInAABBMatch(region.minX(), region.maxX(), region.minY(), region.maxY(), region.minZ(),
+                region.maxZ(), condition, transform);
     }
 
     private boolean allBlocksInAABBMatch(int minX, int maxX, int minY, int maxY, int minZ, int maxZ,

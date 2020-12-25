@@ -38,7 +38,6 @@ import org.terasology.logic.common.ActivateEvent;
 import org.terasology.logic.health.DoDestroyEvent;
 import org.terasology.logic.inventory.InventoryManager;
 import org.terasology.math.JomlUtil;
-import org.terasology.math.Region3i;
 import org.terasology.math.Side;
 import org.terasology.network.NetworkComponent;
 import org.terasology.registry.In;
@@ -77,8 +76,6 @@ import org.terasology.world.block.Block;
 import org.terasology.world.block.BlockComponent;
 import org.terasology.world.block.BlockManager;
 import org.terasology.world.block.BlockRegion;
-import org.terasology.world.block.BlockRegionIterable;
-import org.terasology.world.block.BlockRegions;
 import org.terasology.world.block.entity.placement.PlaceBlocks;
 import org.terasology.world.block.family.BlockFamily;
 import org.terasology.world.block.family.HorizontalFamily;
@@ -102,9 +99,9 @@ import java.util.stream.Collectors;
  */
 @RegisterSystem(RegisterMode.AUTHORITY)
 public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
-    private static final Comparator<RegionToFill> REGION_BY_MIN_X_COMPARATOR = Comparator.comparing(r -> r.region.getMinX());
-    private static final Comparator<RegionToFill> REGION_BY_MIN_Y_COMPARATOR = Comparator.comparing(r -> r.region.getMinY());
-    private static final Comparator<RegionToFill> REGION_BY_MIN_Z_COMPARATOR = Comparator.comparing(r -> r.region.getMinZ());
+    private static final Comparator<RegionToFill> REGION_BY_MIN_X_COMPARATOR = Comparator.comparing(r -> r.region.minX());
+    private static final Comparator<RegionToFill> REGION_BY_MIN_Y_COMPARATOR = Comparator.comparing(r -> r.region.minY());
+    private static final Comparator<RegionToFill> REGION_BY_MIN_Z_COMPARATOR = Comparator.comparing(r -> r.region.minZ());
     private static final Comparator<RegionToFill> REGION_BY_BLOCK_TYPE_COMPARATOR = Comparator.comparing(r -> r.blockType.getURI().toString());
     private static final Logger LOGGER = LoggerFactory.getLogger(StructureTemplateEditorServerSystem.class);
 
@@ -624,7 +621,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
 
         Map<Block, Set<Vector3i>> map = new HashMap<>();
         for (BlockRegion absoluteRegion : absoluteRegions) {
-            for (Vector3ic absolutePosition : BlockRegions.iterableInPlace(absoluteRegion)) {
+            for (Vector3ic absolutePosition : absoluteRegion) {
                 Block block = worldProvider.getBlock(absolutePosition);
                 Set<Vector3i> positions = map.get(block);
                 if (positions == null) {
@@ -644,7 +641,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
 
         List<RegionToFill> regionsToFill = new ArrayList<>();
         for (BlockRegion absoluteRegion : absoluteRegions) {
-            for (Vector3ic absolutePosition : BlockRegions.iterableInPlace(absoluteRegion)) {
+            for (Vector3ic absolutePosition : absoluteRegion) {
                 EntityRef blockEntity = blockEntityRegistry.getBlockEntityAt(absolutePosition);
                 BlockPlaceholderComponent placeholderComponent = blockEntity.getComponent(BlockPlaceholderComponent.class);
                 Block block;
@@ -659,8 +656,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
                 Block relativeBlock = transformToRelative.transformBlock(block);
                 RegionToFill regionToFill = new RegionToFill();
                 Vector3i relativePosition = transformToRelative.transformVector3i(new Vector3i(absolutePosition));
-                BlockRegion region = new BlockRegion().union(relativePosition).union(relativePosition);
-                regionToFill.region = region;
+                regionToFill.region = new BlockRegion(relativePosition);
                 regionToFill.blockType = relativeBlock;
                 regionsToFill.add(regionToFill);
 
@@ -694,11 +690,11 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
             sb.append("            { \"blockType\": \"");
             sb.append(regionToFill.blockType);
             sb.append("\", \"region\": { \"min\": [");
-            sb.append(regionToFill.region.getMinX());
+            sb.append(regionToFill.region.minX());
             sb.append(", ");
-            sb.append(regionToFill.region.getMinY());
+            sb.append(regionToFill.region.minY());
             sb.append(", ");
-            sb.append(regionToFill.region.getMinZ());
+            sb.append(regionToFill.region.minZ());
             sb.append("], \"size\": [");
             sb.append(regionToFill.region.getSizeX());
             sb.append(", ");

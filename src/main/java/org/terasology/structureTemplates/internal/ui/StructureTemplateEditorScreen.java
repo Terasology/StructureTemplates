@@ -64,8 +64,8 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
     protected void initializeWithInteractionTarget(EntityRef interactionTarget) {
         EditTemplateRegionProcessComponent editProcessComponent = findEditProcessForInteractionTarget();
         if (editProcessComponent != null) {
-            recordBlockAddition =  editProcessComponent.recordBlockAddition;
-            recordBlockRemoval =  editProcessComponent.recordBlockRemoval;
+            recordBlockAddition = editProcessComponent.recordBlockAddition;
+            recordBlockRemoval = editProcessComponent.recordBlockRemoval;
         } else {
             recordBlockAddition = false;
             recordBlockRemoval = false;
@@ -89,7 +89,7 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
             createSpawnerButton.subscribe(this::onCreateSpawnerButton);
         }
 
-        createTemplateButton= find("createTemplateButton", UIButton.class);
+        createTemplateButton = find("createTemplateButton", UIButton.class);
         if (createTemplateButton != null) {
             createTemplateButton.subscribe(this::onCreateTemplateItemButton);
         }
@@ -148,8 +148,9 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
         if (editingUserComponent == null) {
             return null;
         }
-        EditTemplateRegionProcessComponent editProcessComponent = editingUserComponent.editProcessEntity.getComponent(EditTemplateRegionProcessComponent.class);
-        if  (!editProcessComponent.structureTemplateEditor.equals(getInteractionTarget())) {
+        EditTemplateRegionProcessComponent editProcessComponent =
+                editingUserComponent.editProcessEntity.getComponent(EditTemplateRegionProcessComponent.class);
+        if (!editProcessComponent.structureTemplateEditor.equals(getInteractionTarget())) {
             return null;
         }
         return editProcessComponent;
@@ -165,7 +166,8 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
     }
 
     private void onEditTemplatePropertiesButton(UIWidget button) {
-        StructureTemplatePropertiesScreen screen = getManager().pushScreen("StructureTemplates:StructureTemplatePropertiesScreen", StructureTemplatePropertiesScreen.class);
+        StructureTemplatePropertiesScreen screen = getManager().pushScreen("StructureTemplates" +
+                ":StructureTemplatePropertiesScreen", StructureTemplatePropertiesScreen.class);
         screen.setEditorEntity(getInteractionTarget());
     }
 
@@ -173,13 +175,16 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
     private void onMakeBoxShapedButton(UIWidget button) {
         EntityRef entity = getInteractionTarget();
         StructureTemplateOriginComponent component = entity.getComponent(StructureTemplateOriginComponent.class);
+        //TODO: The region might be invalid (empty) - what should we do in this case?
         BlockRegion absoluteRegion = getBoundingRegion(component.absoluteTemplateRegions);
         StructureTemplateRegionScreen regionScreen = getManager().pushScreen(
                 "StructureTemplates:StructureTemplateRegionScreen", StructureTemplateRegionScreen.class);
 
         BlockComponent blockComponent = entity.getComponent(BlockComponent.class);
-        BlockRegionTransform transformToRelative = StructureTemplateEditorServerSystem.createAbsoluteToRelativeTransform(blockComponent);
-        BlockRegionTransform transformToAbsolute = StructureTemplateEditorServerSystem.createRelativeToAbsoluteTransform(blockComponent);
+        BlockRegionTransform transformToRelative =
+                StructureTemplateEditorServerSystem.createAbsoluteToRelativeTransform(blockComponent);
+        BlockRegionTransform transformToAbsolute =
+                StructureTemplateEditorServerSystem.createRelativeToAbsoluteTransform(blockComponent);
 
         BlockRegion relativeRegion = transformToRelative.transformRegion(absoluteRegion);
         regionScreen.setRegion(relativeRegion);
@@ -189,17 +194,13 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
         });
     }
 
+    /**
+     * Compute the bounding box over the given regions, i.e., build the union of the given regions.
+     *
+     * @return the union of all regions; an invalid region of {@code regions} is empty
+     */
     private BlockRegion getBoundingRegion(List<BlockRegion> regions) {
-        if (regions.size() == 0) {
-            return new BlockRegion();
-        }
-        Vector3i min = new Vector3i(regions.get(0).getMin(new org.joml.Vector3i()));
-        Vector3i max = new Vector3i(regions.get(0).getMax(new org.joml.Vector3i()));
-        for (BlockRegion region: regions) {
-            min.min(region.getMin(new org.joml.Vector3i()));
-            max.max(region.getMax(new org.joml.Vector3i()));
-        }
-        return new BlockRegion(min, max);
+        return regions.stream().reduce(new BlockRegion(BlockRegion.INVALID), BlockRegion::union, BlockRegion::union);
     }
 
     // TODO add item that can do this job or introduce a better way that makes it superflous
@@ -209,10 +210,11 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
         List<BlockRegion> regionsOneHigher = Lists.newArrayList();
 
         BlockComponent blockComponent = entity.getComponent(BlockComponent.class);
-        BlockRegionTransform transformToRelative = StructureTemplateEditorServerSystem.createAbsoluteToRelativeTransform(blockComponent);
+        BlockRegionTransform transformToRelative =
+                StructureTemplateEditorServerSystem.createAbsoluteToRelativeTransform(blockComponent);
 
 
-        for (BlockRegion absoluteRegion: component.absoluteTemplateRegions) {
+        for (BlockRegion absoluteRegion : component.absoluteTemplateRegions) {
             BlockRegion relativeRegion = transformToRelative.transformRegion(absoluteRegion);
             Vector3i max = new Vector3i(relativeRegion.getMax(new Vector3i()));
             max.add(0, 1, 0);
@@ -232,8 +234,9 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
         stringBuilder.append("        \"checksToPerform\": [\n");
         ListUtil.visitList(regions, (BlockRegion region, boolean last) -> {
             stringBuilder.append(String.format(
-                    "            {\"condition\": \"StructureTemplates:IsGroundLike\", \"region\" :{\"min\": [%d, %d, %d], \"size\": [%d, %d, %d]}}",
-                    region.getMinX(),region.getMinY(), region.getMinZ(),region.getSizeX(), region.getSizeY(), region.getSizeZ()));
+                    "            {\"condition\": \"StructureTemplates:IsGroundLike\", \"region\" :{\"min\": [%d, %d, " +
+                            "%d], \"size\": [%d, %d, %d]}}",
+                    region.minX(), region.minY(), region.minZ(), region.getSizeX(), region.getSizeY(), region.getSizeZ()));
             if (last) {
                 stringBuilder.append("\n");
             } else {

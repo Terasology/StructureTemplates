@@ -18,6 +18,7 @@ package org.terasology.structureTemplates.internal.systems;
 import com.google.common.collect.Lists;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
+import org.joml.Vector3ic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.entitySystem.entity.EntityBuilder;
@@ -33,7 +34,6 @@ import org.terasology.logic.characters.events.AttackEvent;
 import org.terasology.logic.common.ActivateEvent;
 import org.terasology.logic.common.lifespan.LifespanComponent;
 import org.terasology.logic.location.LocationComponent;
-import org.terasology.math.JomlUtil;
 import org.terasology.network.ClientComponent;
 import org.terasology.registry.In;
 import org.terasology.structureTemplates.components.ProtectRegionsForAFewHoursComponent;
@@ -43,7 +43,6 @@ import org.terasology.structureTemplates.internal.components.NoInteractionWhenPr
 import org.terasology.structureTemplates.util.ProtectedRegionUtility;
 import org.terasology.world.block.BlockComponent;
 import org.terasology.world.block.BlockRegion;
-import org.terasology.world.block.BlockRegions;
 import org.terasology.world.block.entity.placement.PlaceBlocks;
 import org.terasology.world.block.regions.BlockRegionComponent;
 
@@ -51,7 +50,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * System to make {@link ProtectedRegionsComponent} work.
@@ -77,8 +75,8 @@ public class ProtectedRegionServerSystem extends BaseComponentSystem {
     public void onAttackBlockRegion(AttackEvent event, EntityRef targetEntity,
                                     BlockRegionComponent blockRegionComponent) {
         List<Vector3i> positions = Lists.newArrayList();
-        for (Vector3i pos : BlockRegions.iterable(blockRegionComponent.region)) {
-            positions.add(pos);
+        for (Vector3ic pos : blockRegionComponent.region) {
+            positions.add(new Vector3i(pos));
         }
 
         if (isInProtectedRegion(positions)) {

@@ -35,7 +35,7 @@ public final class BlockRegionUtilities {
      */
     public static Vector3i determineBottomCenter(SpawnBlockRegionsComponent spawnBlockRegionsComponent) {
         Vector3f bbCenter = getBoundingBox(spawnBlockRegionsComponent).center(new Vector3f());
-        Vector3i center = new Vector3i(new Vector3f(bbCenter.x, (float) getBoundingBox(spawnBlockRegionsComponent).getMinY(),
+        Vector3i center = new Vector3i(new Vector3f(bbCenter.x, (float) getBoundingBox(spawnBlockRegionsComponent).minY(),
             bbCenter.z), RoundingMode.FLOOR);
         return center;
     }
@@ -52,23 +52,23 @@ public final class BlockRegionUtilities {
         Vector3i max = new Vector3i(regionsToFill.get(0).region.getMax(new Vector3i()));
         Vector3i min = new Vector3i(regionsToFill.get(0).region.getMin(new Vector3i()));
         for (SpawnBlockRegionsComponent.RegionToFill regionToFill : regionsToFill) {
-            if (regionToFill.region.getMaxX() > max.x()) {
-                max.x = regionToFill.region.getMaxX();
+            if (regionToFill.region.maxX() > max.x()) {
+                max.x = regionToFill.region.maxX();
             }
-            if (regionToFill.region.getMaxY() > max.y()) {
-                max.y = regionToFill.region.getMaxY();
+            if (regionToFill.region.maxY() > max.y()) {
+                max.y = regionToFill.region.maxY();
             }
-            if (regionToFill.region.getMaxZ() > max.z()) {
-                max.z = regionToFill.region.getMaxZ();
+            if (regionToFill.region.maxZ() > max.z()) {
+                max.z = regionToFill.region.maxZ();
             }
-            if (regionToFill.region.getMinX() < min.x()) {
-                min.x = regionToFill.region.getMinX();
+            if (regionToFill.region.minX() < min.x()) {
+                min.x = regionToFill.region.minX();
             }
-            if (regionToFill.region.getMinY() < min.y()) {
-                min.y = regionToFill.region.getMinY();
+            if (regionToFill.region.minY() < min.y()) {
+                min.y = regionToFill.region.minY();
             }
-            if (regionToFill.region.getMinZ() < min.z()) {
-                min.z = regionToFill.region.getMinZ();
+            if (regionToFill.region.minZ() < min.z()) {
+                min.z = regionToFill.region.minZ();
             }
         }
         return new BlockRegion(min, max);

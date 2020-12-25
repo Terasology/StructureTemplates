@@ -17,11 +17,8 @@ package org.terasology.structureTemplates.util;
 
 import org.joml.Vector3i;
 import org.joml.Vector3ic;
-import org.terasology.math.JomlUtil;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent;
 import org.terasology.world.block.BlockRegion;
-import org.terasology.world.block.BlockRegionIterable;
-import org.terasology.world.block.BlockRegions;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -66,7 +63,7 @@ public final class RegionMergeUtil {
     public static Set<Vector3i> positionsOfRegions(List<BlockRegion> originalRegions) {
         Set<Vector3i> positionsInTemplate = new HashSet<>();
         for (BlockRegion region : originalRegions) {
-            for (Vector3ic position : BlockRegions.iterableInPlace(region)) {
+            for (Vector3ic position : region) {
                 positionsInTemplate.add(new Vector3i(position));
             }
         }
@@ -153,68 +150,65 @@ public final class RegionMergeUtil {
     private enum RegionDimension {
         X {
             public int getMin(BlockRegion r) {
-                return r.getMinX();
+                return r.minX();
             }
 
             public int getMax(BlockRegion r) {
-                return r.getMaxX();
+                return r.maxX();
             }
 
             public BlockRegion regionCopyWithMaxSetTo(BlockRegion r, int newMax) {
-                Vector3i max = new Vector3i(newMax, r.getMaxY(), r.getMaxZ());
-                return new BlockRegion().union(r.getMin(new Vector3i())).union(max);
+                return new BlockRegion(r).maxX(newMax);
             }
 
             public Comparator<SpawnBlockRegionsComponent.RegionToFill> regionToFillComparator() {
-                return Comparator.comparing(r -> r.region.getMinX());
+                return Comparator.comparing(r -> r.region.minX());
             }
 
             public Comparator<BlockRegion> regionComparator() {
-                return Comparator.comparing(r -> r.getMinX());
+                return Comparator.comparing(BlockRegion::minX);
             }
         },
         Y {
             public int getMin(BlockRegion r) {
-                return r.getMinY();
+                return r.minY();
             }
 
             public int getMax(BlockRegion r) {
-                return r.getMaxY();
+                return r.maxY();
             }
 
             public BlockRegion regionCopyWithMaxSetTo(BlockRegion r, int newMax) {
-                Vector3i max = new Vector3i(r.getMaxX(), newMax, r.getMaxZ());
-                return new BlockRegion().union(r.getMin(new Vector3i())).union(max);
+                return new BlockRegion(r).maxY(newMax);
             }
 
             public Comparator<SpawnBlockRegionsComponent.RegionToFill> regionToFillComparator() {
-                return Comparator.comparing(r -> r.region.getMinY());
+                return Comparator.comparing(r -> r.region.minY());
             }
 
             public Comparator<BlockRegion> regionComparator() {
-                return Comparator.comparing(r -> r.getMinY());
+                return Comparator.comparing(BlockRegion::minY);
             }
         },
         Z {
             public int getMin(BlockRegion r) {
-                return r.getMinZ();
+                return r.minZ();
             }
 
             public int getMax(BlockRegion r) {
-                return r.getMaxZ();
+                return r.maxZ();
             }
 
             public BlockRegion regionCopyWithMaxSetTo(BlockRegion r, int newMax) {
-                Vector3i max = new Vector3i(r.getMaxX(), r.getMaxY(), newMax);
-                return new BlockRegion().union(r.getMin(new Vector3i())).union(max);
+                return new BlockRegion(r).maxZ(newMax);
             }
 
             public Comparator<SpawnBlockRegionsComponent.RegionToFill> regionToFillComparator() {
-                return Comparator.comparing(r -> r.region.getMinZ());
+                return Comparator.comparing(r -> r.region.minZ());
             }
 
             public Comparator<BlockRegion> regionComparator() {
-                return Comparator.comparing(r -> r.getMinZ());
+                return Comparator.comparing(BlockRegion::minZ);
             }
         };
 

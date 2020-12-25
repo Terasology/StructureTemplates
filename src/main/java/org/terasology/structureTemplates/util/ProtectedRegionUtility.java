@@ -39,7 +39,7 @@ public class ProtectedRegionUtility {
         if (protectedRegions != null) {
             for (BlockRegion region : protectedRegions) {
                 for (Vector3i position : positions) {
-                    if (region.containsPoint(position)) {
+                    if (region.contains(position)) {
                         return true;
                     }
                 }
