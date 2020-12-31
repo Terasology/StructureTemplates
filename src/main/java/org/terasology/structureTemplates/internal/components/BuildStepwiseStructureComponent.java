@@ -17,8 +17,9 @@ package org.terasology.structureTemplates.internal.components;
 
 import java.util.Collections;
 import java.util.List;
+
+import org.joml.Vector3i;
 import org.terasology.entitySystem.Component;
-import org.terasology.math.geom.Vector3i;
 import org.terasology.reflection.MappedContainer;
 import org.terasology.world.block.Block;
 

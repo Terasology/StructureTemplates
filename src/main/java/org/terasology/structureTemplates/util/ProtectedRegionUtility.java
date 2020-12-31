@@ -15,9 +15,8 @@
  */
 package org.terasology.structureTemplates.util;
 
+import org.joml.Vector3i;
 import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.math.JomlUtil;
-import org.terasology.math.geom.Vector3i;
 import org.terasology.structureTemplates.components.ProtectedRegionsComponent;
 import org.terasology.world.block.BlockRegion;
 
@@ -40,7 +39,7 @@ public class ProtectedRegionUtility {
         if (protectedRegions != null) {
             for (BlockRegion region : protectedRegions) {
                 for (Vector3i position : positions) {
-                    if (region.containsPoint(JomlUtil.from(position))) {
+                    if (region.contains(position)) {
                         return true;
                     }
                 }

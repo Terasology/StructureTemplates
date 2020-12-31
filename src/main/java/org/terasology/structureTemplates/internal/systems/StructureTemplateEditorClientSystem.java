@@ -15,6 +15,7 @@
  */
 package org.terasology.structureTemplates.internal.systems;
 
+import org.joml.Vector3i;
 import org.terasology.entitySystem.entity.EntityBuilder;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
@@ -28,14 +29,14 @@ import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.logic.clipboard.ClipboardManager;
 import org.terasology.logic.inventory.InventoryManager;
 import org.terasology.logic.players.LocalPlayer;
-import org.terasology.math.Region3i;
-import org.terasology.math.geom.Vector3i;
+import org.terasology.math.JomlUtil;
 import org.terasology.registry.In;
 import org.terasology.rendering.logic.RegionOutlineComponent;
 import org.terasology.structureTemplates.internal.components.EditTemplateRegionProcessComponent;
 import org.terasology.structureTemplates.internal.components.EditingUserComponent;
 import org.terasology.structureTemplates.internal.components.StructureTemplateOriginComponent;
 import org.terasology.structureTemplates.internal.events.CopyBlockRegionResultEvent;
+import org.terasology.world.block.BlockRegion;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -119,15 +120,15 @@ public class StructureTemplateEditorClientSystem extends BaseComponentSystem {
     }
 
     public void updateOutlineEntities() {
-            List<Region3i> regionsToDraw = getRegionsToDraw();
+            List<BlockRegion> regionsToDraw = getRegionsToDraw();
         destoryOutlineEntities();
 
-        for (Region3i regionToDraw: regionsToDraw) {
+        for (BlockRegion regionToDraw: regionsToDraw) {
             EntityBuilder entityBuilder = entityManager.newBuilder();
             entityBuilder.setPersistent(false);
             RegionOutlineComponent regionOutlineComponent = new RegionOutlineComponent();
-            regionOutlineComponent.corner1 = new Vector3i(regionToDraw.min());
-            regionOutlineComponent.corner2 = new Vector3i(regionToDraw.max());
+            regionOutlineComponent.corner1 = JomlUtil.from(new Vector3i(regionToDraw.getMin(new Vector3i())));
+            regionOutlineComponent.corner2 = JomlUtil.from(new Vector3i(regionToDraw.getMax(new Vector3i())));
             entityBuilder.addComponent(regionOutlineComponent);
             regionOutlineEntities.add(entityBuilder.build());
         }
@@ -160,7 +161,7 @@ public class StructureTemplateEditorClientSystem extends BaseComponentSystem {
     }
 
 
-    private List<Region3i> getRegionsToDraw() {
+    private List<BlockRegion> getRegionsToDraw() {
 
         StructureTemplateOriginComponent structureTemplateOriginComponent = highlightedEditorEntity.getComponent(StructureTemplateOriginComponent.class);
         if (structureTemplateOriginComponent == null) {

@@ -15,6 +15,9 @@
  */
 package org.terasology.structureTemplates.internal.systems;
 
+import org.joml.RoundingMode;
+import org.joml.Vector3f;
+import org.joml.Vector3i;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.entitySystem.entity.EntityBuilder;
@@ -31,7 +34,6 @@ import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.entitySystem.systems.UpdateSubscriberSystem;
 import org.terasology.logic.location.LocationComponent;
 import org.terasology.math.Side;
-import org.terasology.math.geom.Vector3i;
 import org.terasology.registry.In;
 import org.terasology.structureTemplates.components.PendingStructureSpawnComponent;
 import org.terasology.structureTemplates.components.ScheduleStructurePlacementComponent;
@@ -49,7 +51,7 @@ import java.util.Random;
 
 /**
  * Powers the {@link ScheduleStructurePlacementComponent}. When a {@link SpawnStructureEvent} is received it creates
- * entities with the {@lin PendingStructureSpawnComponent} in order to cause the spawning of a prefab with the
+ * entities with the {@link PendingStructureSpawnComponent} in order to cause the spawning of a prefab with the
  * {@link StructureTemplateComponent} at the wanted locations.
  */
 @RegisterSystem(RegisterMode.AUTHORITY)
@@ -80,15 +82,16 @@ public class ScheduledStructureSpawnSystem extends BaseComponentSystem implement
                                              ScheduleStructurePlacementComponent component) {
 
         BlockRegionTransform transformation = event.getTransformation();
-        for (ScheduleStructurePlacementComponent.PlacementToSchedule placement: component.placementsToSchedule) {
-            Side direction =  transformation.transformSide(placement.front);
+        for (ScheduleStructurePlacementComponent.PlacementToSchedule placement : component.placementsToSchedule) {
+            Side direction = transformation.transformSide(placement.front);
             Vector3i position = transformation.transformVector3i(placement.position);
             EntityBuilder entityBuilder = entityManager.newBuilder();
             LocationComponent locationComponent = new LocationComponent();
-            locationComponent.setWorldPosition(position.toVector3f());
+            locationComponent.setWorldPosition(new Vector3f(position));
             entityBuilder.addComponent(locationComponent);
             if (placement.structureTemplateType == null) {
-                logger.error("ScheduleStructurePlacement component in prefab %s has no (valid) structureTemplateType value");
+                logger.error("ScheduleStructurePlacement component in prefab %s has no (valid) structureTemplateType " +
+                    "value");
                 continue;
             }
 
@@ -125,7 +128,7 @@ public class ScheduledStructureSpawnSystem extends BaseComponentSystem implement
             activeEntity = pendingSpawnEntities.get(pendingSpawnEntities.size() - 1);
 
             PendingStructureSpawnComponent pendingStructureSpawnComponent = activeEntity.getComponent(
-                    PendingStructureSpawnComponent.class);
+                PendingStructureSpawnComponent.class);
             LocationComponent locationComponent = activeEntity.getComponent(LocationComponent.class);
             if (pendingStructureSpawnComponent == null || locationComponent == null) {
                 // should not happen though how map gets filled, but just to be sure
@@ -134,19 +137,20 @@ public class ScheduledStructureSpawnSystem extends BaseComponentSystem implement
             }
             Prefab type = pendingStructureSpawnComponent.structureTemplateType;
             activeEntityDirection = pendingStructureSpawnComponent.front;
-            activeEntityLocation = new Vector3i(locationComponent.getWorldPosition());
-            activeEntityRemainingTemplates = structureTemplateProvider.iterateStructureTempaltesOfTypeInRandomOrder(type);
+            activeEntityLocation = new Vector3i(locationComponent.getWorldPosition(new Vector3f()), RoundingMode.FLOOR);
+            activeEntityRemainingTemplates =
+                structureTemplateProvider.iterateStructureTempaltesOfTypeInRandomOrder(type);
         }
 
         // 1 entity should be remaining, as list gets cleared
         EntityRef structureToSpawn = activeEntityRemainingTemplates.next();
 
         StructureTemplateComponent structureTemplateComponent = structureToSpawn.getComponent(
-                StructureTemplateComponent.class);
+            StructureTemplateComponent.class);
 
         // TODO remove last parameter as it is a constant
         BlockRegionTransform blockRegionTransform = createTransformForIncomingConnectionPoint(activeEntityDirection,
-                activeEntityLocation, new Vector3i(0, 0, 0), Side.FRONT);
+            activeEntityLocation, new Vector3i(0, 0, 0), Side.FRONT);
 
         CheckSpawnConditionEvent checkSpawnConditionEvent = new CheckSpawnConditionEvent(blockRegionTransform);
         structureToSpawn.send(checkSpawnConditionEvent);
@@ -174,15 +178,17 @@ public class ScheduledStructureSpawnSystem extends BaseComponentSystem implement
 
     }
 
-    static BlockRegionTransform createTransformForIncomingConnectionPoint(Side direction, Vector3i spawnPosition, Vector3i incomingConnectionPointPosition, Side incomingConnectionPointDirection) {
+    static BlockRegionTransform createTransformForIncomingConnectionPoint(Side direction, Vector3i spawnPosition,
+                                                                          Vector3i incomingConnectionPointPosition,
+                                                                          Side incomingConnectionPointDirection) {
         // TODO Check if simplfiication is possible now that the BlockREgionTransform takes a offset too
         BlockRegionTransform rot = BlockRegionTransform.createRotationThenMovement(
-                incomingConnectionPointDirection, direction, new Vector3i(0,0,0));
+            incomingConnectionPointDirection, direction, new Vector3i(0, 0, 0));
         Vector3i tranformedOffset = rot.transformVector3i(incomingConnectionPointPosition);
         Vector3i actualSpawnPosition = new Vector3i(spawnPosition);
         actualSpawnPosition.sub(tranformedOffset);
 
         return BlockRegionTransform.createRotationThenMovement(incomingConnectionPointDirection, direction,
-                actualSpawnPosition);
+            actualSpawnPosition);
     }
 }

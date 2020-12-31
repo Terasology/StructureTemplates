@@ -3,20 +3,20 @@
 package org.terasology.structureTemplates.internal.ui;
 
 import com.google.common.collect.Lists;
+import org.joml.Vector3i;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.logic.clipboard.ClipboardManager;
 import org.terasology.logic.players.LocalPlayer;
-import org.terasology.math.Region3i;
-import org.terasology.math.geom.Vector3i;
-import org.terasology.registry.In;
-import org.terasology.rendering.nui.BaseInteractionScreen;
 import org.terasology.nui.UIWidget;
 import org.terasology.nui.databinding.Binding;
 import org.terasology.nui.widgets.UIButton;
 import org.terasology.nui.widgets.UICheckbox;
+import org.terasology.registry.In;
+import org.terasology.rendering.nui.BaseInteractionScreen;
 import org.terasology.structureTemplates.internal.components.EditTemplateRegionProcessComponent;
 import org.terasology.structureTemplates.internal.components.EditingUserComponent;
+import org.terasology.structureTemplates.internal.components.StructureTemplateOriginComponent;
 import org.terasology.structureTemplates.internal.events.CreateEditTemplateRegionProcessRequest;
 import org.terasology.structureTemplates.internal.events.CreateStructureSpawnItemRequest;
 import org.terasology.structureTemplates.internal.events.CreateStructureTemplateItemRequest;
@@ -24,11 +24,11 @@ import org.terasology.structureTemplates.internal.events.MakeBoxShapedRequest;
 import org.terasology.structureTemplates.internal.events.StopEditingProcessRequest;
 import org.terasology.structureTemplates.internal.events.StructureTemplateStringRequest;
 import org.terasology.structureTemplates.internal.systems.StructureTemplateEditorServerSystem;
-import org.terasology.structureTemplates.internal.components.StructureTemplateOriginComponent;
+import org.terasology.structureTemplates.util.BlockRegionTransform;
 import org.terasology.structureTemplates.util.ListUtil;
 import org.terasology.structureTemplates.util.RegionMergeUtil;
-import org.terasology.structureTemplates.util.BlockRegionTransform;
 import org.terasology.world.block.BlockComponent;
+import org.terasology.world.block.BlockRegion;
 
 import java.util.List;
 import java.util.Set;
@@ -64,8 +64,8 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
     protected void initializeWithInteractionTarget(EntityRef interactionTarget) {
         EditTemplateRegionProcessComponent editProcessComponent = findEditProcessForInteractionTarget();
         if (editProcessComponent != null) {
-            recordBlockAddition =  editProcessComponent.recordBlockAddition;
-            recordBlockRemoval =  editProcessComponent.recordBlockRemoval;
+            recordBlockAddition = editProcessComponent.recordBlockAddition;
+            recordBlockRemoval = editProcessComponent.recordBlockRemoval;
         } else {
             recordBlockAddition = false;
             recordBlockRemoval = false;
@@ -89,7 +89,7 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
             createSpawnerButton.subscribe(this::onCreateSpawnerButton);
         }
 
-        createTemplateButton= find("createTemplateButton", UIButton.class);
+        createTemplateButton = find("createTemplateButton", UIButton.class);
         if (createTemplateButton != null) {
             createTemplateButton.subscribe(this::onCreateTemplateItemButton);
         }
@@ -148,8 +148,9 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
         if (editingUserComponent == null) {
             return null;
         }
-        EditTemplateRegionProcessComponent editProcessComponent = editingUserComponent.editProcessEntity.getComponent(EditTemplateRegionProcessComponent.class);
-        if  (!editProcessComponent.structureTemplateEditor.equals(getInteractionTarget())) {
+        EditTemplateRegionProcessComponent editProcessComponent =
+                editingUserComponent.editProcessEntity.getComponent(EditTemplateRegionProcessComponent.class);
+        if (!editProcessComponent.structureTemplateEditor.equals(getInteractionTarget())) {
             return null;
         }
         return editProcessComponent;
@@ -165,7 +166,8 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
     }
 
     private void onEditTemplatePropertiesButton(UIWidget button) {
-        StructureTemplatePropertiesScreen screen = getManager().pushScreen("StructureTemplates:StructureTemplatePropertiesScreen", StructureTemplatePropertiesScreen.class);
+        StructureTemplatePropertiesScreen screen = getManager().pushScreen("StructureTemplates" +
+                ":StructureTemplatePropertiesScreen", StructureTemplatePropertiesScreen.class);
         screen.setEditorEntity(getInteractionTarget());
     }
 
@@ -173,67 +175,68 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
     private void onMakeBoxShapedButton(UIWidget button) {
         EntityRef entity = getInteractionTarget();
         StructureTemplateOriginComponent component = entity.getComponent(StructureTemplateOriginComponent.class);
-        Region3i absoluteRegion = getBoundingRegion(component.absoluteTemplateRegions);
+        //TODO: The region might be invalid (empty) - what should we do in this case?
+        BlockRegion absoluteRegion = getBoundingRegion(component.absoluteTemplateRegions);
         StructureTemplateRegionScreen regionScreen = getManager().pushScreen(
                 "StructureTemplates:StructureTemplateRegionScreen", StructureTemplateRegionScreen.class);
 
         BlockComponent blockComponent = entity.getComponent(BlockComponent.class);
-        BlockRegionTransform transformToRelative = StructureTemplateEditorServerSystem.createAbsoluteToRelativeTransform(blockComponent);
-        BlockRegionTransform transformToAbsolute = StructureTemplateEditorServerSystem.createRelativeToAbsoluteTransform(blockComponent);
+        BlockRegionTransform transformToRelative =
+                StructureTemplateEditorServerSystem.createAbsoluteToRelativeTransform(blockComponent);
+        BlockRegionTransform transformToAbsolute =
+                StructureTemplateEditorServerSystem.createRelativeToAbsoluteTransform(blockComponent);
 
-        Region3i relativeRegion = transformToRelative.transformRegion(absoluteRegion);
+        BlockRegion relativeRegion = transformToRelative.transformRegion(absoluteRegion);
         regionScreen.setRegion(relativeRegion);
-        regionScreen.setOkHandler((Region3i relativeNewRegion) -> {
-            Region3i absoluteNewRegion = transformToAbsolute.transformRegion(relativeNewRegion);
+        regionScreen.setOkHandler((BlockRegion relativeNewRegion) -> {
+            BlockRegion absoluteNewRegion = transformToAbsolute.transformRegion(relativeNewRegion);
             localPlayer.getCharacterEntity().send(new MakeBoxShapedRequest(absoluteNewRegion));
         });
     }
 
-    private Region3i getBoundingRegion(List<Region3i> regions) {
-        if (regions.size() == 0) {
-            return Region3i.EMPTY;
-        }
-        Vector3i min = new Vector3i(regions.get(0).min());
-        Vector3i max = new Vector3i(regions.get(0).max());
-        for (Region3i region: regions) {
-            min.min(region.min());
-            max.max(region.max());
-        }
-        return Region3i.createFromMinMax(min, max);
+    /**
+     * Compute the bounding box over the given regions, i.e., build the union of the given regions.
+     *
+     * @return the union of all regions; an invalid region of {@code regions} is empty
+     */
+    private BlockRegion getBoundingRegion(List<BlockRegion> regions) {
+        return regions.stream().reduce(new BlockRegion(BlockRegion.INVALID), BlockRegion::union, BlockRegion::union);
     }
 
     // TODO add item that can do this job or introduce a better way that makes it superflous
     private void onCopyInGroundConditionButton(UIWidget button) {
         EntityRef entity = getInteractionTarget();
         StructureTemplateOriginComponent component = entity.getComponent(StructureTemplateOriginComponent.class);
-        List<Region3i> regionsOneHigher = Lists.newArrayList();
+        List<BlockRegion> regionsOneHigher = Lists.newArrayList();
 
         BlockComponent blockComponent = entity.getComponent(BlockComponent.class);
-        BlockRegionTransform transformToRelative = StructureTemplateEditorServerSystem.createAbsoluteToRelativeTransform(blockComponent);
+        BlockRegionTransform transformToRelative =
+                StructureTemplateEditorServerSystem.createAbsoluteToRelativeTransform(blockComponent);
 
 
-        for (Region3i absoluteRegion: component.absoluteTemplateRegions) {
-            Region3i relativeRegion = transformToRelative.transformRegion(absoluteRegion);
-            Vector3i max = new Vector3i(relativeRegion.max());
-            max.addY(1);
-            regionsOneHigher.add(Region3i.createFromMinMax(relativeRegion.min(), max));
+        for (BlockRegion absoluteRegion : component.absoluteTemplateRegions) {
+            BlockRegion relativeRegion = transformToRelative.transformRegion(absoluteRegion);
+            Vector3i max = new Vector3i(relativeRegion.getMax(new Vector3i()));
+            max.add(0, 1, 0);
+            regionsOneHigher.add(new BlockRegion(relativeRegion.getMin(new Vector3i()), max));
         }
 
         Set<Vector3i> positions = RegionMergeUtil.positionsOfRegions(regionsOneHigher);
-        List<Region3i> regions = RegionMergeUtil.mergePositionsIntoRegions(positions);
+        List<BlockRegion> regions = RegionMergeUtil.mergePositionsIntoRegions(positions);
 
         String string = formatRegionsAsGroundCondition(regions);
         clipboardManager.setClipboardContents(string);
     }
 
-    private String formatRegionsAsGroundCondition(List<Region3i> regions) {
+    private String formatRegionsAsGroundCondition(List<BlockRegion> regions) {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("    \"CheckBlockRegionCondition\" : {\n");
         stringBuilder.append("        \"checksToPerform\": [\n");
-        ListUtil.visitList(regions, (Region3i region, boolean last) -> {
+        ListUtil.visitList(regions, (BlockRegion region, boolean last) -> {
             stringBuilder.append(String.format(
-                    "            {\"condition\": \"StructureTemplates:IsGroundLike\", \"region\" :{\"min\": [%d, %d, %d], \"size\": [%d, %d, %d]}}",
-                    region.minX(),region.minY(), region.minZ(),region.sizeX(), region.sizeY(), region.sizeZ()));
+                    "            {\"condition\": \"StructureTemplates:IsGroundLike\", \"region\" :{\"min\": [%d, %d, " +
+                            "%d], \"size\": [%d, %d, %d]}}",
+                    region.minX(), region.minY(), region.minZ(), region.getSizeX(), region.getSizeY(), region.getSizeZ()));
             if (last) {
                 stringBuilder.append("\n");
             } else {

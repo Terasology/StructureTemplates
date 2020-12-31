@@ -24,7 +24,6 @@ import org.terasology.entitySystem.prefab.PrefabManager;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
-import org.terasology.math.Region3i;
 import org.terasology.registry.In;
 import org.terasology.registry.Share;
 import org.terasology.structureTemplates.components.BlockPredicateComponent;
@@ -33,12 +32,13 @@ import org.terasology.structureTemplates.components.CheckBlockRegionConditionCom
 import org.terasology.structureTemplates.components.RequiredBlockPropertiesComponent;
 import org.terasology.structureTemplates.events.CheckSpawnConditionEvent;
 import org.terasology.structureTemplates.events.GetBlockPredicateEvent;
-import org.terasology.structureTemplates.interfaces.BlockRegionChecker;
 import org.terasology.structureTemplates.interfaces.BlockPredicateProvider;
+import org.terasology.structureTemplates.interfaces.BlockRegionChecker;
 import org.terasology.structureTemplates.util.BlockRegionTransform;
 import org.terasology.world.WorldProvider;
 import org.terasology.world.block.Block;
 import org.terasology.world.block.BlockManager;
+import org.terasology.world.block.BlockRegion;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -72,8 +72,8 @@ public class BlockRegionConditionSystem extends BaseComponentSystem implements B
     private Map<ResourceUrn, EntityRef> prefabUrnToEntityMap = new HashMap<>();
 
     @Override
-    public boolean allBlocksMatch(Region3i untransformedRegion, BlockRegionTransform transform, Predicate<Block> condition) {
-        Region3i region = transform.transformRegion(untransformedRegion);
+    public boolean allBlocksMatch(BlockRegion untransformedRegion, BlockRegionTransform transform, Predicate<Block> condition) {
+        BlockRegion region = transform.transformRegion(untransformedRegion);
         return allBlocksInAABBMatch(region.minX(), region.maxX(), region.minY(), region.maxY(), region.minZ(),
                 region.maxZ(), condition, transform);
     }
@@ -113,10 +113,10 @@ public class BlockRegionConditionSystem extends BaseComponentSystem implements B
             if (conditionPrefab == null) {
                 return;
             }
-            Region3i relativeRegion = checkToPerform.region;
+            BlockRegion relativeRegion = checkToPerform.region;
             if (!allBlocksMatch(relativeRegion,  event.getBlockRegionTransform(), conditionPrefab)) {
                 event.setPreventSpawn(true);
-                Region3i absoluteRegion = event.getBlockRegionTransform().transformRegion(relativeRegion);
+                BlockRegion absoluteRegion = event.getBlockRegionTransform().transformRegion(relativeRegion);
                 event.setSpawnPreventingRegion(absoluteRegion);
                 event.setFailedSpawnCondition(conditionPrefab);
                 event.consume();
@@ -125,7 +125,7 @@ public class BlockRegionConditionSystem extends BaseComponentSystem implements B
         }
     }
 
-    public boolean allBlocksMatch(Region3i untransformedRegion, BlockRegionTransform transform, Prefab prefab) {
+    public boolean allBlocksMatch(BlockRegion untransformedRegion, BlockRegionTransform transform, Prefab prefab) {
         Predicate<Block> predicate = getBlockPredicate(prefab);
         return allBlocksMatch(untransformedRegion, transform, predicate);
     }

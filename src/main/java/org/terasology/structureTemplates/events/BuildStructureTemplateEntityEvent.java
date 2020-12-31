@@ -15,9 +15,9 @@
  */
 package org.terasology.structureTemplates.events;
 
+import org.joml.Vector3i;
 import org.terasology.entitySystem.MutableComponentContainer;
 import org.terasology.entitySystem.event.Event;
-import org.terasology.math.geom.Vector3i;
 import org.terasology.structureTemplates.util.BlockRegionTransform;
 import org.terasology.world.block.Block;
 import org.terasology.world.block.family.BlockFamily;

@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.structureTemplates.internal.systems;
 
+import org.joml.Vector3f;
+import org.joml.Vector3i;
 import org.terasology.entitySystem.entity.EntityBuilder;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
@@ -24,13 +26,11 @@ import org.terasology.logic.location.LocationComponent;
 import org.terasology.logic.players.LocalPlayer;
 import org.terasology.logic.players.PlayerTargetChangedEvent;
 import org.terasology.math.Direction;
-import org.terasology.math.Region3i;
+import org.terasology.math.JomlUtil;
 import org.terasology.math.Side;
-import org.terasology.math.geom.Vector3f;
-import org.terasology.math.geom.Vector3i;
+import org.terasology.nui.Color;
 import org.terasology.registry.In;
 import org.terasology.rendering.logic.RegionOutlineComponent;
-import org.terasology.nui.Color;
 import org.terasology.rendering.nui.NUIManager;
 import org.terasology.structureTemplates.components.SpawnStructureActionComponent;
 import org.terasology.structureTemplates.components.WallPreviewComponent;
@@ -40,6 +40,7 @@ import org.terasology.structureTemplates.internal.ui.StructurePlacementFailureSc
 import org.terasology.structureTemplates.util.RegionMergeUtil;
 import org.terasology.world.WorldProvider;
 import org.terasology.world.block.BlockComponent;
+import org.terasology.world.block.BlockRegion;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -55,7 +56,8 @@ import java.util.Set;
 @RegisterSystem(RegisterMode.CLIENT)
 public class ReplaceWallClientSystem extends BaseComponentSystem implements UpdateSubscriberSystem {
 
-    public static final String STRUCTURE_PLACEMENT_FAILURE_OVERLAY = "StructureTemplates:StructurePlacementFailureScreen";
+    public static final String STRUCTURE_PLACEMENT_FAILURE_OVERLAY = "StructureTemplates" +
+            ":StructurePlacementFailureScreen";
     private static final int MAX_BLOCKS_PER_WALL = 100;
 
     @In
@@ -93,8 +95,8 @@ public class ReplaceWallClientSystem extends BaseComponentSystem implements Upda
         if (spawnPosition == null) {
             return;
         }
-        Vector3f vectorToTarget = new Vector3f(spawnPosition.toVector3f());
-        vectorToTarget.sub(locationComponent.getWorldPosition());
+        Vector3f vectorToTarget = new Vector3f(spawnPosition);
+        vectorToTarget.sub(locationComponent.getWorldPosition(new Vector3f()));
 
         Vector3f directionVector = vectorToTarget;
         Side newDirection = Side.inDirection(directionVector);
@@ -107,19 +109,19 @@ public class ReplaceWallClientSystem extends BaseComponentSystem implements Upda
 
     @ReceiveEvent
     public void onActivatedReplaceWallItemComponent(OnActivatedComponent event, EntityRef entity,
-                                                         ReplaceWallItemComponent component) {
+                                                    ReplaceWallItemComponent component) {
         updateOutlineEntity();
     }
 
     @ReceiveEvent
     public void onChangedReplaceWallItemComponent(OnChangedComponent event, EntityRef entity,
-                                                         ReplaceWallItemComponent component) {
+                                                  ReplaceWallItemComponent component) {
         updateOutlineEntity();
     }
 
     @ReceiveEvent
     public void onBeforeDeactivateReplaceWallItemComponent(BeforeDeactivateComponent event, EntityRef entity,
-                                                                ReplaceWallItemComponent component) {
+                                                           ReplaceWallItemComponent component) {
         updateOutlineEntity();
     }
 
@@ -139,7 +141,7 @@ public class ReplaceWallClientSystem extends BaseComponentSystem implements Upda
         EntityRef newTarget = event.getNewTarget();
         BlockComponent blockComponent = newTarget.getComponent(BlockComponent.class);
         if (blockComponent != null) {
-            spawnPosition = blockComponent.getPosition();
+            spawnPosition = blockComponent.getPosition(new Vector3i());
         } else {
             spawnPosition = null;
         }
@@ -149,7 +151,7 @@ public class ReplaceWallClientSystem extends BaseComponentSystem implements Upda
     public void updateOutlineEntity() {
         EntityRef item = getSelectedItem();
 
-        List<Region3i> regions = getRegionsOfWall(item);
+        List<BlockRegion> regions = getRegionsOfWall(item);
         replaceRegionOutlineEntitiesWith(regions);
 
         WallPreviewComponent wallPreviewComponent = item.getComponent(WallPreviewComponent.class);
@@ -160,26 +162,26 @@ public class ReplaceWallClientSystem extends BaseComponentSystem implements Upda
         item.addOrSaveComponent(wallPreviewComponent);
     }
 
-    void replaceRegionOutlineEntitiesWith(Collection<Region3i> regionsToDraw) {
+    void replaceRegionOutlineEntitiesWith(Collection<BlockRegion> regionsToDraw) {
         for (EntityRef entity : regionOutlineEntities) {
             if (entity.exists()) {
                 entity.destroy();
             }
         }
         regionOutlineEntities.clear();
-        for (Region3i region : regionsToDraw) {
+        for (BlockRegion region : regionsToDraw) {
             EntityRef entity = createOutlineEntity(region, Color.GREEN);
             regionOutlineEntities.add(entity);
         }
     }
 
     // TODO reuse existing method
-    private EntityRef createOutlineEntity(Region3i region, Color color) {
+    private EntityRef createOutlineEntity(BlockRegion region, Color color) {
         EntityBuilder entityBuilder = entityManager.newBuilder();
         entityBuilder.setPersistent(false);
         RegionOutlineComponent regionOutlineComponent = new RegionOutlineComponent();
-        regionOutlineComponent.corner1 = new Vector3i(region.min());
-        regionOutlineComponent.corner2 = new Vector3i(region.max());
+        regionOutlineComponent.corner1 = JomlUtil.from(new Vector3i(region.getMin(new Vector3i())));
+        regionOutlineComponent.corner2 = JomlUtil.from(new Vector3i(region.getMax(new Vector3i())));
         regionOutlineComponent.color = color;
         entityBuilder.addComponent(regionOutlineComponent);
         return entityBuilder.build();
@@ -203,17 +205,17 @@ public class ReplaceWallClientSystem extends BaseComponentSystem implements Upda
     }
 
 
-    private List<Region3i> getRegionsOfWall(EntityRef item) {
+    private List<BlockRegion> getRegionsOfWall(EntityRef item) {
         Set<Vector3i> positionsToAdd = getWallPositions(item);
         return RegionMergeUtil.mergePositionsIntoRegions(positionsToAdd);
     }
 
     private Vector3i getAbsoluteOffset(Side side, Direction relativeDirection) {
-        return getAbsoulteDirection(side, relativeDirection).toSide().getVector3i();
+        return new Vector3i(getAbsoluteDirection(side, relativeDirection).toSide().direction());
     }
 
-    private Direction getAbsoulteDirection(Side side, Direction relativeDirection) {
-        switch(side) {
+    private Direction getAbsoluteDirection(Side side, Direction relativeDirection) {
+        switch (side) {
             case FRONT:
                 return relativeDirection.toSide().yawClockwise(2).toDirection();
             case LEFT:
@@ -244,11 +246,11 @@ public class ReplaceWallClientSystem extends BaseComponentSystem implements Upda
             return Collections.emptySet();
         }
 
-        Vector3i infrontDirection = getAbsoluteOffset(directionPlayerLooksAt,Direction.BACKWARD);
-        Vector3i leftDirection = getAbsoluteOffset(directionPlayerLooksAt,Direction.LEFT);
-        Vector3i rightDirection = getAbsoluteOffset(directionPlayerLooksAt,Direction.RIGHT);
-        Vector3i upDirection = getAbsoluteOffset(directionPlayerLooksAt,Direction.UP);
-        Vector3i downDirection = getAbsoluteOffset(directionPlayerLooksAt,Direction.DOWN);
+        Vector3i infrontDirection = getAbsoluteOffset(directionPlayerLooksAt, Direction.BACKWARD);
+        Vector3i leftDirection = getAbsoluteOffset(directionPlayerLooksAt, Direction.LEFT);
+        Vector3i rightDirection = getAbsoluteOffset(directionPlayerLooksAt, Direction.RIGHT);
+        Vector3i upDirection = getAbsoluteOffset(directionPlayerLooksAt, Direction.UP);
+        Vector3i downDirection = getAbsoluteOffset(directionPlayerLooksAt, Direction.DOWN);
 
         Set<Vector3i> positionsToAdd = new HashSet<>();
         Set<Vector3i> positionsChecked = new HashSet<>();
@@ -284,7 +286,7 @@ public class ReplaceWallClientSystem extends BaseComponentSystem implements Upda
                                                   Vector3i upDirection, Vector3i downDirection,
                                                   Collection<Vector3i> collectionToExtend,
                                                   Vector3i wallPos, Vector3i infrontWallPos) {
-        switch(replaceWallItemComponent.replacementType) {
+        switch (replaceWallItemComponent.replacementType) {
             case AIR_INFRONT_OF_WALL:
                 collectionToExtend.add(infrontWallPos);
                 break;
@@ -326,7 +328,7 @@ public class ReplaceWallClientSystem extends BaseComponentSystem implements Upda
         DisplayNameComponent displayNameComponent = failedConditionPrefab != null ? failedConditionPrefab
                 .getComponent(DisplayNameComponent.class) : null;
         String spawnConditionName = displayNameComponent != null ? displayNameComponent.name : null;
-        Region3i region = event.getSpawnPreventingRegion();
+        BlockRegion region = event.getSpawnPreventingRegion();
         String message;
         if (region != null) {
             if (spawnConditionName != null) {

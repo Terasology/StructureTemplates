@@ -15,10 +15,10 @@
  */
 package org.terasology.structureTemplates.interfaces;
 
-import org.terasology.math.Region3i;
 import org.terasology.registry.In;
 import org.terasology.structureTemplates.util.BlockRegionTransform;
 import org.terasology.world.block.Block;
+import org.terasology.world.block.BlockRegion;
 
 import java.util.function.Predicate;
 
@@ -31,7 +31,7 @@ public interface BlockRegionChecker {
     /**
      * @return true of the specified condition is true for the specified region afte the transformation got applied.
      */
-    boolean allBlocksMatch(Region3i untransformedRegion, BlockRegionTransform transform,
-                                  Predicate<Block> condition);
+    boolean allBlocksMatch(BlockRegion untransformedRegion, BlockRegionTransform transform,
+                           Predicate<Block> condition);
 
 }
