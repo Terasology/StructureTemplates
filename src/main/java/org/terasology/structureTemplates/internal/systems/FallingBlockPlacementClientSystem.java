@@ -3,6 +3,7 @@
 package org.terasology.structureTemplates.internal.systems;
 
 import org.joml.Vector3f;
+import org.joml.Vector3fc;
 import org.terasology.assets.management.AssetManager;
 import org.terasology.engine.Time;
 import org.terasology.entitySystem.entity.EntityBuilder;
@@ -58,26 +59,21 @@ public class FallingBlockPlacementClientSystem extends BaseComponentSystem imple
             EntityRef visualEntity = entry.getValue();
 
             LocationComponent visualLocationComponent = visualEntity.getComponent(LocationComponent.class);
-            Vector3f position = determineVisualFallingBlockPosition(dataEntity);
+            Vector3fc position = determineVisualFallingBlockPosition(dataEntity);
             visualLocationComponent.setWorldPosition(position);
             visualEntity.saveComponent(visualLocationComponent);
         }
     }
 
-    Vector3f determineVisualFallingBlockPosition(EntityRef dataEntity) {
+    private Vector3fc determineVisualFallingBlockPosition(EntityRef dataEntity) {
         FallingBlockComponent component = dataEntity.getComponent(FallingBlockComponent.class);
         LocationComponent dataLocationComponent = dataEntity.getComponent(LocationComponent.class);
         Vector3f finalPosition = dataLocationComponent.getWorldPosition(new Vector3f());
-        return determineVisualFallingBlockPosition(component, finalPosition);
-    }
 
-    Vector3f determineVisualFallingBlockPosition(FallingBlockComponent component, Vector3f finalPosition) {
-        Vector3f position;
-        if (time.getGameTimeInMs() > component.stopGameTimeInMs) {
-            position = finalPosition;
-        } else {
+        if (time.getGameTimeInMs() < component.stopGameTimeInMs) {
             float totalFallDurationInMs = component.stopGameTimeInMs - component.startGameTimeInMs;
-            float totalFallHeight = 0.5f * (-FALLING_BLOCK_ACCELERATION_IN_M_PER_MS) * totalFallDurationInMs * totalFallDurationInMs;
+            float totalFallHeight =
+                0.5f * (-FALLING_BLOCK_ACCELERATION_IN_M_PER_MS) * totalFallDurationInMs * totalFallDurationInMs;
 
             float fallDuration = (component.startGameTimeInMs - time.getGameTimeInMs());
 
@@ -85,12 +81,10 @@ public class FallingBlockPlacementClientSystem extends BaseComponentSystem imple
 
             float finalY = finalPosition.y();
             float initialY = finalY + totalFallHeight;
-            float newY = initialY - amountFallen;
-            position = new Vector3f(finalPosition.x(), newY, finalPosition.z());
+            finalPosition.y = initialY - amountFallen;
         }
-        return position;
+        return finalPosition;
     }
-
 
     @ReceiveEvent
     public void onActivatedFallingBlockComponent(OnActivatedComponent event, EntityRef dataEntity,
