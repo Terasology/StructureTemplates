@@ -20,6 +20,7 @@ import org.joml.Math;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
+import org.joml.Vector3ic;
 import org.terasology.math.JomlUtil;
 import org.terasology.math.Region3i;
 import org.terasology.math.Side;
@@ -42,12 +43,12 @@ public class BlockRegionTransform {
 
     private Vector3i offset;
 
-    private BlockRegionTransform(int counterClockWiseHorizontal90DegreeRotations, Vector3i offset) {
+    private BlockRegionTransform(int counterClockWiseHorizontal90DegreeRotations, Vector3ic offset) {
         this.counterClockWiseHorizontal90DegreeRotations = counterClockWiseHorizontal90DegreeRotations;
         this.offset = new Vector3i(offset);
     }
 
-    public static BlockRegionTransform createMovingThenRotating(Vector3i offset, Side startSide, Side targetSide) {
+    public static BlockRegionTransform createMovingThenRotating(Vector3ic offset, Side startSide, Side targetSide) {
         /*
          * if offset gets added first then it gets transformed by the rotation
          * So to get the same transformation in the form apply rotation first and then
@@ -57,7 +58,7 @@ public class BlockRegionTransform {
         return new BlockRegionTransform(rotations, transformedOffset);
     }
 
-    public static BlockRegionTransform createRotationThenMovement(Side startSide, Side targetSide, Vector3i offset) {
+    public static BlockRegionTransform createRotationThenMovement(Side startSide, Side targetSide, Vector3ic offset) {
         return new BlockRegionTransform(counterClockWiseTurnsFromSideToSide(startSide, targetSide), offset);
     }
 
@@ -114,14 +115,14 @@ public class BlockRegionTransform {
         return side.yawClockwise(4 - counterClockWiseHorizontal90DegreeRotations);
     }
 
-    public Vector3i transformVector3i(Vector3i vectorToTransform) {
+    public Vector3i transformVector3i(Vector3ic vectorToTransform) {
         Vector3i result = vectorRotatedClockWiseHorizontallyNTimes(vectorToTransform,
                 counterClockWiseHorizontal90DegreeRotations);
         result.add(offset);
         return result;
     }
 
-    private static Vector3i vectorRotatedClockWiseHorizontallyNTimes(Vector3i vectorToTransform, int amount) {
+    private static Vector3i vectorRotatedClockWiseHorizontallyNTimes(Vector3ic vectorToTransform, int amount) {
         Vector3i result = new Vector3i(vectorToTransform);
         for (int i = 0; i < amount; i++) {
             int xBackup = result.x();
