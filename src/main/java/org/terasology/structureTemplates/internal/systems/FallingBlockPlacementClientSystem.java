@@ -1,20 +1,9 @@
-/*
- * Copyright 2017 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2020 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.structureTemplates.internal.systems;
 
+import org.joml.Vector3f;
+import org.joml.Vector3fc;
 import org.terasology.assets.management.AssetManager;
 import org.terasology.engine.Time;
 import org.terasology.entitySystem.entity.EntityBuilder;
@@ -28,7 +17,6 @@ import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.entitySystem.systems.UpdateSubscriberSystem;
 import org.terasology.logic.location.LocationComponent;
-import org.terasology.math.geom.Vector3f;
 import org.terasology.registry.In;
 import org.terasology.rendering.assets.material.Material;
 import org.terasology.rendering.logic.MeshComponent;
@@ -71,39 +59,32 @@ public class FallingBlockPlacementClientSystem extends BaseComponentSystem imple
             EntityRef visualEntity = entry.getValue();
 
             LocationComponent visualLocationComponent = visualEntity.getComponent(LocationComponent.class);
-            Vector3f position = determineVisualFallingBlockPosition(dataEntity);
+            Vector3fc position = determineVisualFallingBlockPosition(dataEntity);
             visualLocationComponent.setWorldPosition(position);
             visualEntity.saveComponent(visualLocationComponent);
         }
     }
 
-    Vector3f determineVisualFallingBlockPosition(EntityRef dataEntity) {
+    private Vector3fc determineVisualFallingBlockPosition(EntityRef dataEntity) {
         FallingBlockComponent component = dataEntity.getComponent(FallingBlockComponent.class);
         LocationComponent dataLocationComponent = dataEntity.getComponent(LocationComponent.class);
         Vector3f finalPosition = dataLocationComponent.getWorldPosition(new Vector3f());
-        return determineVisualFallingBlockPosition(component, finalPosition);
-    }
 
-    Vector3f determineVisualFallingBlockPosition(FallingBlockComponent component, Vector3f finalPosition) {
-        Vector3f position;
-        if (time.getGameTimeInMs() > component.stopGameTimeInMs) {
-            position = finalPosition;
-        } else {
+        if (time.getGameTimeInMs() < component.stopGameTimeInMs) {
             float totalFallDurationInMs = component.stopGameTimeInMs - component.startGameTimeInMs;
-            float totalFallHeight = 0.5f*(-FALLING_BLOCK_ACCELERATION_IN_M_PER_MS) * totalFallDurationInMs * totalFallDurationInMs;
+            float totalFallHeight =
+                0.5f * (-FALLING_BLOCK_ACCELERATION_IN_M_PER_MS) * totalFallDurationInMs * totalFallDurationInMs;
 
             float fallDuration = (component.startGameTimeInMs - time.getGameTimeInMs());
 
-            float amountFallen = 0.5f*(-FALLING_BLOCK_ACCELERATION_IN_M_PER_MS) * fallDuration * fallDuration;
+            float amountFallen = 0.5f * (-FALLING_BLOCK_ACCELERATION_IN_M_PER_MS) * fallDuration * fallDuration;
 
-            float finalY = finalPosition.getY();
+            float finalY = finalPosition.y();
             float initialY = finalY + totalFallHeight;
-            float newY = initialY - amountFallen;
-            position = new Vector3f(finalPosition.getX(), newY, finalPosition.getZ());
+            finalPosition.y = initialY - amountFallen;
         }
-        return position;
+        return finalPosition;
     }
-
 
     @ReceiveEvent
     public void onActivatedFallingBlockComponent(OnActivatedComponent event, EntityRef dataEntity,
@@ -116,7 +97,7 @@ public class FallingBlockPlacementClientSystem extends BaseComponentSystem imple
         meshComponent.material = assetManager.getAsset("engine:terrain", Material.class).get();
         meshComponent.translucent = block.isTranslucent();
         entityBuilder.addComponent(meshComponent);
-        ;
+
         LocationComponent locationComponent = new LocationComponent();
         locationComponent.setWorldPosition(determineVisualFallingBlockPosition(dataEntity));
         locationComponent.setWorldScale(0.9999f);
