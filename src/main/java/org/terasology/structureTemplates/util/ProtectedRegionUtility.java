@@ -16,6 +16,7 @@
 package org.terasology.structureTemplates.util;
 
 import org.joml.Vector3i;
+import org.joml.Vector3ic;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.structureTemplates.components.ProtectedRegionsComponent;
 import org.terasology.world.block.BlockRegion;
@@ -32,13 +33,13 @@ public class ProtectedRegionUtility {
      * @param regionEntity
      * @return
      */
-    public static boolean isInProtectedRegion(Collection<Vector3i> positions, EntityRef regionEntity) {
+    public static boolean isInProtectedRegion(Collection<? extends Vector3ic> positions, EntityRef regionEntity) {
         ProtectedRegionsComponent protectedRegionsComponent =
                 regionEntity.getComponent(ProtectedRegionsComponent.class);
         List<BlockRegion> protectedRegions = protectedRegionsComponent.regions;
         if (protectedRegions != null) {
             for (BlockRegion region : protectedRegions) {
-                for (Vector3i position : positions) {
+                for (Vector3ic position : positions) {
                     if (region.contains(position)) {
                         return true;
                     }

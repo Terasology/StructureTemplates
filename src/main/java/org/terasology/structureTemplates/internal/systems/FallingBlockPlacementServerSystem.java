@@ -17,6 +17,7 @@ package org.terasology.structureTemplates.internal.systems;
 
 import org.joml.Vector3f;
 import org.joml.Vector3i;
+import org.joml.Vector3ic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.assets.management.AssetManager;
@@ -175,10 +176,10 @@ public class FallingBlockPlacementServerSystem extends BaseComponentSystem {
 
 
     private void replacePlacementLocationWithAir(Set<Vector3i> locations) {
-        Map<org.terasology.math.geom.Vector3i, Block> airBlocksToPlace = new HashMap<>();
+        Map<Vector3ic, Block> airBlocksToPlace = new HashMap<>();
         Block air = blockManager.getBlock(BlockManager.AIR_ID);
         for (Vector3i position:locations) {
-            airBlocksToPlace.put(JomlUtil.from(position), air);
+            airBlocksToPlace.put(position, air);
         }
         worldProvider.setBlocks(airBlocksToPlace);
     }
