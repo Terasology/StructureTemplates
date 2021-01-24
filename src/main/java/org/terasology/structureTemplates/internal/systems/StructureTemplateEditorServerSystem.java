@@ -37,18 +37,17 @@ import org.terasology.logic.characters.CharacterComponent;
 import org.terasology.logic.common.ActivateEvent;
 import org.terasology.logic.health.DoDestroyEvent;
 import org.terasology.logic.inventory.InventoryManager;
-import org.terasology.math.JomlUtil;
 import org.terasology.math.Side;
 import org.terasology.network.NetworkComponent;
 import org.terasology.registry.In;
 import org.terasology.structureTemplates.components.BlockPlaceholderComponent;
 import org.terasology.structureTemplates.components.FallingBlocksPlacementAlgorithmComponent;
+import org.terasology.structureTemplates.components.NoConstructionAnimationComponent;
 import org.terasology.structureTemplates.components.ScheduleStructurePlacementComponent;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent;
-import org.terasology.structureTemplates.components.NoConstructionAnimationComponent;
-import org.terasology.structureTemplates.components.StructureTemplateComponent;
-import org.terasology.structureTemplates.components.SpawnTemplateActionComponent;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent.RegionToFill;
+import org.terasology.structureTemplates.components.SpawnTemplateActionComponent;
+import org.terasology.structureTemplates.components.StructureTemplateComponent;
 import org.terasology.structureTemplates.events.BuildStructureTemplateEntityEvent;
 import org.terasology.structureTemplates.events.SpawnTemplateEvent;
 import org.terasology.structureTemplates.internal.components.EditTemplateRegionProcessComponent;
@@ -67,9 +66,9 @@ import org.terasology.structureTemplates.internal.events.RequestStructureTemplat
 import org.terasology.structureTemplates.internal.events.StopEditingProcessRequest;
 import org.terasology.structureTemplates.internal.events.StructureTemplateStringRequest;
 import org.terasology.structureTemplates.util.AnimationType;
+import org.terasology.structureTemplates.util.BlockRegionTransform;
 import org.terasology.structureTemplates.util.ListUtil;
 import org.terasology.structureTemplates.util.RegionMergeUtil;
-import org.terasology.structureTemplates.util.BlockRegionTransform;
 import org.terasology.world.BlockEntityRegistry;
 import org.terasology.world.WorldProvider;
 import org.terasology.world.block.Block;
@@ -133,7 +132,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         if (blockComponent == null) {
             return;
         }
-        Vector3i position = JomlUtil.from(blockComponent.position);
+        Vector3i position = blockComponent.getPosition(new Vector3i());
 
 
         Vector3f directionVector = event.getDirection();
@@ -211,7 +210,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         if (editorComponent == null) {
             return; // can happen if entity got destroyed
         }
-        Set<Vector3i> positionSet = Collections.singleton(JomlUtil.from(blockComponent.position));
+        Set<Vector3i> positionSet = Collections.singleton(blockComponent.getPosition(new Vector3i()));
         if (editTemplateRegionProcessComponent.recordBlockAddition && !editTemplateRegionProcessComponent.recordBlockRemoval) {
             removeBlockPositionsFromTemplate(positionSet, editorEnitity, editorComponent);
         }
@@ -430,7 +429,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
             }
             BlockComponent blockComponent = blockEntity.getComponent(BlockComponent.class);
             ScheduleStructurePlacementComponent.PlacementToSchedule placementToSchedule = new ScheduleStructurePlacementComponent.PlacementToSchedule();
-            placementToSchedule.position = transformToRelative.transformVector3i(JomlUtil.from(blockComponent.position));
+            placementToSchedule.position = transformToRelative.transformVector3i(blockComponent.getPosition(new Vector3i()));
             placementToSchedule.position.y -= 1; // placeholder is on top of marked block
             placementToSchedule.front = transformToRelative.transformSide(blockComponent.block.getDirection());
             placementToSchedule.structureTemplateType = structurePlaceholderComponent.selectedPrefab;
@@ -674,13 +673,13 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
     public static BlockRegionTransform createAbsoluteToRelativeTransform(BlockComponent blockComponent) {
         Side front = blockComponent.block.getDirection();
         Vector3i minusOrigin = new Vector3i(0, 0, 0);
-        minusOrigin.sub(JomlUtil.from(blockComponent.position));
+        minusOrigin.sub(blockComponent.getPosition(new Vector3i()));
         return BlockRegionTransform.createMovingThenRotating(minusOrigin, front, Side.FRONT);
     }
 
     public static BlockRegionTransform createRelativeToAbsoluteTransform(BlockComponent blockComponent) {
         Side front = blockComponent.block.getDirection();
-        return BlockRegionTransform.createRotationThenMovement(Side.FRONT, front, JomlUtil.from(blockComponent.position));
+        return BlockRegionTransform.createRotationThenMovement(Side.FRONT, front, blockComponent.getPosition(new Vector3i()));
     }
 
 
@@ -720,7 +719,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
             return;
         }
 
-        Vector3i position = JomlUtil.from(blockComponent.position);
+        Vector3i position = blockComponent.getPosition(new Vector3i());
         Vector3f directionVector = event.getDirection();
         Side directionStructureIsIn = Side.inHorizontalDirection(directionVector.x(), directionVector.z());
         Side frontDirectionOfStructure = directionStructureIsIn.reverse();
