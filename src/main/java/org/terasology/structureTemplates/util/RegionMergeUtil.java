@@ -44,9 +44,9 @@ public final class RegionMergeUtil {
     }
 
 
-    public static List<BlockRegion> mergePositionsIntoRegions(Set<Vector3i> positionsInTemplate) {
+    public static List<BlockRegion> mergePositionsIntoRegions(Set<? extends Vector3ic> positionsInTemplate) {
         List<BlockRegion> newTemplateRegions = new ArrayList<>();
-        for (Vector3i position : positionsInTemplate) {
+        for (Vector3ic position : positionsInTemplate) {
             newTemplateRegions.add(new BlockRegion(position, position));
         }
         RegionMergeUtil.mergeSingleBlockRegions(newTemplateRegions);
