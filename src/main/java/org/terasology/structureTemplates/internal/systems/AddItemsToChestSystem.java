@@ -27,7 +27,6 @@ import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.logic.inventory.InventoryManager;
 import org.terasology.logic.inventory.ItemComponent;
-import org.terasology.math.JomlUtil;
 import org.terasology.registry.In;
 import org.terasology.structureTemplates.components.AddItemsToChestComponent;
 import org.terasology.structureTemplates.events.BuildStructureTemplateEntityEvent;
@@ -132,7 +131,7 @@ public class AddItemsToChestSystem extends BaseComponentSystem {
             List<AddItemsToChestComponent.Item> itemsToAdd = describeItemsOfEntity(blockEntity);
             if (itemsToAdd.size() > 0) {
                 AddItemsToChestComponent.ChestToFill chestToFill = new AddItemsToChestComponent.ChestToFill();
-                Vector3i absolutePosition = new Vector3i(JomlUtil.from(blockComponent.position));
+                Vector3i absolutePosition = blockComponent.getPosition(new Vector3i());
                 Vector3i relativePosition = event.getTransformToRelative().transformVector3i(absolutePosition);
                 chestToFill.position = relativePosition;
                 chestToFill.items = itemsToAdd;

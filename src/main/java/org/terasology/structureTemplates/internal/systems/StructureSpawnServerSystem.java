@@ -304,7 +304,7 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
         Side wantedFrontOfStructure = facedDirection.reverse();
 
         return createBlockRegionTransformForCharacterTargeting(Side.FRONT,
-            wantedFrontOfStructure, JomlUtil.from(blockComponent.position));
+            wantedFrontOfStructure, blockComponent.getPosition(new Vector3i()));
     }
 
     public static BlockRegionTransform createBlockRegionTransformForCharacterTargeting(
