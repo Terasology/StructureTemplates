@@ -131,7 +131,7 @@ public class AddItemsToChestSystem extends BaseComponentSystem {
             List<AddItemsToChestComponent.Item> itemsToAdd = describeItemsOfEntity(blockEntity);
             if (itemsToAdd.size() > 0) {
                 AddItemsToChestComponent.ChestToFill chestToFill = new AddItemsToChestComponent.ChestToFill();
-                Vector3i absolutePosition = new Vector3i(blockComponent.getPosition(new Vector3i()));
+                Vector3i absolutePosition = blockComponent.getPosition(new Vector3i());
                 Vector3i relativePosition = event.getTransformToRelative().transformVector3i(absolutePosition);
                 chestToFill.position = relativePosition;
                 chestToFill.items = itemsToAdd;
