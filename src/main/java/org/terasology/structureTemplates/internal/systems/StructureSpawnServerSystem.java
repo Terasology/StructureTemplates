@@ -121,7 +121,7 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
                                                 NoConstructionAnimationComponent noConstructionAnimationComponent) {
         BlockRegionTransform transformation = event.getTransformation();
 
-        Map<org.terasology.math.geom.Vector3i, Block> blocksToPlace = Maps.newHashMap();
+        Map<Vector3ic, Block> blocksToPlace = Maps.newHashMap();
 
         for (RegionToFill regionToFill : spawnBlockRegionsComponent.regionsToFill) {
             Block block = regionToFill.blockType;
@@ -134,7 +134,7 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
             block = transformation.transformBlock(block);
 
             for (Vector3ic pos : region) {
-                blocksToPlace.put(JomlUtil.from(pos), block);
+                blocksToPlace.put(pos, block);
             }
         }
 
@@ -231,10 +231,10 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
         List<BuildStep> buildSteps = buildStepwiseStructureComponent.getBuildSteps();
         BuildStep step = buildSteps.get(currentStepCount);
 
-        Map<org.terasology.math.geom.Vector3i, Block> blocksToPlace = Maps.newHashMap();
+        Map<Vector3ic, Block> blocksToPlace = Maps.newHashMap();
 
         for (BlockToPlace blockToPlace : step.blocksInStep) {
-            blocksToPlace.put(JomlUtil.from(blockToPlace.pos), blockToPlace.block);
+            blocksToPlace.put(blockToPlace.pos, blockToPlace.block);
         }
 
         worldProvider.setBlocks(blocksToPlace); //TODO: finish migration

@@ -74,7 +74,7 @@ public class ProtectedRegionServerSystem extends BaseComponentSystem {
     @ReceiveEvent(priority = EventPriority.PRIORITY_CRITICAL)
     public void onAttackBlockRegion(AttackEvent event, EntityRef targetEntity,
                                     BlockRegionComponent blockRegionComponent) {
-        List<Vector3i> positions = Lists.newArrayList();
+        List<Vector3ic> positions = Lists.newArrayList();
         for (Vector3ic pos : blockRegionComponent.region) {
             positions.add(new Vector3i(pos));
         }
@@ -84,7 +84,7 @@ public class ProtectedRegionServerSystem extends BaseComponentSystem {
         }
     }
 
-    private boolean isInProtectedRegion(Collection<Vector3i> positions) {
+    private boolean isInProtectedRegion(Collection<Vector3ic> positions) {
         for (EntityRef regionEntity : entityManager.getEntitiesWith(ProtectedRegionsComponent.class)) {
             if (ProtectedRegionUtility.isInProtectedRegion(positions, regionEntity)) {
                 return true;
@@ -100,8 +100,7 @@ public class ProtectedRegionServerSystem extends BaseComponentSystem {
         if (!player.hasComponent(ClientComponent.class)) {
             return;
         }
-        final Set<Vector3i> jomlBlockPositions = event.getBlocks().keySet();
-        if (isInProtectedRegion(jomlBlockPositions)) {
+        if (isInProtectedRegion(event.getBlocks().keySet())) {
             event.consume();
         }
     }
