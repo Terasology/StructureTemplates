@@ -149,14 +149,13 @@ public class BlockRegionTransform {
 
     public BlockRegionTransformComponent toComponent() {
         BlockRegionTransformComponent component = new BlockRegionTransformComponent();
-        component.offset = JomlUtil.from(this.offset);
+        component.offset.set(this.offset);
         component.counterClockWiseHorizontal90DegreeRotations = this.counterClockWiseHorizontal90DegreeRotations;
         return component;
     }
 
     public static BlockRegionTransform createFromComponent(BlockRegionTransformComponent component) {
-        return new BlockRegionTransform(component.counterClockWiseHorizontal90DegreeRotations,
-                JomlUtil.from(component.offset));
+        return new BlockRegionTransform(component.counterClockWiseHorizontal90DegreeRotations, new Vector3i(component.offset));
     }
 
     /**
