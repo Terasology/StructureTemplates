@@ -49,7 +49,6 @@ import org.terasology.world.block.regions.BlockRegionComponent;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 /**
  * System to make {@link ProtectedRegionsComponent} work.

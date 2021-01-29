@@ -15,7 +15,6 @@
  */
 package org.terasology.structureTemplates.internal.events;
 
-import org.terasology.math.Region3i;
 import org.terasology.network.NetworkEvent;
 import org.terasology.network.ServerEvent;
 import org.terasology.structureTemplates.internal.components.StructureTemplateOriginComponent;

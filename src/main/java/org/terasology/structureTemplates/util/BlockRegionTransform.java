@@ -22,7 +22,6 @@ import org.joml.Vector3f;
 import org.joml.Vector3i;
 import org.joml.Vector3ic;
 import org.terasology.math.JomlUtil;
-import org.terasology.math.Region3i;
 import org.terasology.math.Side;
 import org.terasology.structureTemplates.components.BlockRegionTransformComponent;
 import org.terasology.world.block.Block;
@@ -86,12 +85,6 @@ public class BlockRegionTransform {
         }
         return turns;
     }
-
-    public Region3i transformRegion(Region3i region) {
-        return Region3i.createBounded(JomlUtil.from(transformVector3i(JomlUtil.from(region.min()))),
-                JomlUtil.from(transformVector3i(JomlUtil.from(region.max()))));
-    }
-
 
     public BlockRegion transformRegion(BlockRegion region) {
         return new BlockRegion(transformVector3i(region.getMin(new Vector3i())))

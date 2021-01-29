@@ -2,14 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.structureTemplates.internal.ui;
 
+import org.joml.Vector3i;
 import org.terasology.logic.clipboard.ClipboardManager;
 import org.terasology.logic.players.LocalPlayer;
-import org.joml.Vector3i;
-import org.terasology.registry.In;
-import org.terasology.rendering.nui.CoreScreenLayer;
 import org.terasology.nui.UIWidget;
 import org.terasology.nui.widgets.UIButton;
 import org.terasology.nui.widgets.UIText;
+import org.terasology.registry.In;
+import org.terasology.rendering.nui.CoreScreenLayer;
 import org.terasology.world.block.BlockRegion;
 
 import java.util.function.Consumer;

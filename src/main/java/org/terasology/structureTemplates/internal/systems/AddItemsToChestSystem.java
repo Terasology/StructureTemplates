@@ -33,8 +33,8 @@ import org.terasology.structureTemplates.events.BuildStructureTemplateEntityEven
 import org.terasology.structureTemplates.events.SpawnTemplateEvent;
 import org.terasology.structureTemplates.events.StructureBlocksSpawnedEvent;
 import org.terasology.structureTemplates.internal.events.BuildStructureTemplateStringEvent;
-import org.terasology.structureTemplates.util.ListUtil;
 import org.terasology.structureTemplates.util.BlockRegionTransform;
+import org.terasology.structureTemplates.util.ListUtil;
 import org.terasology.world.BlockEntityRegistry;
 import org.terasology.world.block.BlockComponent;
 import org.terasology.world.block.BlockManager;

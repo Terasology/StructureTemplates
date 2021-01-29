@@ -15,7 +15,6 @@
  */
 package org.terasology.structureTemplates.internal.events;
 
-import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.network.NetworkEvent;
 import org.terasology.network.ServerEvent;
 

@@ -2,15 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.structureTemplates.internal.ui;
 
+import org.joml.Vector2i;
 import org.terasology.joml.geom.Rectanglei;
 import org.terasology.math.JomlUtil;
-import org.joml.Vector2i;
-import org.terasology.nui.asset.font.Font;
-import org.terasology.rendering.assets.texture.TextureRegion;
 import org.terasology.nui.Canvas;
 import org.terasology.nui.TextLineBuilder;
+import org.terasology.nui.asset.font.Font;
 import org.terasology.nui.itemRendering.AbstractItemRenderer;
 import org.terasology.nui.itemRendering.StringTextIconRenderer;
+import org.terasology.rendering.assets.texture.TextureRegion;
 
 import java.util.List;
 
