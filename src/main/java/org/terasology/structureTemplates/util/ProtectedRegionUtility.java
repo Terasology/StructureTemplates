@@ -15,7 +15,6 @@
  */
 package org.terasology.structureTemplates.util;
 
-import org.joml.Vector3i;
 import org.joml.Vector3ic;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.structureTemplates.components.ProtectedRegionsComponent;
