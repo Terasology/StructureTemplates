@@ -29,7 +29,6 @@ import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.logic.clipboard.ClipboardManager;
 import org.terasology.logic.inventory.InventoryManager;
 import org.terasology.logic.players.LocalPlayer;
-import org.terasology.math.JomlUtil;
 import org.terasology.registry.In;
 import org.terasology.rendering.logic.RegionOutlineComponent;
 import org.terasology.structureTemplates.internal.components.EditTemplateRegionProcessComponent;
@@ -127,8 +126,8 @@ public class StructureTemplateEditorClientSystem extends BaseComponentSystem {
             EntityBuilder entityBuilder = entityManager.newBuilder();
             entityBuilder.setPersistent(false);
             RegionOutlineComponent regionOutlineComponent = new RegionOutlineComponent();
-            regionOutlineComponent.corner1 = JomlUtil.from(new Vector3i(regionToDraw.getMin(new Vector3i())));
-            regionOutlineComponent.corner2 = JomlUtil.from(new Vector3i(regionToDraw.getMax(new Vector3i())));
+            regionOutlineComponent.corner1 = new Vector3i(regionToDraw.getMin(new Vector3i()));
+            regionOutlineComponent.corner2 = new Vector3i(regionToDraw.getMax(new Vector3i()));
             entityBuilder.addComponent(regionOutlineComponent);
             regionOutlineEntities.add(entityBuilder.build());
         }

@@ -26,7 +26,6 @@ import org.terasology.logic.location.LocationComponent;
 import org.terasology.logic.players.LocalPlayer;
 import org.terasology.logic.players.PlayerTargetChangedEvent;
 import org.terasology.math.Direction;
-import org.terasology.math.JomlUtil;
 import org.terasology.math.Side;
 import org.terasology.nui.Color;
 import org.terasology.registry.In;
@@ -180,8 +179,8 @@ public class ReplaceWallClientSystem extends BaseComponentSystem implements Upda
         EntityBuilder entityBuilder = entityManager.newBuilder();
         entityBuilder.setPersistent(false);
         RegionOutlineComponent regionOutlineComponent = new RegionOutlineComponent();
-        regionOutlineComponent.corner1 = JomlUtil.from(new Vector3i(region.getMin(new Vector3i())));
-        regionOutlineComponent.corner2 = JomlUtil.from(new Vector3i(region.getMax(new Vector3i())));
+        regionOutlineComponent.corner1 = new Vector3i(region.getMin(new Vector3i()));
+        regionOutlineComponent.corner2 = new Vector3i(region.getMax(new Vector3i()));
         regionOutlineComponent.color = color;
         entityBuilder.addComponent(regionOutlineComponent);
         return entityBuilder.build();
