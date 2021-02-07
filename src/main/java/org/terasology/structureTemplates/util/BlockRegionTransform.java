@@ -21,7 +21,6 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 import org.joml.Vector3ic;
-import org.terasology.math.JomlUtil;
 import org.terasology.math.Side;
 import org.terasology.structureTemplates.components.BlockRegionTransformComponent;
 import org.terasology.world.block.Block;
