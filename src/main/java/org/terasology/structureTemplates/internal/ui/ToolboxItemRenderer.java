@@ -4,7 +4,6 @@ package org.terasology.structureTemplates.internal.ui;
 
 import org.joml.Vector2i;
 import org.terasology.joml.geom.Rectanglei;
-import org.terasology.math.JomlUtil;
 import org.terasology.nui.Canvas;
 import org.terasology.nui.TextLineBuilder;
 import org.terasology.nui.asset.font.Font;
@@ -46,11 +45,11 @@ public class ToolboxItemRenderer extends AbstractItemRenderer<ToolboxTreeValue> 
             if (marginTop + texture.getHeight() + marginBottom > canvas.size().y) {
                 // Icon does not fit within the canvas - vertically shrinking it
                 int iconHeight = canvas.size().y - marginTop - marginBottom;
-                canvas.drawTexture(texture, JomlUtil.rectangleiFromMinAndSize(marginLeft, marginTop, texture.getWidth(), iconHeight));
+                canvas.drawTexture(texture, new Rectanglei(marginLeft, marginTop).setSize(texture.getWidth(), iconHeight));
             } else {
                 // Icon fits within the canvas - vertically centering it
                 int iconVerticalPosition = (canvas.size().y - texture.getHeight()) / 2;
-                canvas.drawTexture(texture, JomlUtil.rectangleiFromMinAndSize(marginLeft, iconVerticalPosition, texture.getWidth(), texture.getHeight()));
+                canvas.drawTexture(texture, new Rectanglei(marginLeft, iconVerticalPosition).setSize(texture.getWidth(), texture.getHeight()));
             }
         }
 
@@ -64,7 +63,7 @@ public class ToolboxItemRenderer extends AbstractItemRenderer<ToolboxTreeValue> 
             iconWidth = 0;
         }
 
-        Rectanglei textRegion = JomlUtil.rectangleiFromMinAndSize(iconWidth, 0, canvas.getRegion().lengthX() - iconWidth, canvas.getRegion().lengthY());
+        Rectanglei textRegion = new Rectanglei(iconWidth, 0).setSize(canvas.getRegion().getSizeX() - iconWidth, canvas.getRegion().getSizeY());
         canvas.drawText(text, textRegion);
     }
 
