@@ -17,20 +17,21 @@ package org.terasology.structureTemplates.components;
 
 
 import org.joml.Vector3i;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.terasology.structureTemplates.util.BlockRegionUtilities;
 import org.terasology.world.block.Block;
 import org.terasology.world.block.BlockRegion;
 import org.terasology.world.block.BlockUri;
-import org.junit.Assert;
-import org.terasology.structureTemplates.util.BlockRegionUtilities;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 public class BlockRegionBoundingBoxTest {
     private Block blockA;
     private Block blockB;
 
-    @Before
+    @BeforeAll
     public void prepare() {
         blockA = new Block();
         blockA.setUri(new BlockUri("a:a"));
@@ -48,8 +49,8 @@ public class BlockRegionBoundingBoxTest {
         blockRegionA.regionsToFill.add(regionB);
         blockRegionA.regionsToFill.add(regionC);
         BlockRegion bb = BlockRegionUtilities.getBoundingBox(blockRegionA);
-        Assert.assertEquals(bb.getMax(new Vector3i()), new Vector3i(6, 1, 5));
-        Assert.assertEquals(bb.getMin(new Vector3i()), new Vector3i(2, 0, -1));
+        assertEquals(bb.getMax(new Vector3i()), new Vector3i(6, 1, 5));
+        assertEquals(bb.getMin(new Vector3i()), new Vector3i(2, 0, -1));
 
 
     }

@@ -16,8 +16,8 @@
 package org.terasology.structureTemplates.util;
 
 import org.joml.Vector3i;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent.RegionToFill;
 import org.terasology.world.block.Block;
 import org.terasology.world.block.BlockRegion;
@@ -25,8 +25,7 @@ import org.terasology.world.block.BlockUri;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Tests for {@link   RegionMergeUtil}. Tests exemplay the region merging method mergeRegionsByX.
@@ -37,7 +36,7 @@ public class RegionMergeUtilTest {
     private Block blockA;
     private Block blockB;
 
-    @Before
+    @BeforeAll
     public void prepare() {
         blockA = new Block();
         blockA.setUri(new BlockUri("a:a"));
@@ -222,7 +221,7 @@ public class RegionMergeUtilTest {
 
     private static String regionToString(RegionToFill r) {
         return String.format("block: \"%s\", min: [%d, %d, %d], max: [%d, %d, %d]", r.blockType, r.region.minX(),
-            r.region.minY(), r.region.minZ(), r.region.maxX(), r.region.maxY(), r.region.maxZ());
+                r.region.minY(), r.region.minZ(), r.region.maxX(), r.region.maxY(), r.region.maxZ());
     }
 
     private static String regionsToString(List<RegionToFill> regions) {
