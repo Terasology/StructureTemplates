@@ -84,7 +84,6 @@ import org.terasology.world.block.items.OnBlockItemPlaced;
 import org.terasology.world.block.items.OnBlockToItem;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -220,7 +219,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         }
     }
 
-    private void addBlockPositionsToTemplate(Set<Vector3ic> positions, EntityRef templateEnitity, StructureTemplateOriginComponent templateComponent) {
+    private void addBlockPositionsToTemplate(Set<Vector3ic> positions, EntityRef templateEntity, StructureTemplateOriginComponent templateComponent) {
         List<BlockRegion> originalRegions = templateComponent.absoluteTemplateRegions;
         Set<Vector3ic> positionsInTemplate = Sets.newHashSet();
         positionsInTemplate.addAll(RegionMergeUtil.positionsOfRegions(originalRegions));
@@ -229,7 +228,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         } else {
             positionsInTemplate.addAll(positions);
             templateComponent.absoluteTemplateRegions = RegionMergeUtil.mergePositionsIntoRegions(positionsInTemplate);
-            templateEnitity.saveComponent(templateComponent);
+            templateEntity.saveComponent(templateComponent);
         }
     }
 
@@ -574,7 +573,8 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
             LOGGER.error("Ignored MakeBoxShapedRequest event since there was no interaction with a structure template origin block");
             return;
         }
-        structureTemplateOriginComponent.absoluteTemplateRegions = new ArrayList<>(Arrays.asList(event.getRegion()));
+        structureTemplateOriginComponent.absoluteTemplateRegions.clear();
+        structureTemplateOriginComponent.absoluteTemplateRegions.add(new BlockRegion(event.getRegion()));
         structureTemplateOriginEntity.saveComponent(structureTemplateOriginComponent);
     }
 
@@ -827,8 +827,11 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
     private void addTemplateDataToBlockEntity(Vector3i position, List<BlockRegion> regions, EntityRef originBlockEntity,
                                               StructureTemplateComponent newStructureTemplateComponent) {
         StructureTemplateOriginComponent editorComponent = originBlockEntity.getComponent(StructureTemplateOriginComponent.class);
-        editorComponent.absoluteTemplateRegions = new ArrayList<>(regions);
-        originBlockEntity.saveComponent(editorComponent);
+        if (editorComponent != null) {
+            editorComponent.absoluteTemplateRegions.clear();
+            editorComponent.absoluteTemplateRegions.addAll(regions);
+            originBlockEntity.saveComponent(editorComponent);
+        }
         originBlockEntity.addOrSaveComponent(newStructureTemplateComponent);
     }
 
