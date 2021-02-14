@@ -19,6 +19,7 @@ import org.terasology.network.NetworkEvent;
 import org.terasology.network.ServerEvent;
 import org.terasology.structureTemplates.internal.components.StructureTemplateOriginComponent;
 import org.terasology.world.block.BlockRegion;
+import org.terasology.world.block.BlockRegionc;
 
 /**
  * The event gets sent to a character entity at the server.
@@ -30,15 +31,15 @@ import org.terasology.world.block.BlockRegion;
  */
 @ServerEvent
 public class MakeBoxShapedRequest extends NetworkEvent {
-    private BlockRegion region;
+    private BlockRegion region = new BlockRegion(BlockRegion.INVALID);
     public MakeBoxShapedRequest() {
     }
 
-    public MakeBoxShapedRequest(BlockRegion region) {
-        this.region = region;
+    public MakeBoxShapedRequest(BlockRegionc region) {
+        this.region.set(region);
     }
 
-    public BlockRegion getRegion() {
+    public BlockRegionc getRegion() {
         return region;
     }
 }
