@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.structureTemplates.internal.ui;
 
-import org.joml.Vector3i;
 import org.terasology.logic.clipboard.ClipboardManager;
 import org.terasology.logic.players.LocalPlayer;
 import org.terasology.nui.UIWidget;
@@ -11,6 +10,7 @@ import org.terasology.nui.widgets.UIText;
 import org.terasology.registry.In;
 import org.terasology.rendering.nui.CoreScreenLayer;
 import org.terasology.world.block.BlockRegion;
+import org.terasology.world.block.BlockRegionc;
 
 import java.util.function.Consumer;
 
@@ -38,10 +38,8 @@ public class StructureTemplateRegionScreen extends CoreScreenLayer {
 
 
     public BlockRegion getRegion() {
-        return new BlockRegion(
-                new Vector3i(integerFromField(minXField), integerFromField(minYField), integerFromField(minZField)),
-                new Vector3i(integerFromField(sizeXField), integerFromField(sizeYField), integerFromField(sizeZField))
-        );
+        return new BlockRegion(integerFromField(minXField), integerFromField(minYField), integerFromField(minZField))
+                .setSize(integerFromField(sizeXField), integerFromField(sizeYField), integerFromField(sizeZField));
     }
 
     private Integer integerFromField(UIText field) {
@@ -52,7 +50,7 @@ public class StructureTemplateRegionScreen extends CoreScreenLayer {
         }
     }
 
-    public void setRegion(BlockRegion region) {
+    public void setRegion(BlockRegionc region) {
         minXField.setText(Integer.toString(region.minX()));
         minYField.setText(Integer.toString(region.minY()));
         minZField.setText(Integer.toString(region.minZ()));
