@@ -16,7 +16,7 @@
 package org.terasology.structureTemplates.util;
 
 import org.joml.Vector3i;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent.RegionToFill;
 import org.terasology.world.block.Block;
@@ -25,6 +25,7 @@ import org.terasology.world.block.BlockUri;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -36,7 +37,7 @@ public class RegionMergeUtilTest {
     private Block blockA;
     private Block blockB;
 
-    @BeforeAll
+    @BeforeEach
     public void prepare() {
         blockA = new Block();
         blockA.setUri(new BlockUri("a:a"));

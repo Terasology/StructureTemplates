@@ -17,7 +17,7 @@ package org.terasology.structureTemplates.components;
 
 
 import org.joml.Vector3i;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.terasology.structureTemplates.util.BlockRegionUtilities;
 import org.terasology.world.block.Block;
@@ -31,7 +31,7 @@ public class BlockRegionBoundingBoxTest {
     private Block blockA;
     private Block blockB;
 
-    @BeforeAll
+    @BeforeEach
     public void prepare() {
         blockA = new Block();
         blockA.setUri(new BlockUri("a:a"));
