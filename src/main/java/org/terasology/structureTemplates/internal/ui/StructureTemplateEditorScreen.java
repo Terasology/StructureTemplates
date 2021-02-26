@@ -174,17 +174,22 @@ public class StructureTemplateEditorScreen extends BaseInteractionScreen {
 
     private void onMakeBoxShapedButton(UIWidget button) {
         EntityRef entity = getInteractionTarget();
-        StructureTemplateOriginComponent component = entity.getComponent(StructureTemplateOriginComponent.class);
-        //TODO: The region might be invalid (empty) - what should we do in this case?
-        BlockRegion absoluteRegion = getBoundingRegion(component.absoluteTemplateRegions);
-        StructureTemplateRegionScreen regionScreen = getManager().pushScreen(
-                "StructureTemplates:StructureTemplateRegionScreen", StructureTemplateRegionScreen.class);
 
         BlockComponent blockComponent = entity.getComponent(BlockComponent.class);
         BlockRegionTransform transformToRelative =
                 StructureTemplateEditorServerSystem.createAbsoluteToRelativeTransform(blockComponent);
         BlockRegionTransform transformToAbsolute =
                 StructureTemplateEditorServerSystem.createRelativeToAbsoluteTransform(blockComponent);
+
+        StructureTemplateOriginComponent component = entity.getComponent(StructureTemplateOriginComponent.class);
+        //TODO: The region might be invalid (empty) - what should we do in this case?
+        //      Can we add the position of the interaction target to guarantee a non-empty region?
+        if (component.absoluteTemplateRegions.isEmpty()) {
+            component.absoluteTemplateRegions.add(new BlockRegion(blockComponent.getPosition()));
+        }
+        BlockRegion absoluteRegion = getBoundingRegion(component.absoluteTemplateRegions);
+        StructureTemplateRegionScreen regionScreen = getManager().pushScreen(
+                "StructureTemplates:StructureTemplateRegionScreen", StructureTemplateRegionScreen.class);
 
         BlockRegion relativeRegion = transformToRelative.transformRegion(absoluteRegion);
         regionScreen.setRegion(relativeRegion);

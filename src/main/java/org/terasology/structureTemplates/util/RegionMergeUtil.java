@@ -29,8 +29,8 @@ import java.util.Set;
 /**
  * Utility class for merging touching {@link BlockRegion} and {@link SpawnBlockRegionsComponent.RegionToFill} together.
  *
- * Typically you create first a list of region 3i that contain each a single block position. Then you use the
- * methods of this class to merge them together to fewer larget regions that cover the same blocks.
+ * Typically you create first a list of block regions that contain each a single block position. Then you use the
+ * methods of this class to merge them together to fewer regions of bigger size, covering the same blocks.
  */
 public final class RegionMergeUtil {
     private RegionMergeUtil() {
@@ -59,7 +59,9 @@ public final class RegionMergeUtil {
         mergeRegionsByZ(regions);
     }
 
-
+    /**
+     * Flatten the coordinates given by {@code originalRegions} into a single set of unique vectors.
+     */
     public static Set<Vector3i> positionsOfRegions(List<BlockRegion> originalRegions) {
         Set<Vector3i> positionsInTemplate = new HashSet<>();
         for (BlockRegion region : originalRegions) {
