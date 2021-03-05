@@ -432,7 +432,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
             ScheduleStructurePlacementComponent.PlacementToSchedule placementToSchedule = new ScheduleStructurePlacementComponent.PlacementToSchedule();
             placementToSchedule.position = transformToRelative.transformVector3i(blockComponent.getPosition(new Vector3i()));
             placementToSchedule.position.y -= 1; // placeholder is on top of marked block
-            placementToSchedule.front = transformToRelative.transformSide(blockComponent.block.getDirection());
+            placementToSchedule.front = transformToRelative.transformSide(blockComponent.getBlock().getDirection());
             placementToSchedule.structureTemplateType = structurePlaceholderComponent.selectedPrefab;
             placementToSchedules.add(placementToSchedule);
         }
@@ -673,14 +673,14 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
 
     // TODO move 2 methods to utility class
     public static BlockRegionTransform createAbsoluteToRelativeTransform(BlockComponent blockComponent) {
-        Side front = blockComponent.block.getDirection();
+        Side front = blockComponent.getBlock().getDirection();
         Vector3i minusOrigin = new Vector3i(0, 0, 0);
         minusOrigin.sub(blockComponent.getPosition(new Vector3i()));
         return BlockRegionTransform.createMovingThenRotating(minusOrigin, front, Side.FRONT);
     }
 
     public static BlockRegionTransform createRelativeToAbsoluteTransform(BlockComponent blockComponent) {
-        Side front = blockComponent.block.getDirection();
+        Side front = blockComponent.getBlock().getDirection();
         return BlockRegionTransform.createRotationThenMovement(Side.FRONT, front, blockComponent.getPosition(new Vector3i()));
     }
 
