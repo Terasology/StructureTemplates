@@ -15,9 +15,9 @@
  */
 package org.terasology.structureTemplates.interfaces;
 
-import org.terasology.entitySystem.prefab.Prefab;
-import org.terasology.registry.In;
-import org.terasology.world.block.Block;
+import org.terasology.engine.entitySystem.prefab.Prefab;
+import org.terasology.engine.registry.In;
+import org.terasology.engine.world.block.Block;
 
 import java.util.function.Predicate;
 

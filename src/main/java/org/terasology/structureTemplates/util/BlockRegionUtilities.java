@@ -18,8 +18,8 @@ package org.terasology.structureTemplates.util;
 import org.joml.RoundingMode;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
+import org.terasology.engine.world.block.BlockRegion;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent;
-import org.terasology.world.block.BlockRegion;
 
 import java.util.List;
 

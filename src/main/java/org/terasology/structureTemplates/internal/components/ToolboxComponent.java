@@ -15,7 +15,7 @@
  */
 package org.terasology.structureTemplates.internal.components;
 
-import org.terasology.entitySystem.Component;
+import org.terasology.engine.entitySystem.Component;
 
 /**
  * Component that marks a entity as beeing a toolbox.

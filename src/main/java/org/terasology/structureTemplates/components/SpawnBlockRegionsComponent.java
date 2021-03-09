@@ -15,11 +15,11 @@
  */
 package org.terasology.structureTemplates.components;
 
-import org.terasology.entitySystem.Component;
+import org.terasology.engine.entitySystem.Component;
+import org.terasology.engine.world.block.Block;
+import org.terasology.engine.world.block.BlockRegion;
 import org.terasology.reflection.MappedContainer;
 import org.terasology.structureTemplates.events.SpawnStructureEvent;
-import org.terasology.world.block.Block;
-import org.terasology.world.block.BlockRegion;
 
 import java.util.ArrayList;
 import java.util.List;

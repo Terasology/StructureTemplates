@@ -16,7 +16,7 @@
 package org.terasology.structureTemplates.components;
 
 import org.joml.Vector3i;
-import org.terasology.entitySystem.Component;
+import org.terasology.engine.entitySystem.Component;
 import org.terasology.structureTemplates.util.BlockRegionTransform;
 
 /**

@@ -15,11 +15,11 @@
  */
 package org.terasology.structureTemplates.events;
 
-import org.terasology.entitySystem.event.AbstractConsumableEvent;
-import org.terasology.entitySystem.prefab.Prefab;
+import org.terasology.engine.entitySystem.event.AbstractConsumableEvent;
+import org.terasology.engine.entitySystem.prefab.Prefab;
+import org.terasology.engine.world.block.BlockRegion;
 import org.terasology.structureTemplates.components.CheckBlockRegionConditionComponent;
 import org.terasology.structureTemplates.util.BlockRegionTransform;
-import org.terasology.world.block.BlockRegion;
 
 /**
  * Sent to entities with spawn condition components, in order to check if the spawn conditions are met at a certain

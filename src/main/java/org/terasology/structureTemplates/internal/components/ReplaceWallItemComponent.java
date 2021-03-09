@@ -15,11 +15,11 @@
  */
 package org.terasology.structureTemplates.internal.components;
 
-import org.terasology.entitySystem.Component;
-import org.terasology.network.FieldReplicateType;
-import org.terasology.network.Replicate;
-import org.terasology.world.block.BlockManager;
-import org.terasology.world.block.BlockUri;
+import org.terasology.engine.entitySystem.Component;
+import org.terasology.engine.network.FieldReplicateType;
+import org.terasology.engine.network.Replicate;
+import org.terasology.engine.world.block.BlockManager;
+import org.terasology.engine.world.block.BlockUri;
 
 /**
  * Gives a "wall adder" item the ability to do it's work.

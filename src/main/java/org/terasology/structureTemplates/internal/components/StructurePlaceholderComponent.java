@@ -15,11 +15,11 @@
  */
 package org.terasology.structureTemplates.internal.components;
 
-import org.terasology.entitySystem.Component;
-import org.terasology.entitySystem.prefab.Prefab;
-import org.terasology.network.FieldReplicateType;
-import org.terasology.network.Replicate;
-import org.terasology.world.block.ForceBlockActive;
+import org.terasology.engine.entitySystem.Component;
+import org.terasology.engine.entitySystem.prefab.Prefab;
+import org.terasology.engine.network.FieldReplicateType;
+import org.terasology.engine.network.Replicate;
+import org.terasology.engine.world.block.ForceBlockActive;
 
 /**
  * Makes a structure placholder block a structure placeholder block.

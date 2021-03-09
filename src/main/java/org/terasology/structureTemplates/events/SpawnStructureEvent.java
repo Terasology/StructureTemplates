@@ -15,7 +15,7 @@
  */
 package org.terasology.structureTemplates.events;
 
-import org.terasology.entitySystem.event.AbstractConsumableEvent;
+import org.terasology.engine.entitySystem.event.AbstractConsumableEvent;
 import org.terasology.structureTemplates.util.BlockRegionTransform;
 
 /**

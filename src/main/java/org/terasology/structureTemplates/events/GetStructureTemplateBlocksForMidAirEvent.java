@@ -17,10 +17,10 @@ package org.terasology.structureTemplates.events;
 
 import org.joml.Vector3i;
 import org.joml.Vector3ic;
-import org.terasology.entitySystem.event.Event;
+import org.terasology.engine.entitySystem.event.Event;
+import org.terasology.engine.world.block.Block;
+import org.terasology.engine.world.block.BlockRegion;
 import org.terasology.structureTemplates.util.BlockRegionTransform;
-import org.terasology.world.block.Block;
-import org.terasology.world.block.BlockRegion;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -15,8 +15,8 @@
  */
 package org.terasology.structureTemplates.components;
 
-import org.terasology.entitySystem.Component;
-import org.terasology.entitySystem.prefab.Prefab;
+import org.terasology.engine.entitySystem.Component;
+import org.terasology.engine.entitySystem.prefab.Prefab;
 import org.terasology.structureTemplates.util.AnimationType;
 
 /**

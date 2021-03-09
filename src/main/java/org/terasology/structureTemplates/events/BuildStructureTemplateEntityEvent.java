@@ -16,11 +16,11 @@
 package org.terasology.structureTemplates.events;
 
 import org.joml.Vector3i;
-import org.terasology.entitySystem.MutableComponentContainer;
-import org.terasology.entitySystem.event.Event;
+import org.terasology.engine.entitySystem.MutableComponentContainer;
+import org.terasology.engine.entitySystem.event.Event;
+import org.terasology.engine.world.block.Block;
+import org.terasology.engine.world.block.family.BlockFamily;
 import org.terasology.structureTemplates.util.BlockRegionTransform;
-import org.terasology.world.block.Block;
-import org.terasology.world.block.family.BlockFamily;
 
 import java.util.ArrayList;
 import java.util.Collection;

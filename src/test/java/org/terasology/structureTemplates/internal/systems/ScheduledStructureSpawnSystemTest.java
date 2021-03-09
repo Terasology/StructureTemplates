@@ -17,12 +17,11 @@ package org.terasology.structureTemplates.internal.systems;
 
 import org.joml.Vector3i;
 import org.junit.jupiter.api.Test;
-import org.terasology.math.Side;
+import org.terasology.engine.math.Side;
 import org.terasology.structureTemplates.util.BlockRegionTransform;
 
-import static org.terasology.structureTemplates.internal.systems.ScheduledStructureSpawnSystem.createTransformForIncomingConnectionPoint;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.terasology.structureTemplates.internal.systems.ScheduledStructureSpawnSystem.createTransformForIncomingConnectionPoint;
 
 /**
  * Test for {@link ScheduledStructureSpawnSystem}.

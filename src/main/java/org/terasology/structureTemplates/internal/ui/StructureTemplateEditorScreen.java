@@ -4,16 +4,18 @@ package org.terasology.structureTemplates.internal.ui;
 
 import com.google.common.collect.Lists;
 import org.joml.Vector3i;
-import org.terasology.entitySystem.entity.EntityManager;
-import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.logic.clipboard.ClipboardManager;
-import org.terasology.logic.players.LocalPlayer;
+import org.terasology.engine.entitySystem.entity.EntityManager;
+import org.terasology.engine.entitySystem.entity.EntityRef;
+import org.terasology.engine.logic.clipboard.ClipboardManager;
+import org.terasology.engine.logic.players.LocalPlayer;
+import org.terasology.engine.registry.In;
+import org.terasology.engine.rendering.nui.BaseInteractionScreen;
+import org.terasology.engine.world.block.BlockComponent;
+import org.terasology.engine.world.block.BlockRegion;
 import org.terasology.nui.UIWidget;
 import org.terasology.nui.databinding.Binding;
 import org.terasology.nui.widgets.UIButton;
 import org.terasology.nui.widgets.UICheckbox;
-import org.terasology.registry.In;
-import org.terasology.rendering.nui.BaseInteractionScreen;
 import org.terasology.structureTemplates.internal.components.EditTemplateRegionProcessComponent;
 import org.terasology.structureTemplates.internal.components.EditingUserComponent;
 import org.terasology.structureTemplates.internal.components.StructureTemplateOriginComponent;
@@ -27,8 +29,6 @@ import org.terasology.structureTemplates.internal.systems.StructureTemplateEdito
 import org.terasology.structureTemplates.util.BlockRegionTransform;
 import org.terasology.structureTemplates.util.ListUtil;
 import org.terasology.structureTemplates.util.RegionMergeUtil;
-import org.terasology.world.block.BlockComponent;
-import org.terasology.world.block.BlockRegion;
 
 import java.util.List;
 import java.util.Set;

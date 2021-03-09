@@ -17,8 +17,8 @@ package org.terasology.structureTemplates.util;
 
 import org.joml.Vector3i;
 import org.joml.Vector3ic;
+import org.terasology.engine.world.block.BlockRegion;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent;
-import org.terasology.world.block.BlockRegion;
 
 import java.util.ArrayList;
 import java.util.Comparator;

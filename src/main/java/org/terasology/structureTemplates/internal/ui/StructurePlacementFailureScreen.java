@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.structureTemplates.internal.ui;
 
+import org.terasology.engine.rendering.nui.CoreScreenLayer;
 import org.terasology.nui.WidgetUtil;
 import org.terasology.nui.widgets.UILabel;
-import org.terasology.rendering.nui.CoreScreenLayer;
 
 /**
  * Overlay shown when the user tries to spawn a building but can't because the preconditions are not met.

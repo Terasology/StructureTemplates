@@ -15,11 +15,11 @@
  */
 package org.terasology.structureTemplates.internal.events;
 
-import org.terasology.entitySystem.event.Event;
-import org.terasology.entitySystem.prefab.Prefab;
-import org.terasology.network.OwnerEvent;
+import org.terasology.engine.entitySystem.event.Event;
+import org.terasology.engine.entitySystem.prefab.Prefab;
+import org.terasology.engine.network.OwnerEvent;
+import org.terasology.engine.world.block.BlockRegion;
 import org.terasology.structureTemplates.components.SpawnStructureActionComponent;
-import org.terasology.world.block.BlockRegion;
 
 /**
  * Sent by the server to the owner of an item when a attempt to spawn a structure fails.

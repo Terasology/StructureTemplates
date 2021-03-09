@@ -15,7 +15,7 @@
  */
 package org.terasology.structureTemplates.components;
 
-import org.terasology.entitySystem.Component;
+import org.terasology.engine.entitySystem.Component;
 
 /**
  * Add this component to a StructureTemplate when neither the FallingBlock nor Layer-by-Layer animation is desired.

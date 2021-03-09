@@ -15,7 +15,7 @@
  */
 package org.terasology.structureTemplates.components;
 
-import org.terasology.entitySystem.Component;
+import org.terasology.engine.entitySystem.Component;
 
 /**
  * Add this component to an item to make it spawn a structure template on activation

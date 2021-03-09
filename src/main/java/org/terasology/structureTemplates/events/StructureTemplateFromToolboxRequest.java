@@ -15,9 +15,9 @@
  */
 package org.terasology.structureTemplates.events;
 
-import org.terasology.entitySystem.event.Event;
-import org.terasology.entitySystem.prefab.Prefab;
-import org.terasology.network.ServerEvent;
+import org.terasology.engine.entitySystem.event.Event;
+import org.terasology.engine.entitySystem.prefab.Prefab;
+import org.terasology.engine.network.ServerEvent;
 
 /**
  * Gets sent to the server to inform it that the user wants to have a structure template from the toolbox.

@@ -15,8 +15,8 @@
  */
 package org.terasology.structureTemplates.internal.events;
 
-import org.terasology.entitySystem.Component;
-import org.terasology.entitySystem.event.Event;
+import org.terasology.engine.entitySystem.Component;
+import org.terasology.engine.entitySystem.event.Event;
 
 import java.util.LinkedHashMap;
 

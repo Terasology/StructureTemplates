@@ -15,12 +15,12 @@
  */
 package org.terasology.structureTemplates.components;
 
-import org.terasology.entitySystem.Component;
-import org.terasology.entitySystem.prefab.Prefab;
+import org.terasology.engine.entitySystem.Component;
+import org.terasology.engine.entitySystem.prefab.Prefab;
+import org.terasology.engine.world.block.BlockRegion;
 import org.terasology.reflection.MappedContainer;
 import org.terasology.structureTemplates.events.CheckSpawnConditionEvent;
 import org.terasology.structureTemplates.events.GetBlockPredicateEvent;
-import org.terasology.world.block.BlockRegion;
 
 import java.util.List;
 import java.util.function.Predicate;

@@ -15,7 +15,7 @@
  */
 package org.terasology.structureTemplates.components;
 
-import org.terasology.entitySystem.Component;
+import org.terasology.engine.entitySystem.Component;
 
 /** A marker component for structures that don't need explicit spawning of air blocks. */
 // TODO : Generalise for all kind of Blocks

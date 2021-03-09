@@ -15,11 +15,11 @@
  */
 package org.terasology.structureTemplates.internal.events;
 
-import org.terasology.network.NetworkEvent;
-import org.terasology.network.ServerEvent;
+import org.terasology.engine.network.NetworkEvent;
+import org.terasology.engine.network.ServerEvent;
+import org.terasology.engine.world.block.BlockRegion;
+import org.terasology.engine.world.block.BlockRegionc;
 import org.terasology.structureTemplates.internal.components.StructureTemplateOriginComponent;
-import org.terasology.world.block.BlockRegion;
-import org.terasology.world.block.BlockRegionc;
 
 /**
  * The event gets sent to a character entity at the server.

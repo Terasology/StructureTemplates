@@ -15,8 +15,8 @@
  */
 package org.terasology.structureTemplates.components;
 
-import org.terasology.entitySystem.Component;
-import org.terasology.logic.common.DisplayNameComponent;
+import org.terasology.engine.entitySystem.Component;
+import org.terasology.engine.logic.common.DisplayNameComponent;
 
 /**
  * Only used as marker component to allow the search for prefabs that describe structure template types.

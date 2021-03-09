@@ -15,7 +15,7 @@
  */
 package org.terasology.structureTemplates.internal.components;
 
-import org.terasology.entitySystem.Component;
+import org.terasology.engine.entitySystem.Component;
 
 /**
  * Prevents interaction from happening when it lies in a protected region, when attached to an entity.

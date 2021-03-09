@@ -15,8 +15,8 @@
  */
 package org.terasology.structureTemplates.internal.events;
 
-import org.terasology.entitySystem.event.Event;
-import org.terasology.network.OwnerEvent;
+import org.terasology.engine.entitySystem.event.Event;
+import org.terasology.engine.network.OwnerEvent;
 
 /**
  * Sent from the server to the client with copied data.

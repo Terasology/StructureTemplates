@@ -16,11 +16,11 @@
 package org.terasology.structureTemplates.internal.components;
 
 import com.google.common.collect.Lists;
-import org.terasology.entitySystem.Component;
-import org.terasology.network.FieldReplicateType;
-import org.terasology.network.Replicate;
-import org.terasology.world.block.BlockRegion;
-import org.terasology.world.block.ForceBlockActive;
+import org.terasology.engine.entitySystem.Component;
+import org.terasology.engine.network.FieldReplicateType;
+import org.terasology.engine.network.Replicate;
+import org.terasology.engine.world.block.BlockRegion;
+import org.terasology.engine.world.block.ForceBlockActive;
 
 import java.util.List;
 

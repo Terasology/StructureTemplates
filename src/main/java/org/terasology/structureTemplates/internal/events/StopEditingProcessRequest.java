@@ -15,8 +15,8 @@
  */
 package org.terasology.structureTemplates.internal.events;
 
-import org.terasology.entitySystem.event.Event;
-import org.terasology.network.ServerEvent;
+import org.terasology.engine.entitySystem.event.Event;
+import org.terasology.engine.network.ServerEvent;
 
 /**
  * Sent to a client entity to stop the current editing process. (The entity that represents it will be destroyed)

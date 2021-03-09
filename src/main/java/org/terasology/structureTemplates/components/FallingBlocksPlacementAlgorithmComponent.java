@@ -15,7 +15,7 @@
  */
 package org.terasology.structureTemplates.components;
 
-import org.terasology.entitySystem.Component;
+import org.terasology.engine.entitySystem.Component;
 
 /**
  * This component can be added to a structure template to exchange its placement algorithm with one

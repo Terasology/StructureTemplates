@@ -15,10 +15,10 @@
  */
 package org.terasology.structureTemplates.interfaces;
 
-import org.terasology.registry.In;
+import org.terasology.engine.registry.In;
+import org.terasology.engine.world.block.Block;
+import org.terasology.engine.world.block.BlockRegion;
 import org.terasology.structureTemplates.util.BlockRegionTransform;
-import org.terasology.world.block.Block;
-import org.terasology.world.block.BlockRegion;
 
 import java.util.function.Predicate;
 

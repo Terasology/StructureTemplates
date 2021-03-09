@@ -17,8 +17,8 @@ package org.terasology.structureTemplates.components;
 
 import org.joml.Quaternionf;
 import org.joml.Vector3i;
-import org.terasology.entitySystem.Component;
-import org.terasology.entitySystem.prefab.Prefab;
+import org.terasology.engine.entitySystem.Component;
+import org.terasology.engine.entitySystem.prefab.Prefab;
 import org.terasology.reflection.MappedContainer;
 
 import java.util.List;

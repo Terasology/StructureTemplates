@@ -15,8 +15,8 @@
  */
 package org.terasology.structureTemplates.internal.events;
 
-import org.terasology.network.NetworkEvent;
-import org.terasology.network.ServerEvent;
+import org.terasology.engine.network.NetworkEvent;
+import org.terasology.engine.network.ServerEvent;
 
 /**
  * The event gets sent to a character entity when the user has requested thh creatin of a structure template item in

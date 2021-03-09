@@ -15,7 +15,7 @@
  */
 package org.terasology.structureTemplates.internal.components;
 
-import org.terasology.entitySystem.Component;
+import org.terasology.engine.entitySystem.Component;
 
 /**
  * Used to make the structure template generator item behave like it should

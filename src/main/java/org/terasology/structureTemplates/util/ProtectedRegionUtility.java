@@ -16,9 +16,9 @@
 package org.terasology.structureTemplates.util;
 
 import org.joml.Vector3ic;
-import org.terasology.entitySystem.entity.EntityRef;
+import org.terasology.engine.entitySystem.entity.EntityRef;
+import org.terasology.engine.world.block.BlockRegion;
 import org.terasology.structureTemplates.components.ProtectedRegionsComponent;
-import org.terasology.world.block.BlockRegion;
 
 import java.util.Collection;
 import java.util.List;

@@ -15,9 +15,9 @@
  */
 package org.terasology.structureTemplates.events;
 
-import org.terasology.entitySystem.event.AbstractConsumableEvent;
+import org.terasology.engine.entitySystem.event.AbstractConsumableEvent;
+import org.terasology.engine.world.block.Block;
 import org.terasology.structureTemplates.components.BlockPredicateComponent;
-import org.terasology.world.block.Block;
 
 import java.util.function.Predicate;
 

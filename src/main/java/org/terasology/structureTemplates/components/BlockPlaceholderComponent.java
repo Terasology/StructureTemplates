@@ -15,8 +15,8 @@
  */
 package org.terasology.structureTemplates.components;
 
-import org.terasology.entitySystem.Component;
-import org.terasology.world.block.Block;
+import org.terasology.engine.entitySystem.Component;
+import org.terasology.engine.world.block.Block;
 
 /**
  * Block entities that have this component will be copied as the specified blocks when a structure template gets

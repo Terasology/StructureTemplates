@@ -21,14 +21,14 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 import org.joml.Vector3ic;
-import org.terasology.math.Side;
+import org.terasology.engine.math.Side;
+import org.terasology.engine.world.block.Block;
+import org.terasology.engine.world.block.BlockRegion;
+import org.terasology.engine.world.block.family.AttachedToSurfaceFamily;
+import org.terasology.engine.world.block.family.BlockFamily;
+import org.terasology.engine.world.block.family.BlockPlacementData;
+import org.terasology.engine.world.block.family.SideDefinedBlockFamily;
 import org.terasology.structureTemplates.components.BlockRegionTransformComponent;
-import org.terasology.world.block.Block;
-import org.terasology.world.block.BlockRegion;
-import org.terasology.world.block.family.AttachedToSurfaceFamily;
-import org.terasology.world.block.family.BlockFamily;
-import org.terasology.world.block.family.BlockPlacementData;
-import org.terasology.world.block.family.SideDefinedBlockFamily;
 
 /**
  * Describes a transformation for a region of blocks like a rotation of 90 degrees or a movement by an offset.

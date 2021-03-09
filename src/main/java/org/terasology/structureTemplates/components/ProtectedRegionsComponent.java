@@ -15,9 +15,9 @@
  */
 package org.terasology.structureTemplates.components;
 
-import org.terasology.entitySystem.Component;
-import org.terasology.network.Replicate;
-import org.terasology.world.block.BlockRegion;
+import org.terasology.engine.entitySystem.Component;
+import org.terasology.engine.network.Replicate;
+import org.terasology.engine.world.block.BlockRegion;
 
 import java.util.List;
 

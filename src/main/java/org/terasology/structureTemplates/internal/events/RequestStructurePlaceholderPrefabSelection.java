@@ -15,9 +15,9 @@
  */
 package org.terasology.structureTemplates.internal.events;
 
-import org.terasology.entitySystem.event.Event;
-import org.terasology.entitySystem.prefab.Prefab;
-import org.terasology.network.ServerEvent;
+import org.terasology.engine.entitySystem.event.Event;
+import org.terasology.engine.entitySystem.prefab.Prefab;
+import org.terasology.engine.network.ServerEvent;
 import org.terasology.structureTemplates.internal.components.StructurePlaceholderComponent;
 
 /**

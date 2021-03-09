@@ -15,9 +15,9 @@
  */
 package org.terasology.structureTemplates.events;
 
-import org.terasology.entitySystem.event.Event;
-import org.terasology.network.ServerEvent;
-import org.terasology.world.block.BlockUri;
+import org.terasology.engine.entitySystem.event.Event;
+import org.terasology.engine.network.ServerEvent;
+import org.terasology.engine.world.block.BlockUri;
 
 /**
  * Gets sent to the server to inform it that the user wants to have a block item from the toolbox.

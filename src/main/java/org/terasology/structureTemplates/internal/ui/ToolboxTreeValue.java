@@ -15,8 +15,8 @@
  */
 package org.terasology.structureTemplates.internal.ui;
 
-import org.terasology.entitySystem.event.Event;
-import org.terasology.rendering.assets.texture.TextureRegion;
+import org.terasology.engine.entitySystem.event.Event;
+import org.terasology.engine.rendering.assets.texture.TextureRegion;
 
 import java.util.function.Supplier;
 

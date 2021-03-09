@@ -19,10 +19,10 @@ package org.terasology.structureTemplates.components;
 import org.joml.Vector3i;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.terasology.engine.world.block.Block;
+import org.terasology.engine.world.block.BlockRegion;
+import org.terasology.engine.world.block.BlockUri;
 import org.terasology.structureTemplates.util.BlockRegionUtilities;
-import org.terasology.world.block.Block;
-import org.terasology.world.block.BlockRegion;
-import org.terasology.world.block.BlockUri;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
