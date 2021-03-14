@@ -36,7 +36,7 @@ import org.terasology.engine.entitySystem.systems.RegisterMode;
 import org.terasology.engine.entitySystem.systems.RegisterSystem;
 import org.terasology.engine.logic.characters.CharacterComponent;
 import org.terasology.engine.logic.common.ActivateEvent;
-import org.terasology.engine.logic.health.DoDestroyEvent;
+import org.terasology.logic.health.DoDestroyEvent;
 import org.terasology.engine.logic.inventory.InventoryManager;
 import org.terasology.engine.math.Side;
 import org.terasology.engine.network.NetworkComponent;
