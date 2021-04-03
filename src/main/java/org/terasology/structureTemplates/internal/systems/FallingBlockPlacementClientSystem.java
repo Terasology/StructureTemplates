@@ -4,7 +4,7 @@ package org.terasology.structureTemplates.internal.systems;
 
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
-import org.terasology.assets.management.AssetManager;
+import org.terasology.gestalt.assets.management.AssetManager;
 import org.terasology.engine.core.Time;
 import org.terasology.engine.entitySystem.entity.EntityBuilder;
 import org.terasology.engine.entitySystem.entity.EntityManager;
