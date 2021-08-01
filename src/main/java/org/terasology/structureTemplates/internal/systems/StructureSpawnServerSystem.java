@@ -22,6 +22,8 @@ import org.joml.Vector3i;
 import org.joml.Vector3ic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.engine.registry.Share;
+import org.terasology.engine.world.BlockEntityRegistry;
 import org.terasology.gestalt.assets.management.AssetManager;
 import org.terasology.engine.entitySystem.entity.EntityManager;
 import org.terasology.engine.entitySystem.entity.EntityRef;
@@ -42,6 +44,8 @@ import org.terasology.engine.world.block.Block;
 import org.terasology.engine.world.block.BlockComponent;
 import org.terasology.engine.world.block.BlockManager;
 import org.terasology.engine.world.block.BlockRegion;
+import org.terasology.multiBlock2.MultiBlockRegistry;
+import org.terasology.multiBlock2.component.MultiBlockCandidateComponent;
 import org.terasology.structureTemplates.components.CompletionTimeComponent;
 import org.terasology.structureTemplates.components.IgnoreAirBlocksComponent;
 import org.terasology.structureTemplates.components.NoConstructionAnimationComponent;
@@ -55,15 +59,19 @@ import org.terasology.structureTemplates.events.GetStructureTemplateBlocksForMid
 import org.terasology.structureTemplates.events.SpawnBlocksOfStructureTemplateEvent;
 import org.terasology.structureTemplates.events.SpawnStructureEvent;
 import org.terasology.structureTemplates.events.SpawnTemplateEvent;
-import org.terasology.structureTemplates.events.StructureBlocksSpawnedEvent;
 import org.terasology.structureTemplates.events.StructureSpawnStartedEvent;
 import org.terasology.structureTemplates.internal.components.BuildStepwiseStructureComponent;
 import org.terasology.structureTemplates.internal.components.BuildStepwiseStructureComponent.BlockToPlace;
 import org.terasology.structureTemplates.internal.components.BuildStepwiseStructureComponent.BuildStep;
 import org.terasology.structureTemplates.internal.components.BuildStructureCounterComponent;
+import org.terasology.structureTemplates.internal.events.SendRegionEvent;
 import org.terasology.structureTemplates.internal.events.StructureSpawnFailedEvent;
+import org.terasology.structureTemplates.internal.recipe.RecipeImpl;
 import org.terasology.structureTemplates.util.BlockRegionTransform;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -96,13 +104,20 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
     private InventoryManager inventoryManager;
 
     @In
+    private BlockEntityRegistry blockRegistry;
+
+    @In
     private BlockManager blockManager;
 
     @In
     private AssetManager assetManager;
+    @In
+    private MultiBlockRegistry multiBlockRegistry;
 
     private BlockRegionTransform regionTransform;
     private EntityRef structureEntity;
+    Vector3ic temp = new Vector3i();
+    List<SpawnBlockRegionsComponent.RegionToFill> blockRegionList = new ArrayList<>();
 
     @ReceiveEvent(priority = EventPriority.PRIORITY_TRIVIAL)
     public void onSpawnStructureWithoutFallingAnimation(SpawnStructureEvent event, EntityRef entity) {
@@ -121,7 +136,6 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
         BlockRegionTransform transformation = event.getTransformation();
 
         Map<Vector3ic, Block> blocksToPlace = Maps.newHashMap();
-
         for (RegionToFill regionToFill : spawnBlockRegionsComponent.regionsToFill) {
             Block block = regionToFill.blockType;
             if (entity.hasComponent(IgnoreAirBlocksComponent.class) && isAir(block)) {
@@ -176,6 +190,9 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
             BlockRegion region = regionToFill.region;
             region = transformation.transformRegion(region);
             block = transformation.transformBlock(block);
+            RegionToFill newRegion = new RegionToFill();
+            newRegion.region = region;
+            blockRegionList.add(newRegion);
 
             for (Vector3ic pos : region) {
                 final int y = pos.y();
@@ -185,11 +202,17 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
                 blocksPerLayer.get(y).add(createBlockToPlace(pos, block));
             }
         }
+        for (SpawnBlockRegionsComponent.RegionToFill region : blockRegionList) {
+            for (Vector3ic pos : region.region) {
+                logger.info(pos.toString());
+            }
+        }
+
 
         List<BuildStep> blocksPerStep = Lists.newArrayList(blocksPerLayer.values()).stream().map(BuildStep::new).collect(Collectors.toList());
         BuildStepwiseStructureComponent buildStepwiseStructureComponent = new BuildStepwiseStructureComponent(blocksPerStep);
         BuildStructureCounterComponent growStructureCounter = new BuildStructureCounterComponent();
-
+        temp = blockRegionList.get(0).region.getMin(new Vector3i());
         EntityRef growingStructureEntity = entityManager.create(buildStepwiseStructureComponent, growStructureCounter);
 
         CompletionTimeComponent completionTimeComponent = new CompletionTimeComponent();
@@ -235,8 +258,11 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
         for (BlockToPlace blockToPlace : step.blocksInStep) {
             blocksToPlace.put(blockToPlace.pos, blockToPlace.block);
         }
-
+        //logger.info(blocksToPlace.toString());
         worldProvider.setBlocks(blocksToPlace); //TODO: finish migration
+        //for (BlockToPlace blockToPlace : step.blocksInStep) {
+            //logger.info(blockRegistry.getEntityAt(blockToPlace.pos).toFullDescription());
+        //}
 
         if (currentStepCount + 1 < buildSteps.size()) {
             counterComponent.iter = currentStepCount + 1;
@@ -252,8 +278,17 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
         if (!event.getActionId().equals(CONSTRUCTION_COMPLETE_ACTION_ID)) {
             return;
         }
-
-        structureEntity.send(new StructureBlocksSpawnedEvent(regionTransform));
+        // once the structure has been placed create the multiblock entity
+        RecipeImpl recipe = new RecipeImpl(blockRegistry);
+        multiBlockRegistry.registerMultiBlockType("Structure", recipe);
+        EntityRef block = blockRegistry.getBlockEntityAt(temp);
+        block.send(new SendRegionEvent(blockRegionList));
+        logger.info(block.toFullDescription());
+        logger.info(worldProvider.getBlock(temp).getBlockFamily().toString());
+        MultiBlockCandidateComponent candidate = new MultiBlockCandidateComponent();
+        candidate.type = new HashSet<>();
+        candidate.type.add("Structure");
+        block.addComponent(candidate);
     }
 
     @ReceiveEvent
