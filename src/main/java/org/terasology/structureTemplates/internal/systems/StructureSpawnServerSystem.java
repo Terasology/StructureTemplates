@@ -111,7 +111,7 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
     private EntityRef structureEntity;
     // location of the mainBlock in the multiBlock Entity
     private Vector3ic location = new Vector3i();
-    // keeps track of the transformed regions corresponding to a structure template and is used to create a multiBlock
+    // keeps track of the transformed regions corresponding to a structure template and is used to create a multiBlock entity
     private ArrayList<Vector3i> blockLocations;
 
     @ReceiveEvent(priority = EventPriority.PRIORITY_TRIVIAL)
