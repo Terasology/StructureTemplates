@@ -29,7 +29,7 @@ import java.util.List;
  */
 public class SpawnBlockRegionsComponent implements Component {
     public List<RegionToFill> regionsToFill = new ArrayList<>();
-
+    public boolean multiBlock = false;
     @MappedContainer
     public static class RegionToFill {
         public BlockRegion region;

@@ -7,6 +7,9 @@ import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent;
 
 import java.util.List;
 
+/**
+ * Send this to any block Entity within the Structure Template to create a multiBlock entity with the
+ */
 public class SendRegionEvent implements Event {
     public List<SpawnBlockRegionsComponent.RegionToFill> regions;
 
