@@ -23,7 +23,7 @@ public class ReplaceWallItemComponent implements Component<ReplaceWallItemCompon
     public ReplacementType replacementType = ReplacementType.WALL;
 
     @Override
-    public void copy(ReplaceWallItemComponent other) {
+    public void copyFrom(ReplaceWallItemComponent other) {
         this.blockUri = other.blockUri;
         this.replacementType = other.replacementType;
     }

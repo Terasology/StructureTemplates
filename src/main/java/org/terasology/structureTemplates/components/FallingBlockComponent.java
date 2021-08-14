@@ -28,7 +28,7 @@ public class FallingBlockComponent implements Component<FallingBlockComponent> {
     public String blockUri;
 
     @Override
-    public void copy(FallingBlockComponent other) {
+    public void copyFrom(FallingBlockComponent other) {
         this.stopGameTimeInMs = other.stopGameTimeInMs;
         this.startGameTimeInMs = other.startGameTimeInMs;
         this.blockUri = other.blockUri;

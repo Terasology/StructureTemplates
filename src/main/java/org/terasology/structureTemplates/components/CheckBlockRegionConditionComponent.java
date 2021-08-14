@@ -29,7 +29,7 @@ public class CheckBlockRegionConditionComponent implements Component<CheckBlockR
     public List<BlockRegionConditionCheck> checksToPerform;
 
     @Override
-    public void copy(CheckBlockRegionConditionComponent other) {
+    public void copyFrom(CheckBlockRegionConditionComponent other) {
         this.checksToPerform = other.checksToPerform.stream()
                 .map(BlockRegionConditionCheck::copy)
                 .collect(Collectors.toList());

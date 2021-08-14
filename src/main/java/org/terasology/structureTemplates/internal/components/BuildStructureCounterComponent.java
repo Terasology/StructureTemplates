@@ -11,7 +11,7 @@ public class BuildStructureCounterComponent implements Component<BuildStructureC
     public int iter;
 
     @Override
-    public void copy(BuildStructureCounterComponent other) {
+    public void copyFrom(BuildStructureCounterComponent other) {
         this.iter = other.iter;
     }
 }

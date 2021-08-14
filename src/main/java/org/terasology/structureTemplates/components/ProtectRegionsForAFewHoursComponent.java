@@ -18,7 +18,7 @@ public class ProtectRegionsForAFewHoursComponent implements Component<ProtectReg
     public float hoursToProtect = 2.0f;
 
     @Override
-    public void copy(ProtectRegionsForAFewHoursComponent other) {
+    public void copyFrom(ProtectRegionsForAFewHoursComponent other) {
         this.regions = other.regions.stream()
                 .map(BlockRegion::new)
                 .collect(Collectors.toList());

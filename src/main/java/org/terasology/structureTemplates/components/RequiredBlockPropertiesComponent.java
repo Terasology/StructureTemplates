@@ -19,13 +19,13 @@ import java.util.function.Predicate;
  */
 public class RequiredBlockPropertiesComponent implements Component<RequiredBlockPropertiesComponent> {
     /**
-     * If not null, the {@link Block}s in the specified required are required to have {@link Block#penetrable} set to
+     * If not null, the {@link Block}s in the specified required are required to have {@link Block#isPenetrable()} set to
      * the specified value.
      */
     public Boolean penetrable = null;
 
     /**
-     * If not null, the {@link Block}s in the specified required are required to have {@link Block#liquid} set to
+     * If not null, the {@link Block}s in the specified required are required to have {@link Block#isLiquid()} set to
      * the specified value.
      */
     public Boolean liquid = null;
@@ -34,7 +34,7 @@ public class RequiredBlockPropertiesComponent implements Component<RequiredBlock
     public Boolean loaded = null;
 
     @Override
-    public void copy(RequiredBlockPropertiesComponent other) {
+    public void copyFrom(RequiredBlockPropertiesComponent other) {
         this.penetrable = other.penetrable;
         this.liquid = other.liquid;
         this.loaded = other.loaded;

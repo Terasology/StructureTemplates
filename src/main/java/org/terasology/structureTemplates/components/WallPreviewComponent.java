@@ -24,7 +24,7 @@ public class WallPreviewComponent implements Component<WallPreviewComponent> {
     public List<BlockRegion> wallRegions;
 
     @Override
-    public void copy(WallPreviewComponent other) {
+    public void copyFrom(WallPreviewComponent other) {
         this.wallRegions = other.wallRegions.stream()
                 .map(BlockRegion::new)
                 .collect(Collectors.toList());

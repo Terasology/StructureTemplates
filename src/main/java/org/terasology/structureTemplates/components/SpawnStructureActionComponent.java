@@ -16,7 +16,7 @@ public class SpawnStructureActionComponent implements Component<SpawnStructureAc
     public BlockRegion unconfirmSpawnErrorRegion;
 
     @Override
-    public void copy(SpawnStructureActionComponent other) {
+    public void copyFrom(SpawnStructureActionComponent other) {
         this.unconfirmSpawnErrorRegion = new BlockRegion(other.unconfirmSpawnErrorRegion);
     }
 }

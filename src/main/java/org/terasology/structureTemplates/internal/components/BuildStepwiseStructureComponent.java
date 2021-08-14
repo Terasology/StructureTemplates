@@ -30,7 +30,7 @@ public class BuildStepwiseStructureComponent implements Component<BuildStepwiseS
     }
 
     @Override
-    public void copy(BuildStepwiseStructureComponent other) {
+    public void copyFrom(BuildStepwiseStructureComponent other) {
         this.buildSteps = other.buildSteps.stream()
                 .map(BuildStep::copy)
                 .collect(Collectors.toList());

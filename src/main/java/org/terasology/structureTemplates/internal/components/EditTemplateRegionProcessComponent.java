@@ -21,7 +21,7 @@ public class EditTemplateRegionProcessComponent implements Component<EditTemplat
     public boolean recordBlockRemoval;
 
     @Override
-    public void copy(EditTemplateRegionProcessComponent other) {
+    public void copyFrom(EditTemplateRegionProcessComponent other) {
         this.structureTemplateEditor = other.structureTemplateEditor;
         this.recordBlockAddition = other.recordBlockAddition;
         this.recordBlockRemoval = other.recordBlockRemoval;

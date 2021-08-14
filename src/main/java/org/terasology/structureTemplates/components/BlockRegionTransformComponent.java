@@ -15,7 +15,7 @@ public class BlockRegionTransformComponent implements Component<BlockRegionTrans
     public Vector3i offset;
 
     @Override
-    public void copy(BlockRegionTransformComponent other) {
+    public void copyFrom(BlockRegionTransformComponent other) {
         this.counterClockWiseHorizontal90DegreeRotations = other.counterClockWiseHorizontal90DegreeRotations;
         this.offset = other.offset;
     }

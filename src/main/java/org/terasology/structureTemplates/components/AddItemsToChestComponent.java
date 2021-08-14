@@ -22,7 +22,7 @@ public class AddItemsToChestComponent implements Component<AddItemsToChestCompon
     public List<ChestToFill> chestsToFill;
 
     @Override
-    public void copy(AddItemsToChestComponent other) {
+    public void copyFrom(AddItemsToChestComponent other) {
         this.chestsToFill = other.chestsToFill.stream()
                 .map(ChestToFill::copy)
                 .collect(Collectors.toList());

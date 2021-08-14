@@ -32,7 +32,7 @@ public class PendingStructureSpawnComponent implements Component<PendingStructur
     public Side front;
 
     @Override
-    public void copy(PendingStructureSpawnComponent other) {
+    public void copyFrom(PendingStructureSpawnComponent other) {
         this.structureTemplateType = other.structureTemplateType;
         this.front = other.front;
     }

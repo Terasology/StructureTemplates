@@ -8,7 +8,7 @@ public class CompletionTimeComponent implements Component<CompletionTimeComponen
     public long completionDelay;
 
     @Override
-    public void copy(CompletionTimeComponent other) {
+    public void copyFrom(CompletionTimeComponent other) {
         this.completionDelay = other.completionDelay;
     }
 }

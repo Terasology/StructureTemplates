@@ -23,7 +23,7 @@ public class EditingUserComponent implements Component<EditingUserComponent> {
 
 
     @Override
-    public void copy(EditingUserComponent other) {
+    public void copyFrom(EditingUserComponent other) {
         this.editProcessEntity = other.editProcessEntity;
     }
 }

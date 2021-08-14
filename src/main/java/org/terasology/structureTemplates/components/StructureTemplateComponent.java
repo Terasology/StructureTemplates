@@ -24,7 +24,7 @@ public class StructureTemplateComponent implements Component<StructureTemplateCo
     public AnimationType animationType = AnimationType.LayerByLayer;
 
     @Override
-    public void copy(StructureTemplateComponent other) {
+    public void copyFrom(StructureTemplateComponent other) {
         this.type = other.type;
         this.spawnChance = other.spawnChance;
         this.animationType = other.animationType;

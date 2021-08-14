@@ -12,7 +12,7 @@ public class PrepareFallingBlockEntityComponent implements Component<PrepareFall
     public long fallDurationInMs;
 
     @Override
-    public void copy(PrepareFallingBlockEntityComponent other) {
+    public void copyFrom(PrepareFallingBlockEntityComponent other) {
         this.block = other.block;
         this.targetPosition = new Vector3i(other.targetPosition);
         this.fallDurationInMs = other.fallDurationInMs;

@@ -21,7 +21,7 @@ public class TimedStructureCompletionComponent implements Component<TimedStructu
     public long gameTimeInMsWhenStructureGetsCompleted;
 
     @Override
-    public void copy(TimedStructureCompletionComponent other) {
+    public void copyFrom(TimedStructureCompletionComponent other) {
         this.structureTemplate = other.structureTemplate;
         this.gameTimeInMsWhenStructureGetsCompleted = other.gameTimeInMsWhenStructureGetsCompleted;
     }

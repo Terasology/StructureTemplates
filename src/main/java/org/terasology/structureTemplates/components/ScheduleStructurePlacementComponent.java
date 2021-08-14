@@ -28,7 +28,7 @@ public class ScheduleStructurePlacementComponent implements Component<ScheduleSt
     public List<PlacementToSchedule> placementsToSchedule;
 
     @Override
-    public void copy(ScheduleStructurePlacementComponent other) {
+    public void copyFrom(ScheduleStructurePlacementComponent other) {
         this.placementsToSchedule = other.placementsToSchedule.stream()
                 .map(PlacementToSchedule::copy)
                 .collect(Collectors.toList());

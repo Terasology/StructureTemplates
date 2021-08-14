@@ -19,7 +19,7 @@ public class SpawnBlockRegionsComponent implements Component<SpawnBlockRegionsCo
     public List<RegionToFill> regionsToFill = new ArrayList<>();
 
     @Override
-    public void copy(SpawnBlockRegionsComponent other) {
+    public void copyFrom(SpawnBlockRegionsComponent other) {
         this.regionsToFill = other.regionsToFill.stream()
                 .map(RegionToFill::copy)
                 .collect(Collectors.toList());

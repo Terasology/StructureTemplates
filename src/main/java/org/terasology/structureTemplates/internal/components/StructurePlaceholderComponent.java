@@ -17,7 +17,7 @@ public class StructurePlaceholderComponent implements Component<StructurePlaceho
     public Prefab selectedPrefab;
 
     @Override
-    public void copy(StructurePlaceholderComponent other) {
+    public void copyFrom(StructurePlaceholderComponent other) {
         this.selectedPrefab = other.selectedPrefab;
     }
 }

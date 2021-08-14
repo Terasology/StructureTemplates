@@ -14,7 +14,7 @@ public class BlockPlaceholderComponent implements Component<BlockPlaceholderComp
     public Block block;
 
     @Override
-    public void copy(BlockPlaceholderComponent other) {
+    public void copyFrom(BlockPlaceholderComponent other) {
         this.block = other.block;
     }
 }

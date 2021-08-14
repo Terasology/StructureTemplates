@@ -17,7 +17,7 @@ public class ProtectedRegionsComponent implements Component<ProtectedRegionsComp
     public List<BlockRegion> regions;
 
     @Override
-    public void copy(ProtectedRegionsComponent other) {
+    public void copyFrom(ProtectedRegionsComponent other) {
         this.regions = other.regions.stream()
                 .map(BlockRegion::new)
                 .collect(Collectors.toList());

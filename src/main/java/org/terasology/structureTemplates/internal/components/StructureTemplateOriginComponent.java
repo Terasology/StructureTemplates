@@ -25,7 +25,7 @@ public class StructureTemplateOriginComponent implements Component<StructureTemp
     public List<BlockRegion> absoluteTemplateRegions = Lists.newArrayList();
 
     @Override
-    public void copy(StructureTemplateOriginComponent other) {
+    public void copyFrom(StructureTemplateOriginComponent other) {
         this.absoluteTemplateRegions = other.absoluteTemplateRegions.stream()
                 .map(BlockRegion::new)
                 .collect(Collectors.toList());

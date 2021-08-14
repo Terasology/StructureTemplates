@@ -19,7 +19,7 @@ public class SpawnPrefabsComponent implements Component<SpawnPrefabsComponent> {
     public List<PrefabToSpawn> prefabsToSpawn;
 
     @Override
-    public void copy(SpawnPrefabsComponent other) {
+    public void copyFrom(SpawnPrefabsComponent other) {
         this.prefabsToSpawn = other.prefabsToSpawn.stream()
                 .map(PrefabToSpawn::copy)
                 .collect(Collectors.toList());
