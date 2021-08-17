@@ -30,6 +30,8 @@ import java.util.List;
 public class SpawnBlockRegionsComponent implements Component {
     public List<RegionToFill> regionsToFill = new ArrayList<>();
     public boolean multiBlock = false;
+    public String effector;
+    public String targeter;
     @MappedContainer
     public static class RegionToFill {
         public BlockRegion region;

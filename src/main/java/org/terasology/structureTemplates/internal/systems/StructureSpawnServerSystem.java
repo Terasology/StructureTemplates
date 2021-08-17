@@ -22,6 +22,7 @@ import org.joml.Vector3i;
 import org.joml.Vector3ic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.engine.entitySystem.Component;
 import org.terasology.engine.world.BlockEntityRegistry;
 import org.terasology.gestalt.assets.management.AssetManager;
 import org.terasology.engine.entitySystem.entity.EntityManager;
@@ -266,8 +267,9 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
         }
         // once the structure has been placed create the multiblock entity
         if (entity.hasComponent(SpawnBlockRegionsComponent.class) && entity.getComponent(SpawnBlockRegionsComponent.class).multiBlock) {
+            SpawnBlockRegionsComponent spawn = entity.getComponent(SpawnBlockRegionsComponent.class);
             EntityRef block = blockRegistry.getBlockEntityAt(location);
-            block.send(new SendRegionEvent(blockLocations));
+            block.send(new SendRegionEvent(blockLocations, spawn.effector, spawn.targeter));
         }
         structureEntity.send(new StructureBlocksSpawnedEvent(regionTransform));
     }
