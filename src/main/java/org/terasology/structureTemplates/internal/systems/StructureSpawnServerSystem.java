@@ -143,7 +143,7 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
             block = transformation.transformBlock(block);
 
             for (Vector3ic pos : region) {
-                blocksToPlace.put(pos, block);
+                blocksToPlace.put(new Vector3i(pos), block);
             }
         }
 

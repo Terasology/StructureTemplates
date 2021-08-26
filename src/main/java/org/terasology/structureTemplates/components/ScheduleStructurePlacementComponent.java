@@ -1,27 +1,15 @@
-/*
- * Copyright 2016 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2021 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.structureTemplates.components;
 
 import org.joml.Vector3i;
-import org.terasology.engine.entitySystem.Component;
 import org.terasology.engine.entitySystem.prefab.Prefab;
 import org.terasology.engine.math.Side;
+import org.terasology.gestalt.entitysystem.component.Component;
 import org.terasology.reflection.MappedContainer;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Add this component to a structure template entity in order to have it spawn a structure at the given position
@@ -36,8 +24,15 @@ import java.util.List;
  * to be happen when the system finds time for it. When there are no other outstanding structure spawns this is
  * usually during the next update call of the systems..
  */
-public class ScheduleStructurePlacementComponent implements Component {
+public class ScheduleStructurePlacementComponent implements Component<ScheduleStructurePlacementComponent> {
     public List<PlacementToSchedule> placementsToSchedule;
+
+    @Override
+    public void copyFrom(ScheduleStructurePlacementComponent other) {
+        this.placementsToSchedule = other.placementsToSchedule.stream()
+                .map(PlacementToSchedule::copy)
+                .collect(Collectors.toList());
+    }
 
     @MappedContainer
     public static class PlacementToSchedule {
@@ -57,5 +52,13 @@ public class ScheduleStructurePlacementComponent implements Component {
          * The direction in which the front of the spawned structure should point to.
          */
         public Side front;
+
+        PlacementToSchedule copy() {
+            PlacementToSchedule newPlacement = new PlacementToSchedule();
+            newPlacement.structureTemplateType = this.structureTemplateType;
+            newPlacement.position = new Vector3i(this.position);
+            newPlacement.front = this.front;
+            return newPlacement;
+        }
     }
 }
