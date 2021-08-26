@@ -17,6 +17,9 @@ import java.util.stream.Collectors;
  */
 public class SpawnBlockRegionsComponent implements Component<SpawnBlockRegionsComponent> {
     public List<RegionToFill> regionsToFill = new ArrayList<>();
+    public boolean multiBlock = false;
+    public String effector;
+    public String targeter;
 
     @Override
     public void copyFrom(SpawnBlockRegionsComponent other) {

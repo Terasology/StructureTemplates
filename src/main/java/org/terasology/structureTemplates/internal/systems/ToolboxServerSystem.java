@@ -17,6 +17,7 @@ package org.terasology.structureTemplates.internal.systems;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.engine.registry.Share;
 import org.terasology.gestalt.assets.management.AssetManager;
 import org.terasology.engine.entitySystem.entity.EntityBuilder;
 import org.terasology.engine.entitySystem.entity.EntityManager;
@@ -51,6 +52,7 @@ import java.util.Optional;
  *
  */
 @RegisterSystem(RegisterMode.AUTHORITY)
+@Share(value = ToolboxServerSystem.class)
 public class ToolboxServerSystem extends BaseComponentSystem {
     private static final Logger logger = LoggerFactory.getLogger(ScheduledStructureSpawnSystem.class);
 
@@ -138,7 +140,7 @@ public class ToolboxServerSystem extends BaseComponentSystem {
      * @param itemType what kind of item to create
      * @return the created item entity
      */
-    private EntityRef createItem(final Prefab prefab, final ItemType itemType) {
+    public EntityRef createItem(final Prefab prefab, final ItemType itemType) {
         EntityBuilder entityBuilder = entityManager.newBuilder(prefab);
         entityBuilder.addPrefab("engine:iconItem");
 

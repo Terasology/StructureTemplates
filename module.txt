@@ -16,6 +16,10 @@
         {
             "id": "Inventory",
             "minVersion": "1.1.0"
+        },
+        {
+            "id": "MultiBlock",
+            "minVersion": "1.1.0"
         }
     ],
     "serverSideOnly": false,

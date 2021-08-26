@@ -22,6 +22,8 @@ import org.joml.Vector3i;
 import org.joml.Vector3ic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.engine.entitySystem.Component;
+import org.terasology.engine.world.BlockEntityRegistry;
 import org.terasology.gestalt.assets.management.AssetManager;
 import org.terasology.engine.entitySystem.entity.EntityManager;
 import org.terasology.engine.entitySystem.entity.EntityRef;
@@ -42,6 +44,7 @@ import org.terasology.engine.world.block.Block;
 import org.terasology.engine.world.block.BlockComponent;
 import org.terasology.engine.world.block.BlockManager;
 import org.terasology.engine.world.block.BlockRegion;
+import org.terasology.multiBlock2.event.SendRegionEvent;
 import org.terasology.structureTemplates.components.CompletionTimeComponent;
 import org.terasology.structureTemplates.components.IgnoreAirBlocksComponent;
 import org.terasology.structureTemplates.components.NoConstructionAnimationComponent;
@@ -64,6 +67,7 @@ import org.terasology.structureTemplates.internal.components.BuildStructureCount
 import org.terasology.structureTemplates.internal.events.StructureSpawnFailedEvent;
 import org.terasology.structureTemplates.util.BlockRegionTransform;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -96,6 +100,9 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
     private InventoryManager inventoryManager;
 
     @In
+    private BlockEntityRegistry blockRegistry;
+
+    @In
     private BlockManager blockManager;
 
     @In
@@ -103,6 +110,10 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
 
     private BlockRegionTransform regionTransform;
     private EntityRef structureEntity;
+    // location of the mainBlock in the multiBlock Entity
+    private Vector3ic location = new Vector3i();
+    // keeps track of the transformed regions corresponding to a structure template and is used to create a multiBlock entity
+    private ArrayList<Vector3i> blockLocations;
 
     @ReceiveEvent(priority = EventPriority.PRIORITY_TRIVIAL)
     public void onSpawnStructureWithoutFallingAnimation(SpawnStructureEvent event, EntityRef entity) {
@@ -121,7 +132,6 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
         BlockRegionTransform transformation = event.getTransformation();
 
         Map<Vector3ic, Block> blocksToPlace = Maps.newHashMap();
-
         for (RegionToFill regionToFill : spawnBlockRegionsComponent.regionsToFill) {
             Block block = regionToFill.blockType;
             if (entity.hasComponent(IgnoreAirBlocksComponent.class) && isAir(block)) {
@@ -167,6 +177,7 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
         BlockRegionTransform transformation = event.getTransformation();
 
         Map<Integer, List<BlockToPlace>> blocksPerLayer = Maps.newTreeMap();
+        blockLocations = new ArrayList<>();
         for (RegionToFill regionToFill : spawnBlockRegionComponent.regionsToFill) {
             Block block = regionToFill.blockType;
             if (entity.hasComponent(IgnoreAirBlocksComponent.class) && isAir(block)) {
@@ -178,6 +189,7 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
             block = transformation.transformBlock(block);
 
             for (Vector3ic pos : region) {
+                blockLocations.add(new Vector3i(pos));
                 final int y = pos.y();
                 if (!blocksPerLayer.containsKey(y)) {
                     blocksPerLayer.put(y, Lists.newArrayList());
@@ -186,11 +198,12 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
             }
         }
 
+
         List<BuildStep> blocksPerStep = Lists.newArrayList(blocksPerLayer.values()).stream().map(BuildStep::new).collect(Collectors.toList());
         BuildStepwiseStructureComponent buildStepwiseStructureComponent = new BuildStepwiseStructureComponent(blocksPerStep);
         BuildStructureCounterComponent growStructureCounter = new BuildStructureCounterComponent();
-
-        EntityRef growingStructureEntity = entityManager.create(buildStepwiseStructureComponent, growStructureCounter);
+        location = blockLocations.get(0);
+        EntityRef growingStructureEntity = entityManager.create(buildStepwiseStructureComponent, growStructureCounter, spawnBlockRegionComponent);
 
         CompletionTimeComponent completionTimeComponent = new CompletionTimeComponent();
         completionTimeComponent.completionDelay = buildStepwiseStructureComponent.getBuildSteps().size() * 1000 + 100;
@@ -212,7 +225,8 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
             BlockRegion region = regionToFill.region;
             region = transformation.transformRegion(region);
             block = transformation.transformBlock(block);
-
+            RegionToFill newRegion = new RegionToFill();
+            newRegion.region = region;
 
             event.fillRegion(region, block);
         }
@@ -235,7 +249,6 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
         for (BlockToPlace blockToPlace : step.blocksInStep) {
             blocksToPlace.put(blockToPlace.pos, blockToPlace.block);
         }
-
         worldProvider.setBlocks(blocksToPlace); //TODO: finish migration
 
         if (currentStepCount + 1 < buildSteps.size()) {
@@ -252,7 +265,12 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
         if (!event.getActionId().equals(CONSTRUCTION_COMPLETE_ACTION_ID)) {
             return;
         }
-
+        // once the structure has been placed create the multiblock entity
+        if (entity.hasComponent(SpawnBlockRegionsComponent.class) && entity.getComponent(SpawnBlockRegionsComponent.class).multiBlock) {
+            SpawnBlockRegionsComponent spawn = entity.getComponent(SpawnBlockRegionsComponent.class);
+            EntityRef block = blockRegistry.getBlockEntityAt(location);
+            block.send(new SendRegionEvent(blockLocations, spawn.effector, spawn.targeter));
+        }
         structureEntity.send(new StructureBlocksSpawnedEvent(regionTransform));
     }
 
