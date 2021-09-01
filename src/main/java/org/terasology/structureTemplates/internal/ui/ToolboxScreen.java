@@ -1,12 +1,10 @@
-// Copyright 2020 The Terasology Foundation
+// Copyright 2021 The Terasology Foundation
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.structureTemplates.internal.ui;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import org.terasology.gestalt.assets.ResourceUrn;
-import org.terasology.gestalt.assets.management.AssetManager;
 import org.terasology.engine.entitySystem.entity.EntityManager;
 import org.terasology.engine.entitySystem.entity.EntityRef;
 import org.terasology.engine.entitySystem.event.Event;
@@ -25,6 +23,8 @@ import org.terasology.engine.world.block.BlockManager;
 import org.terasology.engine.world.block.BlockUri;
 import org.terasology.engine.world.block.shapes.BlockShape;
 import org.terasology.engine.world.block.tiles.WorldAtlas;
+import org.terasology.gestalt.assets.ResourceUrn;
+import org.terasology.gestalt.assets.management.AssetManager;
 import org.terasology.nui.UIWidget;
 import org.terasology.nui.databinding.ReadOnlyBinding;
 import org.terasology.nui.widgets.UIButton;
@@ -36,6 +36,7 @@ import org.terasology.structureTemplates.events.StructureSpawnerFromToolboxReque
 import org.terasology.structureTemplates.events.StructureTemplateFromToolboxRequest;
 import org.terasology.structureTemplates.util.ItemType;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -129,8 +130,8 @@ public class ToolboxScreen extends BaseInteractionScreen {
         List<BlockUri> blockList = Lists.newArrayList(blocks);
         blockList.sort(Comparator.comparing(BlockUri::toString));
 
-        Set<ResourceUrn> blockShapes = assetManager.getAvailableAssets(BlockShape.class);
-
+        List<ResourceUrn> blockShapes = new ArrayList<>(assetManager.getAvailableAssets(BlockShape.class));
+        blockShapes.sort(Comparator.comparing(ResourceUrn::toString));
 
         for (BlockUri block : blockList) {
             if (!block.equals(BlockManager.AIR_ID) && !block.equals(BlockManager.UNLOADED_ID)) {
@@ -143,7 +144,6 @@ public class ToolboxScreen extends BaseInteractionScreen {
                 ToolboxTree blockFamiliyTree = createBlockNode(block);
                 if (freeFormBlocks.contains(block)) {
                     for (ResourceUrn shareUrn : blockShapes) {
-
                         blockFamiliyTree.addChild(new ToolboxTreeValue(shareUrn.toString(),
                                 genericBlockTexture,
                                 () -> new BlockFromToolboxRequest(new BlockUri(block.getBlockFamilyDefinitionUrn(), shareUrn))));
