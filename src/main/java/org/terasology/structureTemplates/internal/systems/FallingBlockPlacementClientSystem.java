@@ -1,10 +1,9 @@
-// Copyright 2020 The Terasology Foundation
+// Copyright 2021 The Terasology Foundation
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.structureTemplates.internal.systems;
 
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
-import org.terasology.gestalt.assets.management.AssetManager;
 import org.terasology.engine.core.Time;
 import org.terasology.engine.entitySystem.entity.EntityBuilder;
 import org.terasology.engine.entitySystem.entity.EntityManager;
@@ -22,6 +21,7 @@ import org.terasology.engine.rendering.assets.material.Material;
 import org.terasology.engine.rendering.logic.MeshComponent;
 import org.terasology.engine.world.block.Block;
 import org.terasology.engine.world.block.BlockManager;
+import org.terasology.gestalt.assets.management.AssetManager;
 import org.terasology.structureTemplates.components.FallingBlockComponent;
 
 import java.util.LinkedHashMap;
