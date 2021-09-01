@@ -31,7 +31,7 @@ public class SpawnPrefabsComponent implements Component<SpawnPrefabsComponent> {
         public Vector3i position;
         public Quaternionf rotation = new Quaternionf();
 
-        PrefabToSpawn copy(){
+        PrefabToSpawn copy() {
             PrefabToSpawn newSpawn = new PrefabToSpawn();
             newSpawn.prefab = this.prefab;
             newSpawn.position = new Vector3i(this.position);

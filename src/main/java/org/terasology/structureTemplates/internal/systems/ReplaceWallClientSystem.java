@@ -1,4 +1,4 @@
-// Copyright 2020 The Terasology Foundation
+// Copyright 2021 The Terasology Foundation
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.structureTemplates.internal.systems;
 
@@ -18,10 +18,6 @@ import org.terasology.engine.entitySystem.systems.RegisterSystem;
 import org.terasology.engine.entitySystem.systems.UpdateSubscriberSystem;
 import org.terasology.engine.input.InputSystem;
 import org.terasology.engine.logic.common.DisplayNameComponent;
-import org.terasology.module.inventory.components.InventoryComponent;
-import org.terasology.module.inventory.systems.InventoryManager;
-import org.terasology.module.inventory.components.SelectedInventorySlotComponent;
-import org.terasology.module.inventory.events.InventorySlotChangedEvent;
 import org.terasology.engine.logic.location.LocationComponent;
 import org.terasology.engine.logic.players.LocalPlayer;
 import org.terasology.engine.logic.players.PlayerTargetChangedEvent;
@@ -33,6 +29,10 @@ import org.terasology.engine.rendering.nui.NUIManager;
 import org.terasology.engine.world.WorldProvider;
 import org.terasology.engine.world.block.BlockComponent;
 import org.terasology.engine.world.block.BlockRegion;
+import org.terasology.module.inventory.components.InventoryComponent;
+import org.terasology.module.inventory.components.SelectedInventorySlotComponent;
+import org.terasology.module.inventory.events.InventorySlotChangedEvent;
+import org.terasology.module.inventory.systems.InventoryManager;
 import org.terasology.nui.Color;
 import org.terasology.structureTemplates.components.SpawnStructureActionComponent;
 import org.terasology.structureTemplates.components.WallPreviewComponent;

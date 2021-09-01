@@ -1,18 +1,5 @@
-/*
- * Copyright 2017 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2021 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.structureTemplates.internal.systems;
 
 import org.joml.Vector3f;
@@ -56,7 +43,7 @@ public class ProtectedRegionClientSystem extends BaseComponentSystem {
         return false;
     }
 
-    @ReceiveEvent(priority = EventPriority.PRIORITY_CRITICAL, components = {NoInteractionWhenProtected.class})
+    @ReceiveEvent(priority = EventPriority.PRIORITY_CRITICAL, components = NoInteractionWhenProtected.class)
     public void onActivationPredicted(ActivationPredicted event, EntityRef target) {
         Vector3f position = event.getTarget().getComponent(LocationComponent.class).getWorldPosition(new Vector3f());
         //TODO: is this equivalent to  new Vector3i(position, RoundingMode.HALF_UP);

@@ -1,4 +1,4 @@
-// Copyright 2020 The Terasology Foundation
+// Copyright 2021 The Terasology Foundation
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.structureTemplates.internal.systems;
 
@@ -20,10 +20,6 @@ import org.terasology.engine.entitySystem.systems.UpdateSubscriberSystem;
 import org.terasology.engine.input.InputSystem;
 import org.terasology.engine.logic.clipboard.ClipboardManager;
 import org.terasology.engine.logic.common.DisplayNameComponent;
-import org.terasology.module.inventory.components.InventoryComponent;
-import org.terasology.module.inventory.systems.InventoryManager;
-import org.terasology.module.inventory.components.SelectedInventorySlotComponent;
-import org.terasology.module.inventory.events.InventorySlotChangedEvent;
 import org.terasology.engine.logic.location.LocationComponent;
 import org.terasology.engine.logic.players.LocalPlayer;
 import org.terasology.engine.logic.players.PlayerTargetChangedEvent;
@@ -33,6 +29,10 @@ import org.terasology.engine.rendering.logic.RegionOutlineComponent;
 import org.terasology.engine.rendering.nui.NUIManager;
 import org.terasology.engine.world.block.BlockComponent;
 import org.terasology.engine.world.block.BlockRegion;
+import org.terasology.module.inventory.components.InventoryComponent;
+import org.terasology.module.inventory.components.SelectedInventorySlotComponent;
+import org.terasology.module.inventory.events.InventorySlotChangedEvent;
+import org.terasology.module.inventory.systems.InventoryManager;
 import org.terasology.nui.Color;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent;
 import org.terasology.structureTemplates.components.SpawnStructureActionComponent;
@@ -175,7 +175,6 @@ public class StructureSpawnClientSystem extends BaseComponentSystem implements U
         return entityBuilder.build();
     }
 
-
     private List<ColoredRegion> getRegionsToDraw() {
         EntityRef characterEntity = locatPlayer.getCharacterEntity();
         SelectedInventorySlotComponent selectedSlotComponent = characterEntity.
@@ -234,25 +233,6 @@ public class StructureSpawnClientSystem extends BaseComponentSystem implements U
         return regionsToDraw;
     }
 
-    private static final class ColoredRegion {
-        private BlockRegion region;
-        private Color color;
-
-        public ColoredRegion(BlockRegion region, Color color) {
-            this.region = region;
-            this.color = color;
-        }
-
-        public BlockRegion getRegion() {
-            return region;
-        }
-
-        public Color getColor() {
-            return color;
-        }
-    }
-
-
     @ReceiveEvent
     public void onStructureSpawnFailedEvent(StructureSpawnFailedEvent event, EntityRef entity,
                                             SpawnStructureActionComponent spawnActionComponent) {
@@ -278,5 +258,23 @@ public class StructureSpawnClientSystem extends BaseComponentSystem implements U
         StructurePlacementFailureScreen messagePopup = nuiManager.pushScreen(
                 STRUCTURE_PLACEMENT_FAILURE_OVERLAY, StructurePlacementFailureScreen.class);
         messagePopup.setMessage(message);
+    }
+
+    private static final class ColoredRegion {
+        private BlockRegion region;
+        private Color color;
+
+        ColoredRegion(BlockRegion region, Color color) {
+            this.region = region;
+            this.color = color;
+        }
+
+        public BlockRegion getRegion() {
+            return region;
+        }
+
+        public Color getColor() {
+            return color;
+        }
     }
 }

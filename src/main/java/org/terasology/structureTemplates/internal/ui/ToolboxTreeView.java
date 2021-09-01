@@ -1,14 +1,10 @@
-// Copyright 2020 The Terasology Foundation
+// Copyright 2021 The Terasology Foundation
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.structureTemplates.internal.ui;
 
 import org.terasology.nui.widgets.UITreeView;
 
-/**
- *
- */
 public class ToolboxTreeView extends UITreeView<ToolboxTreeValue> {
-
 
     public ToolboxTreeView() {
         super();
