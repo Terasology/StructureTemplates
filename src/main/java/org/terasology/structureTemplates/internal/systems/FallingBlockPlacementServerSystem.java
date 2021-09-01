@@ -1,18 +1,5 @@
-/*
- * Copyright 2017 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2021 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.structureTemplates.internal.systems;
 
 import org.joml.Vector3f;
@@ -20,7 +7,6 @@ import org.joml.Vector3i;
 import org.joml.Vector3ic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.gestalt.assets.management.AssetManager;
 import org.terasology.engine.core.Time;
 import org.terasology.engine.entitySystem.entity.EntityBuilder;
 import org.terasology.engine.entitySystem.entity.EntityManager;
@@ -37,6 +23,7 @@ import org.terasology.engine.registry.In;
 import org.terasology.engine.world.WorldProvider;
 import org.terasology.engine.world.block.Block;
 import org.terasology.engine.world.block.BlockManager;
+import org.terasology.gestalt.assets.management.AssetManager;
 import org.terasology.structureTemplates.components.CompletionTimeComponent;
 import org.terasology.structureTemplates.components.FallingBlockComponent;
 import org.terasology.structureTemplates.components.FallingBlocksPlacementAlgorithmComponent;
@@ -52,9 +39,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-/**
- *
- */
 @RegisterSystem(RegisterMode.AUTHORITY)
 public class FallingBlockPlacementServerSystem extends BaseComponentSystem {
     private static final Logger logger = LoggerFactory.getLogger(FallingBlockPlacementServerSystem.class);
@@ -82,8 +66,9 @@ public class FallingBlockPlacementServerSystem extends BaseComponentSystem {
     @In
     private WorldProvider worldProvider;
 
-    long maxStopGameTimeInMs = 0;
-    BlockRegionTransform transformation;
+    private long maxStopGameTimeInMs = 0;
+
+    private BlockRegionTransform transformation;
 
     /**
      * This overrides the normal instant structure template spawning with one where an animation of falling blocks
@@ -91,7 +76,7 @@ public class FallingBlockPlacementServerSystem extends BaseComponentSystem {
      * the event {@link StructureBlocksSpawnedEvent} gets send when the fall down animation has been played for
      * all blocks. So there might be a few seconds between the events.
      */
-    @ReceiveEvent(components = {FallingBlocksPlacementAlgorithmComponent.class})
+    @ReceiveEvent(components = FallingBlocksPlacementAlgorithmComponent.class)
     public void onSpawnStructureEventWithBlocksPriority(SpawnStructureEvent event, EntityRef entity) {
         transformation = event.getTransformation();
         entity.send(new StructureSpawnStartedEvent(event.getTransformation()));
@@ -114,7 +99,8 @@ public class FallingBlockPlacementServerSystem extends BaseComponentSystem {
                 float distanceToMin = entry.getKey().gridDistance(minPos);
                 float additionalOffsetPerDistanceToMin = 1f;
                 float fallDistance = additionalOffsetPerDistanceToMin * distanceToMin;
-                long fallDurationInMs = Math.round(Math.sqrt(2 * fallDistance / (-FallingBlockPlacementClientSystem.FALLING_BLOCK_ACCELERATION_IN_M_PER_MS)));
+                long fallDurationInMs =
+                        Math.round(Math.sqrt(2 * fallDistance / (-FallingBlockPlacementClientSystem.FALLING_BLOCK_ACCELERATION_IN_M_PER_MS)));
 
                 delay += fallDurationInMs;
 
@@ -184,7 +170,8 @@ public class FallingBlockPlacementServerSystem extends BaseComponentSystem {
     }
 
     @ReceiveEvent
-    public void createFallingBlockEntity(DelayedActionTriggeredEvent event, EntityRef entityRef, PrepareFallingBlockEntityComponent fallingBlockEntityComponent) {
+    public void createFallingBlockEntity(DelayedActionTriggeredEvent event, EntityRef entityRef,
+                                         PrepareFallingBlockEntityComponent fallingBlockEntityComponent) {
         if (!event.getActionId().equals(CREATE_ENTITY_ACTION_ID)) {
             return;
         }

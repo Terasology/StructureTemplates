@@ -1,25 +1,10 @@
-/*
- * Copyright 2016 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2021 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.structureTemplates.internal.systems;
 
 import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.gestalt.assets.ResourceUrn;
-import org.terasology.gestalt.assets.management.AssetManager;
 import org.terasology.engine.entitySystem.entity.EntityBuilder;
 import org.terasology.engine.entitySystem.entity.EntityManager;
 import org.terasology.engine.entitySystem.entity.EntityRef;
@@ -30,6 +15,8 @@ import org.terasology.engine.entitySystem.systems.RegisterMode;
 import org.terasology.engine.entitySystem.systems.RegisterSystem;
 import org.terasology.engine.registry.In;
 import org.terasology.engine.registry.Share;
+import org.terasology.gestalt.assets.ResourceUrn;
+import org.terasology.gestalt.assets.management.AssetManager;
 import org.terasology.structureTemplates.components.StructureTemplateComponent;
 import org.terasology.structureTemplates.components.StructureTemplateTypeComponent;
 import org.terasology.structureTemplates.interfaces.StructureTemplateProvider;
@@ -56,7 +43,7 @@ public class StructureTemplateProviderSystem extends BaseComponentSystem impleme
     @In
     private PrefabManager prefabManager;
 
-    private Random random = new Random();
+    private final Random random = new Random();
 
     @In
     private AssetManager assetManager;
@@ -102,24 +89,6 @@ public class StructureTemplateProviderSystem extends BaseComponentSystem impleme
         }
     }
 
-    private static final class EntityChanceTuple {
-        private EntityRef entity;
-        private int chance;
-
-        public EntityChanceTuple(EntityRef entity, int chance) {
-            this.entity = entity;
-            this.chance = chance;
-        }
-
-        public int getChance() {
-            return chance;
-        }
-
-        public EntityRef getEntity() {
-            return entity;
-        }
-    }
-
     public EntityRef getRandomTemplateOfType(Prefab type) {
         List<EntityChanceTuple> list = getEntityChanceTuplesForPrefab(type);
         return selectRandomOneBasedOnChance(list);
@@ -142,7 +111,6 @@ public class StructureTemplateProviderSystem extends BaseComponentSystem impleme
         return entityChanceTuple.getEntity();
     }
 
-
     private int randomIndexBasedOnSpawnChance(List<EntityChanceTuple> list) {
         long sumOfAll = 0;
         for (EntityChanceTuple entityChanceTuple:list) {
@@ -150,7 +118,7 @@ public class StructureTemplateProviderSystem extends BaseComponentSystem impleme
         }
         long randomValue = Math.abs(random.nextLong() % sumOfAll);
         long sum = 0;
-        for (int index = 0;index < list.size(); index++) {
+        for (int index = 0; index < list.size(); index++) {
             EntityChanceTuple entityChanceTuple = list.get(index);
             sum += entityChanceTuple.getChance();
             if (randomValue < sum) {
@@ -168,9 +136,27 @@ public class StructureTemplateProviderSystem extends BaseComponentSystem impleme
         return getRandomTemplateOfType(prefab.get());
     }
 
-    public Iterator<EntityRef> iterateStructureTempaltesOfTypeInRandomOrder(Prefab prefab) {
+    public Iterator<EntityRef> iterateStructureTemplatesOfTypeInRandomOrder(Prefab prefab) {
         List<EntityChanceTuple> entityChanceTuples = getEntityChanceTuplesForPrefab(prefab);
         return new StructureTemplateIterator(entityChanceTuples);
+    }
+
+    private static final class EntityChanceTuple {
+        private final EntityRef entity;
+        private final int chance;
+
+        EntityChanceTuple(EntityRef entity, int chance) {
+            this.entity = entity;
+            this.chance = chance;
+        }
+
+        public int getChance() {
+            return chance;
+        }
+
+        public EntityRef getEntity() {
+            return entity;
+        }
     }
 
     private class StructureTemplateIterator implements Iterator<EntityRef> {
@@ -179,7 +165,7 @@ public class StructureTemplateProviderSystem extends BaseComponentSystem impleme
          *
          * @param list won't be modified, this class works with a copy of this list
          */
-        public StructureTemplateIterator(List<EntityChanceTuple> list) {
+        StructureTemplateIterator(List<EntityChanceTuple> list) {
             this.remaining = new ArrayList<EntityChanceTuple>(list);
         }
 

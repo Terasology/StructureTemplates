@@ -52,6 +52,8 @@ public class BuildStepwiseStructureComponent implements Component<BuildStepwiseS
     @MappedContainer
     public static class BuildStep {
 
+        public List<BlockToPlace> blocksInStep;
+
         public BuildStep(List<BlockToPlace> blocksInStep) {
             this.blocksInStep = blocksInStep;
         }
@@ -59,8 +61,6 @@ public class BuildStepwiseStructureComponent implements Component<BuildStepwiseS
         public BuildStep() {
             this(Collections.emptyList());
         }
-
-        public List<BlockToPlace> blocksInStep;
 
         BuildStep copy() {
             return new BuildStep(blocksInStep.stream().map(BlockToPlace::copy).collect(Collectors.toList()));
