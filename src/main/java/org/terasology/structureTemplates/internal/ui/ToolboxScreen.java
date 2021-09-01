@@ -36,6 +36,7 @@ import org.terasology.structureTemplates.events.StructureSpawnerFromToolboxReque
 import org.terasology.structureTemplates.events.StructureTemplateFromToolboxRequest;
 import org.terasology.structureTemplates.util.ItemType;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -129,8 +130,8 @@ public class ToolboxScreen extends BaseInteractionScreen {
         List<BlockUri> blockList = Lists.newArrayList(blocks);
         blockList.sort(Comparator.comparing(BlockUri::toString));
 
-        Set<ResourceUrn> blockShapes = assetManager.getAvailableAssets(BlockShape.class);
-
+        List<ResourceUrn> blockShapes = new ArrayList<>(assetManager.getAvailableAssets(BlockShape.class));
+        blockShapes.sort(Comparator.comparing(ResourceUrn::toString));
 
         for (BlockUri block : blockList) {
             if (!block.equals(BlockManager.AIR_ID) && !block.equals(BlockManager.UNLOADED_ID)) {
@@ -143,7 +144,6 @@ public class ToolboxScreen extends BaseInteractionScreen {
                 ToolboxTree blockFamiliyTree = createBlockNode(block);
                 if (freeFormBlocks.contains(block)) {
                     for (ResourceUrn shareUrn : blockShapes) {
-
                         blockFamiliyTree.addChild(new ToolboxTreeValue(shareUrn.toString(),
                                 genericBlockTexture,
                                 () -> new BlockFromToolboxRequest(new BlockUri(block.getBlockFamilyDefinitionUrn(), shareUrn))));
