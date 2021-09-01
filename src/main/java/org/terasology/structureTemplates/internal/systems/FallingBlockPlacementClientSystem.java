@@ -27,9 +27,6 @@ import org.terasology.structureTemplates.components.FallingBlockComponent;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/**
- *
- */
 @RegisterSystem(RegisterMode.CLIENT)
 public class FallingBlockPlacementClientSystem extends BaseComponentSystem implements UpdateSubscriberSystem {
 

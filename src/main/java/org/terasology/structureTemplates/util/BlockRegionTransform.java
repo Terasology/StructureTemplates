@@ -20,7 +20,7 @@ import org.terasology.structureTemplates.components.BlockRegionTransformComponen
 /**
  * Describes a transformation for a region of blocks like a rotation of 90 degrees or a movement by an offset.
  */
-public class BlockRegionTransform {
+public final class BlockRegionTransform {
     /**
      * How often it will be rotated around the y axis by 90 degree. Must be either 0, 1, 2 or 3.
      */

@@ -139,20 +139,20 @@ public class StructureTemplateEditorClientSystem extends BaseComponentSystem {
         }
 
         EntityRef editProcessEntity = editingUserComponent.editProcessEntity;
-        EditTemplateRegionProcessComponent editTemplateRegionProcessComponent = editProcessEntity.getComponent(EditTemplateRegionProcessComponent.class);
-        if (editTemplateRegionProcessComponent == null) {
+        EditTemplateRegionProcessComponent editComponent = editProcessEntity.getComponent(EditTemplateRegionProcessComponent.class);
+        if (editComponent == null) {
             return EntityRef.NULL;
         }
-        return editTemplateRegionProcessComponent.structureTemplateEditor;
+        return editComponent.structureTemplateEditor;
     }
 
 
     private List<BlockRegion> getRegionsToDraw() {
 
-        StructureTemplateOriginComponent structureTemplateOriginComponent = highlightedEditorEntity.getComponent(StructureTemplateOriginComponent.class);
-        if (structureTemplateOriginComponent == null) {
+        StructureTemplateOriginComponent origin = highlightedEditorEntity.getComponent(StructureTemplateOriginComponent.class);
+        if (origin == null) {
             return Collections.emptyList();
         }
-        return new ArrayList<>(structureTemplateOriginComponent.absoluteTemplateRegions);
+        return new ArrayList<>(origin.absoluteTemplateRegions);
     }
 }

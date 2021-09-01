@@ -91,7 +91,7 @@ public class ProtectedRegionServerSystem extends BaseComponentSystem {
         }
     }
 
-    @ReceiveEvent(priority = EventPriority.PRIORITY_CRITICAL, components = {NoInteractionWhenProtected.class})
+    @ReceiveEvent(priority = EventPriority.PRIORITY_CRITICAL, components = NoInteractionWhenProtected.class)
     public void onActivation(ActivateEvent event, EntityRef target) {
         Vector3f position = event.getTarget().getComponent(LocationComponent.class).getWorldPosition(new Vector3f());
         //TODO: is this equivalent to  new Vector3i(position, RoundingMode.HALF_UP);

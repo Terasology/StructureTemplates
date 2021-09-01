@@ -175,7 +175,6 @@ public class StructureSpawnClientSystem extends BaseComponentSystem implements U
         return entityBuilder.build();
     }
 
-
     private List<ColoredRegion> getRegionsToDraw() {
         EntityRef characterEntity = locatPlayer.getCharacterEntity();
         SelectedInventorySlotComponent selectedSlotComponent = characterEntity.
@@ -234,25 +233,6 @@ public class StructureSpawnClientSystem extends BaseComponentSystem implements U
         return regionsToDraw;
     }
 
-    private static final class ColoredRegion {
-        private BlockRegion region;
-        private Color color;
-
-        public ColoredRegion(BlockRegion region, Color color) {
-            this.region = region;
-            this.color = color;
-        }
-
-        public BlockRegion getRegion() {
-            return region;
-        }
-
-        public Color getColor() {
-            return color;
-        }
-    }
-
-
     @ReceiveEvent
     public void onStructureSpawnFailedEvent(StructureSpawnFailedEvent event, EntityRef entity,
                                             SpawnStructureActionComponent spawnActionComponent) {
@@ -278,5 +258,23 @@ public class StructureSpawnClientSystem extends BaseComponentSystem implements U
         StructurePlacementFailureScreen messagePopup = nuiManager.pushScreen(
                 STRUCTURE_PLACEMENT_FAILURE_OVERLAY, StructurePlacementFailureScreen.class);
         messagePopup.setMessage(message);
+    }
+
+    private static final class ColoredRegion {
+        private BlockRegion region;
+        private Color color;
+
+        ColoredRegion(BlockRegion region, Color color) {
+            this.region = region;
+            this.color = color;
+        }
+
+        public BlockRegion getRegion() {
+            return region;
+        }
+
+        public Color getColor() {
+            return color;
+        }
     }
 }

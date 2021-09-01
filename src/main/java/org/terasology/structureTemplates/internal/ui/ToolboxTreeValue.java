@@ -7,13 +7,10 @@ import org.terasology.engine.rendering.assets.texture.TextureRegion;
 
 import java.util.function.Supplier;
 
-/**
- *
- */
 public final class ToolboxTreeValue {
-    private String text;
-    private TextureRegion textureRegion;
-    private Supplier<Event> itemRequestFactory;
+    private final String text;
+    private final TextureRegion textureRegion;
+    private final Supplier<Event> itemRequestFactory;
 
     public ToolboxTreeValue(String text, TextureRegion textureRegion, Supplier<Event> itemRequestFactory) {
         this.text = text;
@@ -30,7 +27,7 @@ public final class ToolboxTreeValue {
     }
 
     @Override
-    public final String toString() {
+    public String toString() {
         return text;
     }
 

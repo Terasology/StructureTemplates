@@ -70,7 +70,7 @@ public class BlockRegionConditionSystem extends BaseComponentSystem implements B
         for (int x = minX; x <= maxX; x++) {
             for (int y = minY; y <= maxY; y++) {
                 for (int z = minZ; z <= maxZ; z++) {
-                    Block untransformedBlock = worldProvider.getBlock(x ,y, z);
+                    Block untransformedBlock = worldProvider.getBlock(x, y, z);
                     Block transformedBlock = transform.transformBlock(untransformedBlock);
                     if (!condition.test(transformedBlock)) {
                         return false;

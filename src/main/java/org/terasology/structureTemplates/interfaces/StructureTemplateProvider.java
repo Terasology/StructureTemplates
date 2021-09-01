@@ -50,6 +50,6 @@ public interface StructureTemplateProvider {
      * @throws IllegalArgumentException if there is no {@link StructureTemplateComponent} that references the specified
      *                                  structure tempalte type.
      */
-    public Iterator<EntityRef> iterateStructureTempaltesOfTypeInRandomOrder(Prefab structureTemplateTypePrefab)
+    Iterator<EntityRef> iterateStructureTemplatesOfTypeInRandomOrder(Prefab structureTemplateTypePrefab)
             throws IllegalArgumentException;
 }

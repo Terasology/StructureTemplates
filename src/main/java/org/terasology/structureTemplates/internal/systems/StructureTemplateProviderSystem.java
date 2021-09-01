@@ -43,7 +43,7 @@ public class StructureTemplateProviderSystem extends BaseComponentSystem impleme
     @In
     private PrefabManager prefabManager;
 
-    private Random random = new Random();
+    private final Random random = new Random();
 
     @In
     private AssetManager assetManager;
@@ -89,24 +89,6 @@ public class StructureTemplateProviderSystem extends BaseComponentSystem impleme
         }
     }
 
-    private static final class EntityChanceTuple {
-        private EntityRef entity;
-        private int chance;
-
-        public EntityChanceTuple(EntityRef entity, int chance) {
-            this.entity = entity;
-            this.chance = chance;
-        }
-
-        public int getChance() {
-            return chance;
-        }
-
-        public EntityRef getEntity() {
-            return entity;
-        }
-    }
-
     public EntityRef getRandomTemplateOfType(Prefab type) {
         List<EntityChanceTuple> list = getEntityChanceTuplesForPrefab(type);
         return selectRandomOneBasedOnChance(list);
@@ -129,7 +111,6 @@ public class StructureTemplateProviderSystem extends BaseComponentSystem impleme
         return entityChanceTuple.getEntity();
     }
 
-
     private int randomIndexBasedOnSpawnChance(List<EntityChanceTuple> list) {
         long sumOfAll = 0;
         for (EntityChanceTuple entityChanceTuple:list) {
@@ -137,7 +118,7 @@ public class StructureTemplateProviderSystem extends BaseComponentSystem impleme
         }
         long randomValue = Math.abs(random.nextLong() % sumOfAll);
         long sum = 0;
-        for (int index = 0;index < list.size(); index++) {
+        for (int index = 0; index < list.size(); index++) {
             EntityChanceTuple entityChanceTuple = list.get(index);
             sum += entityChanceTuple.getChance();
             if (randomValue < sum) {
@@ -155,9 +136,27 @@ public class StructureTemplateProviderSystem extends BaseComponentSystem impleme
         return getRandomTemplateOfType(prefab.get());
     }
 
-    public Iterator<EntityRef> iterateStructureTempaltesOfTypeInRandomOrder(Prefab prefab) {
+    public Iterator<EntityRef> iterateStructureTemplatesOfTypeInRandomOrder(Prefab prefab) {
         List<EntityChanceTuple> entityChanceTuples = getEntityChanceTuplesForPrefab(prefab);
         return new StructureTemplateIterator(entityChanceTuples);
+    }
+
+    private static final class EntityChanceTuple {
+        private final EntityRef entity;
+        private final int chance;
+
+        EntityChanceTuple(EntityRef entity, int chance) {
+            this.entity = entity;
+            this.chance = chance;
+        }
+
+        public int getChance() {
+            return chance;
+        }
+
+        public EntityRef getEntity() {
+            return entity;
+        }
     }
 
     private class StructureTemplateIterator implements Iterator<EntityRef> {
@@ -166,7 +165,7 @@ public class StructureTemplateProviderSystem extends BaseComponentSystem impleme
          *
          * @param list won't be modified, this class works with a copy of this list
          */
-        public StructureTemplateIterator(List<EntityChanceTuple> list) {
+        StructureTemplateIterator(List<EntityChanceTuple> list) {
             this.remaining = new ArrayList<EntityChanceTuple>(list);
         }
 

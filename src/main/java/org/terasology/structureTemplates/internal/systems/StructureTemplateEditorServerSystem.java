@@ -158,19 +158,19 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         }
 
         EntityRef editProcessEntity = editingUserComponent.editProcessEntity;
-        EditTemplateRegionProcessComponent editTemplateRegionProcessComponent = editProcessEntity.getComponent(EditTemplateRegionProcessComponent.class);
-        if (editTemplateRegionProcessComponent == null) {
+        EditTemplateRegionProcessComponent editComponent = editProcessEntity.getComponent(EditTemplateRegionProcessComponent.class);
+        if (editComponent == null) {
             return;
         }
-        EntityRef editorEnitity = editTemplateRegionProcessComponent.structureTemplateEditor;
+        EntityRef editorEnitity = editComponent.structureTemplateEditor;
         StructureTemplateOriginComponent editorComponent = editorEnitity.getComponent(StructureTemplateOriginComponent.class);
         if (editorComponent == null) {
             return; // can happen if entity got destroyed
         }
-        if (editTemplateRegionProcessComponent.recordBlockAddition) {
+        if (editComponent.recordBlockAddition) {
             addBlockPositionsToTemplate(placeBlocks.getBlocks().keySet(), editorEnitity, editorComponent);
         }
-        if (editTemplateRegionProcessComponent.recordBlockRemoval && !editTemplateRegionProcessComponent.recordBlockAddition) {
+        if (editComponent.recordBlockRemoval && !editComponent.recordBlockAddition) {
             removeBlockPositionsFromTemplate(placeBlocks.getBlocks().keySet(), editorEnitity, editorComponent);
         }
     }
@@ -188,47 +188,46 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         }
 
         EntityRef editProcessEntity = editingUserComponent.editProcessEntity;
-        EditTemplateRegionProcessComponent editTemplateRegionProcessComponent = editProcessEntity.getComponent(EditTemplateRegionProcessComponent.class);
-        if (editTemplateRegionProcessComponent == null) {
+        EditTemplateRegionProcessComponent editComponent = editProcessEntity.getComponent(EditTemplateRegionProcessComponent.class);
+        if (editComponent == null) {
             return;
         }
-        EntityRef editorEnitity = editTemplateRegionProcessComponent.structureTemplateEditor;
-        StructureTemplateOriginComponent editorComponent = editorEnitity.getComponent(StructureTemplateOriginComponent.class);
+        EntityRef editorEntity = editComponent.structureTemplateEditor;
+        StructureTemplateOriginComponent editorComponent = editorEntity.getComponent(StructureTemplateOriginComponent.class);
         if (editorComponent == null) {
             return; // can happen if entity got destroyed
         }
         Set<Vector3ic> positionSet = Collections.singleton(blockComponent.getPosition(new Vector3i()));
-        if (editTemplateRegionProcessComponent.recordBlockAddition && !editTemplateRegionProcessComponent.recordBlockRemoval) {
-            removeBlockPositionsFromTemplate(positionSet, editorEnitity, editorComponent);
+        if (editComponent.recordBlockAddition && !editComponent.recordBlockRemoval) {
+            removeBlockPositionsFromTemplate(positionSet, editorEntity, editorComponent);
         }
-        if (editTemplateRegionProcessComponent.recordBlockRemoval) {
-            addBlockPositionsToTemplate(positionSet, editorEnitity, editorComponent);
+        if (editComponent.recordBlockRemoval) {
+            addBlockPositionsToTemplate(positionSet, editorEntity, editorComponent);
         }
     }
 
-    private void addBlockPositionsToTemplate(Set<Vector3ic> positions, EntityRef templateEntity, StructureTemplateOriginComponent templateComponent) {
+    private void addBlockPositionsToTemplate(Set<Vector3ic> positions,
+                                             EntityRef templateEntity,
+                                             StructureTemplateOriginComponent templateComponent) {
         List<BlockRegion> originalRegions = templateComponent.absoluteTemplateRegions;
         Set<Vector3ic> positionsInTemplate = Sets.newHashSet();
         positionsInTemplate.addAll(RegionMergeUtil.positionsOfRegions(originalRegions));
         if (positionsInTemplate.containsAll(positions)) {
-            // nothing to do
-        } else {
             positionsInTemplate.addAll(positions);
             templateComponent.absoluteTemplateRegions = RegionMergeUtil.mergePositionsIntoRegions(positionsInTemplate);
             templateEntity.saveComponent(templateComponent);
         }
     }
 
-    private void removeBlockPositionsFromTemplate(Set<Vector3ic> positions, EntityRef templateEntity, StructureTemplateOriginComponent templateComponent) {
+    private void removeBlockPositionsFromTemplate(Set<Vector3ic> positions,
+                                                  EntityRef templateEntity,
+                                                  StructureTemplateOriginComponent templateComponent) {
         List<BlockRegion> originalRegions = templateComponent.absoluteTemplateRegions;
         Set<Vector3ic> positionsInTemplate = Sets.newHashSet();
         positionsInTemplate.addAll(RegionMergeUtil.positionsOfRegions(originalRegions));
-        if (!positionsInTemplate.containsAll(positions)) {
-            // nothing to do
-        } else {
+        if (positionsInTemplate.containsAll(positions)) {
             positionsInTemplate.removeAll(positions);
-            List<BlockRegion> newTemplateRegions = RegionMergeUtil.mergePositionsIntoRegions(positionsInTemplate);
-            templateComponent.absoluteTemplateRegions = newTemplateRegions;
+            templateComponent.absoluteTemplateRegions = RegionMergeUtil.mergePositionsIntoRegions(positionsInTemplate);
             templateEntity.saveComponent(templateComponent);
         }
     }
@@ -308,7 +307,6 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
     public void onStopEditingProcessRequest(StopEditingProcessRequest event, EntityRef client) {
         EditingUserComponent editingUserComponent = client.getComponent(EditingUserComponent.class);
         if (editingUserComponent != null) {
-            EditTemplateRegionProcessComponent editProcessComponent = editingUserComponent.editProcessEntity.getComponent(EditTemplateRegionProcessComponent.class);
             editingUserComponent.editProcessEntity.destroy();
             client.removeComponent(EditingUserComponent.class);
         }
@@ -318,8 +316,8 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
     public void onCreateStructureSpawnItemRequest(CreateStructureSpawnItemRequest event, EntityRef characterEntity,
                                                   CharacterComponent characterComponent) {
         EntityRef structureTemplateOriginEntity = characterComponent.authorizedInteractionTarget;
-        StructureTemplateOriginComponent structureTemplateOriginComponent = structureTemplateOriginEntity.getComponent(StructureTemplateOriginComponent.class);
-        if (structureTemplateOriginComponent == null) {
+        StructureTemplateOriginComponent origin = structureTemplateOriginEntity.getComponent(StructureTemplateOriginComponent.class);
+        if (origin == null) {
             LOGGER.error("Ignored CreateStructureSpawnItemRequest event since there was no interaction with a structure template origin block");
             return;
         }
@@ -331,7 +329,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         }
 
         EntityBuilder entityBuilder = entityManager.newBuilder("StructureTemplates:structureSpawnItem");
-        addComponentsToTemplate(structureTemplateOriginEntity, structureTemplateOriginComponent, blockComponent, entityBuilder);
+        addComponentsToTemplate(structureTemplateOriginEntity, origin, blockComponent, entityBuilder);
         // TODO allow the player to select construction animation
         EntityRef structureSpawnItem = entityBuilder.build();
 
@@ -344,8 +342,8 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
     public void onCreateStructureTemplateItemRequest(CreateStructureTemplateItemRequest event, EntityRef characterEntity,
                                                      CharacterComponent characterComponent) {
         EntityRef structureTemplateOriginEntity = characterComponent.authorizedInteractionTarget;
-        StructureTemplateOriginComponent structureTemplateOriginComponent = structureTemplateOriginEntity.getComponent(StructureTemplateOriginComponent.class);
-        if (structureTemplateOriginComponent == null) {
+        StructureTemplateOriginComponent origin = structureTemplateOriginEntity.getComponent(StructureTemplateOriginComponent.class);
+        if (origin == null) {
             LOGGER.error("Ignored CreateStructureTemplateItemRequest event since there was no interaction with a structure template origin block");
             return;
         }
@@ -357,7 +355,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         }
 
         EntityBuilder entityBuilder = entityManager.newBuilder("StructureTemplates:structureTemplateItem");
-        addComponentsToTemplate(structureTemplateOriginEntity, structureTemplateOriginComponent, blockComponent, entityBuilder);
+        addComponentsToTemplate(structureTemplateOriginEntity, origin, blockComponent, entityBuilder);
         EntityRef structureSpawnItem = entityBuilder.build();
 
         // TODO check permission once PermissionManager is public API
@@ -416,7 +414,8 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
                 continue;
             }
             BlockComponent blockComponent = blockEntity.getComponent(BlockComponent.class);
-            ScheduleStructurePlacementComponent.PlacementToSchedule placementToSchedule = new ScheduleStructurePlacementComponent.PlacementToSchedule();
+            ScheduleStructurePlacementComponent.PlacementToSchedule placementToSchedule =
+                    new ScheduleStructurePlacementComponent.PlacementToSchedule();
             placementToSchedule.position = transformToRelative.transformVector3i(blockComponent.getPosition(new Vector3i()));
             placementToSchedule.position.y -= 1; // placeholder is on top of marked block
             placementToSchedule.front = transformToRelative.transformSide(blockComponent.getBlock().getDirection());
@@ -526,7 +525,8 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
     public void onCopyBlockRegionRequest(StructureTemplateStringRequest event, EntityRef characterEntity,
                                          CharacterComponent characterComponent) {
         EntityRef structureTemplateOriginEntity = characterComponent.authorizedInteractionTarget;
-        StructureTemplateOriginComponent structureTemplateOriginComponent = structureTemplateOriginEntity.getComponent(StructureTemplateOriginComponent.class);
+        StructureTemplateOriginComponent structureTemplateOriginComponent =
+                structureTemplateOriginEntity.getComponent(StructureTemplateOriginComponent.class);
         if (structureTemplateOriginComponent == null) {
             LOGGER.error("Ignored StructureTemplateStringRequest event since there was no interaction with a structure template origin block");
             return;
@@ -555,18 +555,18 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
     public void onMakeBoxShapedRequest(MakeBoxShapedRequest event, EntityRef characterEntity,
                                        CharacterComponent characterComponent) {
         EntityRef structureTemplateOriginEntity = characterComponent.authorizedInteractionTarget;
-        StructureTemplateOriginComponent structureTemplateOriginComponent = structureTemplateOriginEntity.getComponent(StructureTemplateOriginComponent.class);
-        if (structureTemplateOriginComponent == null) {
+        StructureTemplateOriginComponent origin = structureTemplateOriginEntity.getComponent(StructureTemplateOriginComponent.class);
+        if (origin == null) {
             LOGGER.error("Ignored MakeBoxShapedRequest event since there was no interaction with a structure template origin block");
             return;
         }
-        structureTemplateOriginComponent.absoluteTemplateRegions.clear();
-        structureTemplateOriginComponent.absoluteTemplateRegions.add(new BlockRegion(event.getRegion()));
-        structureTemplateOriginEntity.saveComponent(structureTemplateOriginComponent);
+        origin.absoluteTemplateRegions.clear();
+        origin.absoluteTemplateRegions.add(new BlockRegion(event.getRegion()));
+        structureTemplateOriginEntity.saveComponent(origin);
     }
 
 
-    @ReceiveEvent(components = {BlockItemComponent.class})
+    @ReceiveEvent(components = BlockItemComponent.class)
     public void onBlockItemPlaced(OnBlockItemPlaced event, EntityRef itemEntity,
                                   StructureTemplateOriginComponent editorComponentOfItem) {
         EntityRef placedBlockEntity = event.getPlacedBlock();
@@ -585,7 +585,7 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         placedBlockEntity.addOrSaveComponent(componentLibrary.copy(structureTemplateComponentOfItem));
     }
 
-    @ReceiveEvent(components = {})
+    @ReceiveEvent
     public void onBlockToItem(OnBlockToItem event, EntityRef blockEntity,
                               StructureTemplateOriginComponent componentOfBlock) {
         EntityRef item = event.getItem();

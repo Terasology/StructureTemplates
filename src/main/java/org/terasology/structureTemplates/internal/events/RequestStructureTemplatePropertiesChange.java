@@ -40,5 +40,7 @@ public class RequestStructureTemplatePropertiesChange implements Event {
         return spawnChance;
     }
 
-    public AnimationType getAnimationType() { return animationType; }
+    public AnimationType getAnimationType() {
+        return animationType;
+    }
 }

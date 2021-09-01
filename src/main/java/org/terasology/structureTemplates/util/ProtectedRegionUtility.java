@@ -10,7 +10,9 @@ import org.terasology.structureTemplates.components.ProtectedRegionsComponent;
 import java.util.Collection;
 import java.util.List;
 
-public class ProtectedRegionUtility {
+public final class ProtectedRegionUtility {
+
+    private ProtectedRegionUtility() { }
 
     /**
      * Checks if the specified positions are completely inside the given regionEntity.

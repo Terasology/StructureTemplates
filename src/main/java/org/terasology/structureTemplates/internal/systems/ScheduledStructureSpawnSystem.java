@@ -126,7 +126,7 @@ public class ScheduledStructureSpawnSystem extends BaseComponentSystem implement
             activeEntityDirection = pendingStructureSpawnComponent.front;
             activeEntityLocation = new Vector3i(locationComponent.getWorldPosition(new Vector3f()), RoundingMode.FLOOR);
             activeEntityRemainingTemplates =
-                structureTemplateProvider.iterateStructureTempaltesOfTypeInRandomOrder(type);
+                structureTemplateProvider.iterateStructureTemplatesOfTypeInRandomOrder(type);
         }
 
         // 1 entity should be remaining, as list gets cleared

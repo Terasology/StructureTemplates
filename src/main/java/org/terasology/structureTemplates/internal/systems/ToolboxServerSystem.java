@@ -34,9 +34,6 @@ import org.terasology.structureTemplates.util.ItemType;
 
 import java.util.Optional;
 
-/**
- *
- */
 @RegisterSystem(RegisterMode.AUTHORITY)
 public class ToolboxServerSystem extends BaseComponentSystem {
     private static final Logger logger = LoggerFactory.getLogger(ScheduledStructureSpawnSystem.class);

@@ -4,11 +4,7 @@ package org.terasology.structureTemplates.internal.ui;
 
 import org.terasology.nui.widgets.UITreeView;
 
-/**
- *
- */
 public class ToolboxTreeView extends UITreeView<ToolboxTreeValue> {
-
 
     public ToolboxTreeView() {
         super();

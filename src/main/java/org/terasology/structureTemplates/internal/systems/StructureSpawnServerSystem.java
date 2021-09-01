@@ -207,8 +207,10 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
 
 
     @ReceiveEvent
-    public void onDelayedTriggeredEvent(DelayedActionTriggeredEvent event, EntityRef entity,
-                                        BuildStepwiseStructureComponent buildStepwiseStructureComponent, BuildStructureCounterComponent counterComponent) {
+    public void onDelayedTriggeredEvent(DelayedActionTriggeredEvent event,
+                                        EntityRef entity,
+                                        BuildStepwiseStructureComponent buildStepwiseStructureComponent,
+                                        BuildStructureCounterComponent counterComponent) {
 
         if (!event.getActionId().equals(GROW_STRUCTURE_ACTION_ID)) {
             return;

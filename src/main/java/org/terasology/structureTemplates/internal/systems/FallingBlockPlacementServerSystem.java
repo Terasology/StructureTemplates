@@ -39,9 +39,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-/**
- *
- */
 @RegisterSystem(RegisterMode.AUTHORITY)
 public class FallingBlockPlacementServerSystem extends BaseComponentSystem {
     private static final Logger logger = LoggerFactory.getLogger(FallingBlockPlacementServerSystem.class);
@@ -69,8 +66,9 @@ public class FallingBlockPlacementServerSystem extends BaseComponentSystem {
     @In
     private WorldProvider worldProvider;
 
-    long maxStopGameTimeInMs = 0;
-    BlockRegionTransform transformation;
+    private long maxStopGameTimeInMs = 0;
+
+    private BlockRegionTransform transformation;
 
     /**
      * This overrides the normal instant structure template spawning with one where an animation of falling blocks
@@ -78,7 +76,7 @@ public class FallingBlockPlacementServerSystem extends BaseComponentSystem {
      * the event {@link StructureBlocksSpawnedEvent} gets send when the fall down animation has been played for
      * all blocks. So there might be a few seconds between the events.
      */
-    @ReceiveEvent(components = {FallingBlocksPlacementAlgorithmComponent.class})
+    @ReceiveEvent(components = FallingBlocksPlacementAlgorithmComponent.class)
     public void onSpawnStructureEventWithBlocksPriority(SpawnStructureEvent event, EntityRef entity) {
         transformation = event.getTransformation();
         entity.send(new StructureSpawnStartedEvent(event.getTransformation()));
@@ -101,7 +99,8 @@ public class FallingBlockPlacementServerSystem extends BaseComponentSystem {
                 float distanceToMin = entry.getKey().gridDistance(minPos);
                 float additionalOffsetPerDistanceToMin = 1f;
                 float fallDistance = additionalOffsetPerDistanceToMin * distanceToMin;
-                long fallDurationInMs = Math.round(Math.sqrt(2 * fallDistance / (-FallingBlockPlacementClientSystem.FALLING_BLOCK_ACCELERATION_IN_M_PER_MS)));
+                long fallDurationInMs =
+                        Math.round(Math.sqrt(2 * fallDistance / (-FallingBlockPlacementClientSystem.FALLING_BLOCK_ACCELERATION_IN_M_PER_MS)));
 
                 delay += fallDurationInMs;
 
@@ -171,7 +170,8 @@ public class FallingBlockPlacementServerSystem extends BaseComponentSystem {
     }
 
     @ReceiveEvent
-    public void createFallingBlockEntity(DelayedActionTriggeredEvent event, EntityRef entityRef, PrepareFallingBlockEntityComponent fallingBlockEntityComponent) {
+    public void createFallingBlockEntity(DelayedActionTriggeredEvent event, EntityRef entityRef,
+                                         PrepareFallingBlockEntityComponent fallingBlockEntityComponent) {
         if (!event.getActionId().equals(CREATE_ENTITY_ACTION_ID)) {
             return;
         }
