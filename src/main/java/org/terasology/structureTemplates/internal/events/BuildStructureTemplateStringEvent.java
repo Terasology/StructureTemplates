@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.structureTemplates.internal.events;
 
-import org.terasology.engine.entitySystem.event.Event;
 import org.terasology.gestalt.entitysystem.component.Component;
+import org.terasology.gestalt.entitysystem.event.Event;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

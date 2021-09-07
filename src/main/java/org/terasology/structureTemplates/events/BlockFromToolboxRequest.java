@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.structureTemplates.events;
 
-import org.terasology.engine.entitySystem.event.Event;
 import org.terasology.engine.network.ServerEvent;
 import org.terasology.engine.world.block.BlockUri;
+import org.terasology.gestalt.entitysystem.event.Event;
 
 /**
  * Gets sent to the server to inform it that the user wants to have a block item from the toolbox.

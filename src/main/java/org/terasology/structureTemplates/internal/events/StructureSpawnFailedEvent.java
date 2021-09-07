@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.structureTemplates.internal.events;
 
-import org.terasology.engine.entitySystem.event.Event;
 import org.terasology.engine.entitySystem.prefab.Prefab;
 import org.terasology.engine.network.OwnerEvent;
 import org.terasology.engine.world.block.BlockRegion;
+import org.terasology.gestalt.entitysystem.event.Event;
 import org.terasology.structureTemplates.components.SpawnStructureActionComponent;
 
 /**
