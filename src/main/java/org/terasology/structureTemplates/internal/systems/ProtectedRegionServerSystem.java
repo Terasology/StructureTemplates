@@ -12,6 +12,7 @@ import org.terasology.engine.entitySystem.entity.EntityBuilder;
 import org.terasology.engine.entitySystem.entity.EntityManager;
 import org.terasology.engine.entitySystem.entity.EntityRef;
 import org.terasology.engine.entitySystem.event.EventPriority;
+import org.terasology.engine.entitySystem.event.Priority;
 import org.terasology.engine.entitySystem.event.ReceiveEvent;
 import org.terasology.engine.entitySystem.systems.BaseComponentSystem;
 import org.terasology.engine.entitySystem.systems.RegisterMode;
@@ -48,7 +49,8 @@ public class ProtectedRegionServerSystem extends BaseComponentSystem {
     @In
     private EntityManager entityManager;
 
-    @ReceiveEvent(priority = EventPriority.PRIORITY_CRITICAL)
+    @Priority(EventPriority.PRIORITY_CRITICAL)
+    @ReceiveEvent
     public void onAttackBlock(AttackEvent event, EntityRef targetEntity, BlockComponent blockComponent) {
         Vector3i pos = blockComponent.getPosition(new Vector3i());
 
@@ -57,7 +59,8 @@ public class ProtectedRegionServerSystem extends BaseComponentSystem {
         }
     }
 
-    @ReceiveEvent(priority = EventPriority.PRIORITY_CRITICAL)
+    @Priority(EventPriority.PRIORITY_CRITICAL)
+    @ReceiveEvent
     public void onAttackBlockRegion(AttackEvent event, EntityRef targetEntity,
                                     BlockRegionComponent blockRegionComponent) {
         List<Vector3ic> positions = Lists.newArrayList();
@@ -79,7 +82,8 @@ public class ProtectedRegionServerSystem extends BaseComponentSystem {
         return false;
     }
 
-    @ReceiveEvent(priority = EventPriority.PRIORITY_CRITICAL)
+    @Priority(EventPriority.PRIORITY_CRITICAL)
+    @ReceiveEvent
     public void onPlaceBlocks(PlaceBlocks event, EntityRef entity) {
         EntityRef instigator = event.getInstigator();
         EntityRef player = instigator.getOwner();
@@ -91,7 +95,8 @@ public class ProtectedRegionServerSystem extends BaseComponentSystem {
         }
     }
 
-    @ReceiveEvent(priority = EventPriority.PRIORITY_CRITICAL, components = NoInteractionWhenProtected.class)
+    @Priority(EventPriority.PRIORITY_CRITICAL)
+    @ReceiveEvent(components = NoInteractionWhenProtected.class)
     public void onActivation(ActivateEvent event, EntityRef target) {
         Vector3f position = event.getTarget().getComponent(LocationComponent.class).getWorldPosition(new Vector3f());
         //TODO: is this equivalent to  new Vector3i(position, RoundingMode.HALF_UP);
@@ -102,7 +107,8 @@ public class ProtectedRegionServerSystem extends BaseComponentSystem {
         }
     }
 
-    @ReceiveEvent(priority = EventPriority.PRIORITY_LOW)
+    @Priority(EventPriority.PRIORITY_LOW)
+    @ReceiveEvent
     public void onStructureBlocksSpawnedEvent(StructureBlocksSpawnedEvent event, EntityRef entity,
                                               ProtectRegionsForAFewHoursComponent component) {
         EntityBuilder entityBuilder = entityManager.newBuilder();

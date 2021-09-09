@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.terasology.engine.entitySystem.entity.EntityManager;
 import org.terasology.engine.entitySystem.entity.EntityRef;
 import org.terasology.engine.entitySystem.event.EventPriority;
+import org.terasology.engine.entitySystem.event.Priority;
 import org.terasology.engine.entitySystem.event.ReceiveEvent;
 import org.terasology.engine.entitySystem.systems.BaseComponentSystem;
 import org.terasology.engine.entitySystem.systems.RegisterMode;
@@ -91,7 +92,8 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
     private BlockRegionTransform regionTransform;
     private EntityRef structureEntity;
 
-    @ReceiveEvent(priority = EventPriority.PRIORITY_TRIVIAL)
+    @Priority(EventPriority.PRIORITY_TRIVIAL)
+    @ReceiveEvent
     public void onSpawnStructureWithoutFallingAnimation(SpawnStructureEvent event, EntityRef entity) {
         regionTransform = event.getTransformation();
         structureEntity = entity;
@@ -100,7 +102,8 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
         event.consume();
     }
 
-    @ReceiveEvent(priority = EventPriority.PRIORITY_HIGH)
+    @Priority(EventPriority.PRIORITY_HIGH)
+    @ReceiveEvent
     public void onSpawnStructureWithNoAnimation(SpawnStructureEvent event,
                                                 EntityRef entity,
                                                 SpawnBlockRegionsComponent spawnBlockRegionsComponent,
@@ -141,7 +144,8 @@ public class StructureSpawnServerSystem extends BaseComponentSystem {
         }
     }
 
-    @ReceiveEvent(priority = EventPriority.PRIORITY_HIGH)
+    @Priority(EventPriority.PRIORITY_HIGH)
+    @ReceiveEvent
     public void onSpawnTemplateEventWithBlocksPriority(SpawnTemplateEvent event, EntityRef entity) {
         structureEntity = entity;
         entity.send(new SpawnBlocksOfStructureTemplateEvent(event.getTransformation()));
