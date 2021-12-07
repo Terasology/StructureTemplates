@@ -4,9 +4,9 @@ package org.terasology.structureTemplates.events;
 
 import org.joml.Vector3i;
 import org.terasology.engine.entitySystem.MutableComponentContainer;
-import org.terasology.engine.entitySystem.event.Event;
 import org.terasology.engine.world.block.Block;
 import org.terasology.engine.world.block.family.BlockFamily;
+import org.terasology.gestalt.entitysystem.event.Event;
 import org.terasology.structureTemplates.util.BlockRegionTransform;
 
 import java.util.ArrayList;

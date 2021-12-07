@@ -14,7 +14,7 @@ import org.terasology.engine.entitySystem.entity.EntityBuilder;
 import org.terasology.engine.entitySystem.entity.EntityManager;
 import org.terasology.engine.entitySystem.entity.EntityRef;
 import org.terasology.engine.entitySystem.event.EventPriority;
-import org.terasology.engine.entitySystem.event.ReceiveEvent;
+import org.terasology.engine.entitySystem.event.Priority;
 import org.terasology.engine.entitySystem.metadata.ComponentLibrary;
 import org.terasology.engine.entitySystem.metadata.EntitySystemLibrary;
 import org.terasology.engine.entitySystem.prefab.Prefab;
@@ -39,6 +39,7 @@ import org.terasology.engine.world.block.family.HorizontalFamily;
 import org.terasology.engine.world.block.items.BlockItemComponent;
 import org.terasology.engine.world.block.items.OnBlockItemPlaced;
 import org.terasology.engine.world.block.items.OnBlockToItem;
+import org.terasology.gestalt.entitysystem.event.ReceiveEvent;
 import org.terasology.module.inventory.systems.InventoryManager;
 import org.terasology.structureTemplates.components.BlockPlaceholderComponent;
 import org.terasology.structureTemplates.components.FallingBlocksPlacementAlgorithmComponent;
@@ -429,7 +430,8 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         }
     }
 
-    @ReceiveEvent(priority = EventPriority.PRIORITY_CRITICAL)
+    @Priority(EventPriority.PRIORITY_CRITICAL)
+    @ReceiveEvent
     public void onBuildTemplateComponentString(BuildStructureTemplateStringEvent event, EntityRef template,
                                                StructureTemplateComponent component) {
         StringBuilder sb = new StringBuilder();
@@ -457,7 +459,8 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         event.addJsonForComponent(sb.toString(), StructureTemplateComponent.class);
     }
 
-    @ReceiveEvent(priority = EventPriority.PRIORITY_HIGH)
+    @Priority(EventPriority.PRIORITY_HIGH)
+    @ReceiveEvent
     public void onBuildTemplateStringWithBlockRegions(BuildStructureTemplateStringEvent event, EntityRef template,
                                                       SpawnBlockRegionsComponent component) {
         StringBuilder sb = new StringBuilder();
@@ -469,7 +472,8 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         event.addJsonForComponent(sb.toString(), SpawnBlockRegionsComponent.class);
     }
 
-    @ReceiveEvent(priority = EventPriority.PRIORITY_HIGH)
+    @Priority(EventPriority.PRIORITY_HIGH)
+    @ReceiveEvent
     public void onBuildTemplateStringWithBlockRegions(BuildStructureTemplateStringEvent event, EntityRef template,
                                                       FallingBlocksPlacementAlgorithmComponent component) {
         StringBuilder sb = new StringBuilder();
@@ -478,7 +482,8 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
         event.addJsonForComponent(sb.toString(), FallingBlocksPlacementAlgorithmComponent.class);
     }
 
-    @ReceiveEvent(priority = EventPriority.PRIORITY_HIGH)
+    @Priority(EventPriority.PRIORITY_HIGH)
+    @ReceiveEvent
     public void onBuildTemplateStringWithBlockRegions(BuildStructureTemplateStringEvent event, EntityRef template,
                                                       NoConstructionAnimationComponent component) {
         StringBuilder sb = new StringBuilder();
@@ -727,7 +732,8 @@ public class StructureTemplateEditorServerSystem extends BaseComponentSystem {
             newStructureTemplateComponent);
     }
 
-    @ReceiveEvent(priority = EventPriority.PRIORITY_NORMAL)
+    @Priority(EventPriority.PRIORITY_NORMAL)
+    @ReceiveEvent
     public void onSpawnTemplateEventWithPlaceholderPriority(SpawnTemplateEvent event, EntityRef entity,
                                                             ScheduleStructurePlacementComponent placementComponent) {
         BlockRegionTransform transformation = event.getTransformation();

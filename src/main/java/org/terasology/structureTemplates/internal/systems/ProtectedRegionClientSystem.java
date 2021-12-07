@@ -9,13 +9,14 @@ import org.slf4j.LoggerFactory;
 import org.terasology.engine.entitySystem.entity.EntityManager;
 import org.terasology.engine.entitySystem.entity.EntityRef;
 import org.terasology.engine.entitySystem.event.EventPriority;
-import org.terasology.engine.entitySystem.event.ReceiveEvent;
+import org.terasology.engine.entitySystem.event.Priority;
 import org.terasology.engine.entitySystem.systems.BaseComponentSystem;
 import org.terasology.engine.entitySystem.systems.RegisterMode;
 import org.terasology.engine.entitySystem.systems.RegisterSystem;
 import org.terasology.engine.logic.characters.events.ActivationPredicted;
 import org.terasology.engine.logic.location.LocationComponent;
 import org.terasology.engine.registry.In;
+import org.terasology.gestalt.entitysystem.event.ReceiveEvent;
 import org.terasology.structureTemplates.components.ProtectedRegionsComponent;
 import org.terasology.structureTemplates.internal.components.NoInteractionWhenProtected;
 import org.terasology.structureTemplates.util.ProtectedRegionUtility;
@@ -43,7 +44,8 @@ public class ProtectedRegionClientSystem extends BaseComponentSystem {
         return false;
     }
 
-    @ReceiveEvent(priority = EventPriority.PRIORITY_CRITICAL, components = NoInteractionWhenProtected.class)
+    @Priority(EventPriority.PRIORITY_CRITICAL)
+    @ReceiveEvent(components = NoInteractionWhenProtected.class)
     public void onActivationPredicted(ActivationPredicted event, EntityRef target) {
         Vector3f position = event.getTarget().getComponent(LocationComponent.class).getWorldPosition(new Vector3f());
         //TODO: is this equivalent to  new Vector3i(position, RoundingMode.HALF_UP);
