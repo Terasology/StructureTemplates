@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
  * TODO: add javadoc
  */
 public class BuildStepwiseStructureComponent implements Component<BuildStepwiseStructureComponent> {
-    private List<BuildStep> buildSteps;
+    public List<BuildStep> buildSteps;
 
     public BuildStepwiseStructureComponent(List<BuildStep> buildSteps) {
         this.buildSteps = buildSteps;
